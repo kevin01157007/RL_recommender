@@ -6,9 +6,6 @@ from recbole.quick_start import run_recbole
 from recbole.model.general_recommender import LightGCN
 from recbole.data.utils import create_dataset, data_preparation
 from recbole.config.configurator import Config
-import networkx as nx
-import matplotlib.pyplot as plt
-import community  # Louvain 方法
 
 # 配置 RecBole 設置
 config_dict = {
