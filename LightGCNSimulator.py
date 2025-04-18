@@ -21,3 +21,4 @@ class LightGCNSimulator:
         users_emb = self.get_user_embedding(user_id, self.model, self.data)
         items_emb = self.get_item_embedding(item_id, self.model, self.data)
         return  self.model.f(torch.matmul(users_emb, items_emb.t()))
+    
