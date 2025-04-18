@@ -4,6 +4,7 @@ class LightGCNSimulator:
         self.user_num = user_num
         self.item_num = item_num
         self.model = model
+        self.model.eval()
         self.data = data
     def get_user_embedding(self, user_id, model, data):
         all_users_items = model(model.embedding_user_item.weight.clone(),
