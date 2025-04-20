@@ -1,0 +1,746 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
+ <head> 
+  <title>Breaking Filter Bubble: A Reinforcement Learning Framework of Controllable Recommender System</title> <!-- Copyright (c) 2010-2015 The MathJax Consortium -->
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+  <meta name="viewport" content="width=device-width; initial-scale=1.0;" /> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" /> 
+  <link media="screen, print" rel="stylesheet" href="https://dl.acm.org/pubs/lib/css/bootstrap.min.css" />
+  <link media="screen, print" rel="stylesheet" href="https://dl.acm.org/pubs/lib/css/bootstrap-theme.min.css" />
+  <link media="screen, print" rel="stylesheet" href="https://dl.acm.org/pubs/lib/css/main.css" />
+  <script src="https://dl.acm.org/pubs/lib/js/jquery.min.js" type="text/javascript"></script> 
+  <script src="https://dl.acm.org/pubs/lib/js/bootstrap.min.js" type="text/javascript"></script> 
+  <script src="https://dl.acm.org/pubs/lib/js/bibCit.js" type="text/javascript"></script> 
+  <script src="https://dl.acm.org/pubs/lib/js/divTab.js" type="text/javascript"></script> 
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_CHTML"></script> 
+  <script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script> 
+ </head> 
+ <body id="main"> 
+  <main> 
+   <section class="front-matter"> 
+    <section> 
+     <header class="title-info"> 
+      <div class="journal-title"> 
+       <h1> <span class="title">Breaking Filter Bubble: A Reinforcement Learning Framework of Controllable Recommender System</span> <br /> <span class="subTitle"></span> </h1> 
+      </div> 
+     </header> 
+     <div class="authorGroup"> 
+      <div class="author"> <a href="https://orcid.org/0000-0002-4688-8354" ref="author"><span class="givenName">Zhenyang</span> <span class="surName">Li</span></a>, Tsinghua University, China, <a href="mailto:lizy20@mails.tsinghua.edu.cn">lizy20@mails.tsinghua.edu.cn</a> 
+      </div> 
+      <div class="author"> <a href="https://orcid.org/0000-0002-2649-2061" ref="author"><span class="givenName">Yancheng</span> <span class="surName">Dong</span></a>, Tsinghua University, China, <a href="mailto:dongyc20@mails.tsinghua.edu.cn">dongyc20@mails.tsinghua.edu.cn</a> 
+      </div> 
+      <div class="author"> <a href="https://orcid.org/0000-0002-7561-5646" ref="author"><span class="givenName">Chen</span> <span class="surName">Gao</span></a>, Tsinghua University, China and Huawei Noah's Ark Lab, China, <a href="mailto:chgao96@gmail.com">chgao96@gmail.com</a> 
+      </div> 
+      <div class="author"> <a href="https://orcid.org/0000-0002-2975-0783" ref="author"><span class="givenName">Yizhou</span> <span class="surName">Zhao</span></a>, Carnegie Mellon University, USA, <a href="mailto:yizhouz@andrew.cmu.edu">yizhouz@andrew.cmu.edu</a> 
+      </div> 
+      <div class="author"> <a href="https://orcid.org/0000-0002-8800-1483" ref="author"><span class="givenName">Dong</span> <span class="surName">Li</span></a>, Huawei Noah's Ark Lab, China, <a href="mailto:lidong106@huawei.com">lidong106@huawei.com</a> 
+      </div> 
+      <div class="author"> <a href="https://orcid.org/0000-0002-0422-8235" ref="author"><span class="givenName">Jianye</span> <span class="surName">Hao</span></a>, Huawei Noah's Ark Lab, China, <a href="mailto:haojianye@huawei.com">haojianye@huawei.com</a> 
+      </div> 
+      <div class="author"> <a href="https://orcid.org/0000-0002-5826-3765" ref="author"><span class="givenName">Kai</span> <span class="surName">Zhang</span></a>, Tsinghua Shenzhen International Graduate School, Tsinghua University, China and Research Institute of Tsinghua, Pearl River Delta, China, <a href="mailto:zhangkai@sz.tsinghua.edu.cn">zhangkai@sz.tsinghua.edu.cn</a> 
+      </div> 
+      <div class="author"> <a href="https://orcid.org/0000-0001-5617-1659" ref="author"><span class="givenName">Yong</span> <span class="surName">Li</span></a>, Tsinghua University, China, <a href="mailto:liyong07@tsinghua.edu.cn">liyong07@tsinghua.edu.cn</a> 
+      </div> 
+      <div class="author"> <a href="https://orcid.org/0000-0002-5462-6178" ref="author"><span class="givenName">Zhi</span> <span class="surName">Wang</span></a>, Tsinghua-Berkeley Shenzhen Institute, Tsinghua Shenzhen International Graduate School, China and Peng Cheng Laboratory, China, <a href="mailto:wangzhi@sz.tsinghua.edu.cn">wangzhi@sz.tsinghua.edu.cn</a> 
+      </div> 
+     </div> 
+     <br /> 
+     <div class="pubInfo"> 
+      <p>DOI: <a href="https://doi.org/10.1145/3543507.3583856" target="_blank">https://doi.org/10.1145/3543507.3583856</a> <br />WWW '23: <a href="https://doi.org/10.1145/3543507" target="_blank">Proceedings of the ACM Web Conference 2023</a>, Austin, TX, USA, April 2023</p> 
+     </div> 
+     <div class="abstract"> 
+      <p><small> In the information-overloaded era of the Web, recommender systems that provide personalized content filtering are now the mainstream portal for users to access Web information. Recommender systems deploy machine learning models to learn users’ preferences from collected historical data, leading to more centralized recommendation results due to the feedback loop. As a result, it will harm the ranking of content outside the narrowed scope and limit the options seen by users. In this work, we first conduct data analysis from a graph view to observe that the users’ feedback is restricted to limited items, verifying the phenomenon of centralized recommendation. We further develop a general simulation framework to derive the procedure of the recommender system, including data collection, model learning, and item exposure, which forms a loop. To address the filter bubble issue under the feedback loop, we then propose a general and easy-to-use reinforcement learning-based method, which can adaptively select few but effective connections between nodes from different communities as the exposure list. We conduct extensive experiments in the simulation framework based on large-scale real-world datasets. The results demonstrate that our proposed reinforcement learning-based control method can serve as an effective solution to alleviate the filter bubble and the separated communities induced by it. We believe the proposed framework of controllable recommendation in this work can inspire not only the researchers of recommender systems, but also a broader community concerned with artificial intelligence algorithms’ impact on humanity, especially for those vulnerable populations on the Web.</small></p> 
+     </div> 
+     <div class="CCSconcepts"> <ccs2012>
+       <small> <span style="font-weight:bold;">CCS Concepts:</span> • <strong>Information systems → World Wide Web</strong>; <em>Recommender systems; Personalization;</em> </small>
+      </ccs2012> 
+     </div> 
+     <br /> 
+     <div class="classifications"> 
+      <div class="author"> <span style="font-weight:bold;"><small>Keywords:</small></span> <span class="keyword"><small>Controllable Recommendation</small>, </span> <span class="keyword"> <small>Filter Bubble</small>, </span> <span class="keyword"> <small>Reinforcement Learning</small></span> 
+      </div> 
+      <br /> 
+      <div class="AcmReferenceFormat"> 
+       <p><small> <span style="font-weight:bold;">ACM Reference Format:</span> <br />Zhenyang Li, Yancheng Dong, Chen Gao, Yizhou Zhao, Dong Li, Jianye Hao, Kai Zhang, Yong Li, and Zhi Wang. 2023. Breaking Filter Bubble: A Reinforcement Learning Framework of Controllable Recommender System. In <em>Proceedings of the ACM Web Conference 2023 (WWW '23), April 30--May 04, 2023, Austin, TX, USA.</em> ACM, New York, NY, USA 9 Pages. <a href="https://doi.org/10.1145/3543507.3583856" class="link-inline force-break" target="_blank">https://doi.org/10.1145/3543507.3583856</a></small></p> 
+      </div> 
+     </div> 
+    </section> 
+   </section> 
+   <section class="body"> 
+    <section id="sec-2"> 
+     <header> 
+      <div class="title-info"> 
+       <h2> <span class="section-number">1</span> INTRODUCTION</h2> 
+      </div> 
+     </header> 
+     <p>Recommender systems (RS) are currently one of the most popular Web applications in the information-overloaded era&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0010">10</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0033">33</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0036">36</a>]. The recommendation algorithms infer user preferences from the collected behavioral log and generate personalized lists of content. Almost all recommender systems pursue the objective of high accuracy to improve user experience and platform profit. Due to the existence of the <em>feedback loop</em>&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0021">21</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0028">28</a>], the information that users can access is largely determined by the exposure list of recommendation algorithms, in turn narrowing the feedback that the recommender system can collect. As a result, the users’ behaviors are more and more likely to be constrained by a small fraction of homogeneous content, which is known as the <em>filter bubble</em> effect&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0002">2</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0008">8</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0011">11</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0024">24</a>]. For example, in short-video platforms such as TikTok, users may be exposed to only a specific group of short-videos, so they will not have the opportunity to interact with the videos outside the bubble, bringing concerns including fairness, discrimination, etc., especially for the underrepresented communities on the Web such as users from less-developed areas, elderly people, and so on. Therefore, it is essential to prevent the recommendation algorithms from dominating the system savagely, motivating our solution of a controllable recommender system.</p> 
+     <p>Some existing works have used the concept of controllable recommendation&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0025">25</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0026">26</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0030">30</a>], but it always refers to the user who can control the system. Parra&nbsp;<em>et al.</em>&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0025">25</a>] investigated a new scenario under which users can control how different recommendation algorithms or recommendation strategies are fused. Rahdari&nbsp;<em>et al.</em>&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0026">26</a>] developed an interactive recommender system where users can select keywords to filter and control recommendation results. Wang&nbsp;<em>et al.</em>&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0030">30</a>] consider a scenario that the user aims to explore diverse items and can provide such feedback to the recommender systems. Another recent work&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0005">5</a>] also used the term “controllable recommendation”; however, the definition of “control” refers to using a hyper-parameter to balance two recommendation algorithms. In short, the existing works for controllable recommendation pay more attention to let users have the right to control the recommendation list. In contrast, in this work we focus on the filter bubble issue caused by the feedback-loop, and study how to control the recommender system to alleviate this issue.</p> 
+     <p>In this paper, we first analyze the issue of filter bubbles in existing recommenders when there is no control. To address the issue, we propose a general framework of controllable recommendation, under which we design a simulator following the standard pipeline of real-world recommender systems. Further experiments on the simulator also verify the filter bubble caused by feedback-loop of recommender systems. We then develop a reinforcement learning (RL) pipeline based on graph neural networks. Specifically, the graph neural network can learn node representations, which can be coupled to the recommendation model, and the RL method can adaptively select the possible interaction across communities with different interests and control the system to make auxiliary exposures. We conduct experiments on two large-scale benchmark datasets, and the results show that our exposure strategy based on RL can reduce the number or size of isolated communities, while keeping similar or even better recommendation accuracy. That is, the negative impact of recommender systems can be partly addressed. In short, the contribution of this paper is claimed as follows.</p> 
+     <ul class="list-no-style"> 
+      <li id="list1" label="•">We take the first step to approach the problem of addressing the filter bubble with a controllable recommender system, motivated by the analysis from real-world datasets and in a different manner compared with existing works of controllable recommendation.<br /></li> 
+      <li id="list2" label="•">We propose a general framework supported by a simulator and a RL method based on graph neural networks, which can control the additional exposure to help break the filter bubble in existing recommenders.<br /></li> 
+      <li id="list3" label="•">Extensive experiments on two real-world datasets verify the effectiveness of our method, having good accuracy and better community characteristics. The further studies of the proposed method explain its rationality.<br /></li> 
+     </ul> 
+     <figure id="fig1"> 
+      <img src="https://dl.acm.org/cms/attachment/html/10.1145/3543507.3583856/assets/html/images/www23-366-fig1.jpg" class="img-responsive" alt="Few connections between communities" aria-describedby="fig002" /> 
+      <p style="display:none" id="fig002">Community detection visualization of Gowalla. There are few connections between communities, thus we are trying to find more connections.</p> 
+      <figcaption> <span class="figure-number">Figure 1:</span> <span class="figure-title">Community detection visualization of Gowalla. There are few connections between communities.</span> 
+      </figcaption> 
+     </figure> 
+     <figure id="fig2"> 
+      <img src="https://dl.acm.org/cms/attachment/html/10.1145/3543507.3583856/assets/html/images/www23-366-fig2.jpg" class="img-responsive" alt="The size of the community varies greatly" aria-describedby="fig003" /> 
+      <p style="display:none" id="fig003">Community size distribution of Gowalla dataset and Yelp2018 dataset. This indicates that there are filter bubbles in real datasets.</p> 
+      <figcaption> <span class="figure-number">Figure 2:</span> <span class="figure-title">Community size distribution of Gowalla dataset and Yelp2018 dataset.</span> 
+      </figcaption> 
+     </figure> 
+    </section> 
+    <section id="sec-3"> 
+     <header> 
+      <div class="title-info"> 
+       <h2> <span class="section-number">2</span> MOTIVATION</h2> 
+      </div> 
+     </header> 
+     <p>In this section, we perform analysis on existing recommenders to confirm the issues (mentioned in the introduction). We aim to understand the filter bubble, <em>i.e.</em>, the extent to which certain users are stuck in a “bubble” of specific recommended content from the real-world datasets.</p> 
+     <p>Specifically, the user-item interaction data in recommender system can be viewed as a bipartite graph, in which users and items are treated as nodes and interactions are treated as edges. We utilize the widely-used community detection algorithm&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0004">4</a>] on the bipartite graph to obtain communities refer to the user-item clusters with dense interactions. A community with few interactions with other user/item nodes means that the users in this community mainly interacts with the items inside, with constrained user accessibility, the detected communities can be regarded as <em>bubbles</em>.</p> 
+     <p>We illustrate the communities in Figure&nbsp;<a class="fig" href="#fig1">1</a> of Gowalla dataset. Here different colors refer to users or items belonging to different communities, where we do not distinguish user or item. As we can observe, the whole user-item graph is separated into multiple sub-graphs&nbsp;<em>i.e.</em>, communities. For example, the largest and the second-largest community are marked with green and purple, in which the connections (user-item interactions) are very dense and the cross-community interactions are far sparser. We also present the distribution of the community size of Gowalla dataset and Yelp2018 dataset in Figure&nbsp;<a class="fig" href="#fig2">2</a>. We can observe that the quantitative results also show that users and items can be divided into multiple communities.</p> 
+     <p>To alleviate the effect of the filter bubble, it is essential to introduce a control strategy into the system. Imagine we can control the recommender system to add an exposure edge connecting Community-1 and Community-2, as shown in Figure&nbsp;<a class="fig" href="#fig1">1</a>, the users in a community can access the content from another one, which provides users opportunities to break the bubble.</p> 
+    </section> 
+    <section id="sec-4"> 
+     <header> 
+      <div class="title-info"> 
+       <h2> <span class="section-number">3</span> PROBLEM DEFINITION</h2> 
+      </div> 
+     </header> 
+     <p>In this section, based on the motivation supported by the analysis of real-world data, we define the studied problem. We provide the lists of all used symbols along with their definitions in Table&nbsp;<a class="tbl" href="#tab1">1</a>.</p> 
+     <p><strong>Traditional recommender system</strong> Based on the above notations and definitions, the traditional recommender system's goal can be described as follows. The given input <em>D<sub>train</sub></em> is the historically-collected user-item interaction data. The output is a model that can estimate the probability that a user will interact with a given item, and the recommendation list is generated by ranking the items in candidate pools based on the probability.</p> 
+     <p><strong>Controllable recommender system</strong> Different from the traditional recommendation, the controllable recommendation's goal in our studied problem has another output: the controlled exposure <em>i.e.</em> the auxiliary recommendation list that tries to 1) satisfy user interests, 2) collect useful feedback data for the further model learning and 3) alleviate the filter bubble.</p> 
+     <div class="table-responsive" id="tab1"> 
+      <div class="table-caption"> <span class="table-number">Table 1:</span> <span class="table-title">Frequently used notations in this paper.</span> 
+      </div> 
+      <table class="table"> 
+       <tbody> 
+        <tr style="border-bottom: 2pt solid #000000;"> 
+         <td style="text-align:left;">Notations</td> 
+         <td style="text-align:left;">Descriptions</td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"> <span class="inline-equation"><span class="tex">$\mathcal {U}, \mathcal {I}$</span></span> </td> 
+         <td style="text-align:left;">The user set and the item set</td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"> <span class="inline-equation"><span class="tex">$\mathcal {I}_i^t$</span></span> </td> 
+         <td style="text-align:left;">The item set recommended to user <em>u<sub>i</sub></em> at time step <em>t</em></td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"> <span class="inline-equation"><span class="tex">$D_{train}^t$</span></span> </td> 
+         <td style="text-align:left;">The training set at the time step <em>t</em></td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"><em>D<sub>test</sub></em></td> 
+         <td style="text-align:left;">The testing set at all time steps</td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"><em>f<sub>sim</sub></em></td> 
+         <td style="text-align:left;">The simulator that models user-item interactions</td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"> <span class="inline-equation"><span class="tex">$\mathcal {E}_t$</span></span> </td> 
+         <td style="text-align:left;">The additional exposure edges set at time step <em>t</em></td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"> <span class="inline-equation"><span class="tex">$\mathcal {N}_i$</span></span> </td> 
+         <td style="text-align:left;">Neighbors of node <em>i</em></td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"> <span class="inline-equation"><span class="tex">$\mathbf {x}_i^{(l)}$</span></span> </td> 
+         <td style="text-align:left;">The embedding of node <em>i</em> at layer <em>l</em></td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"> <span class="inline-equation"><span class="tex">$\mathbf {z}_i \in \mathbb {R}^{p\times 1}$</span></span> </td> 
+         <td style="text-align:left;">The encoded <em>p</em>-dimension representation of node <em>i</em></td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"><strong>W</strong><sup>(<em>l</em>)</sup>, <strong>b</strong><sup>(<em>l</em>)</sup></td> 
+         <td style="text-align:left;">The parameters of the <em>l</em>th convolution layer</td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"><strong>W</strong><sub>0</sub>, <strong>W</strong><sub>1</sub></td> 
+         <td style="text-align:left;">The parameters of linear layer</td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"><em>G<sub>k</sub></em></td> 
+         <td style="text-align:left;">The graph structure after executing <em>k</em> action</td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"> <span class="inline-equation"><span class="tex">$|\mathcal {B}| = M$</span></span> </td> 
+         <td style="text-align:left;">The memory replay buffer of size <em>M</em></td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"> <span class="inline-equation"><span class="tex">$s_i \in \mathcal {S}$</span></span> </td> 
+         <td style="text-align:left;">A state and the state space</td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"> <span class="inline-equation"><span class="tex">$A_{s_i} = \lbrace a_i\rbrace$</span></span> </td> 
+         <td style="text-align:left;">An action and the action space for state <em>s<sub>i</sub></em></td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"><em>r<sub>i</sub></em>, <em>r</em><sub><em>i</em>, <em>i</em> + <em>n</em></sub></td> 
+         <td style="text-align:left;">A reward and the summed reward of <em>n</em> step.</td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;">Θ</td> 
+         <td style="text-align:left;">The parameters of evaluation Q-network</td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"> <span class="inline-equation"><span class="tex">$\hat{\Theta }$</span></span> </td> 
+         <td style="text-align:left;">The parameters of target Q-network</td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"><em>γ</em></td> 
+         <td style="text-align:left;">The reward factor</td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"><em>T</em></td> 
+         <td style="text-align:left;">The maximum number of game episodes</td> 
+        </tr> 
+        <tr> 
+         <td style="text-align:left;"><em>K</em></td> 
+         <td style="text-align:left;">The maximum steps in one game</td> 
+        </tr> 
+        <tr style="border-bottom: 2pt solid #000000;"> 
+         <td style="text-align:left;"><em>K<sub>init</sub></em></td> 
+         <td style="text-align:left;">The heuristic initialization steps</td> 
+        </tr> 
+       </tbody> 
+      </table> 
+     </div> 
+    </section> 
+    <section id="sec-5"> 
+     <header> 
+      <div class="title-info"> 
+       <h2> <span class="section-number">4</span> METHODOLOGY</h2> 
+      </div> 
+     </header> 
+     <p>In this section, we first introduce the overall framework of controllable recommender system with the proposed simulation environment, and we then elaborate on the carefully-developed controllable exposure strategy based on reinforcement learning.</p> 
+     <section id="sec-6"> 
+      <header> 
+       <div class="title-info"> 
+        <h3> <span class="section-number">4.1</span> Simulator environment and framework</h3> 
+       </div> 
+      </header> 
+      <p>As the problem proposed in section <a class="sec" href="#sec-4">3</a>, how to simulate the centralized recommendation phenomenon and evaluate the effectiveness of control strategies remains a challenge. Here we provide a framework for discussing this scenario, namely the user interaction modeling and RS policy evolution.</p> 
+      <p>To collect the user feedback on the recommendation, we utilize a simulator <em>f<sub>sim</sub></em> to model the interaction between the user and RS. We leverage the historical interaction data to train the simulator, capturing the user's preference and interest. Given the recommended items set <span class="inline-equation"><span class="tex">$\mathcal {I}_i^t$</span></span> to user <em>u<sub>i</sub></em> at time step <em>t</em>, the simulator acts as a real user and outputs the selected item set as <span class="inline-equation"><span class="tex">$f_{sim}(\mathcal {I}_i^t, u_i)$</span></span>, which contains user behavior and explicit interests of goods. In reality, the recommendation system is always updated and evolved based on user feedback. Considering the accumulation of real-time feedback from users into historical training data, we construct trainset <span class="inline-equation"><span class="tex">$D_{train}^{t}$</span></span> at time step <em>t</em>.</p> 
+      <p>After detailedly describing the two components, the entire simulating flow as:</p> 
+      <ul class="list-no-style"> 
+       <li id="list4" label="•"><strong>Step1</strong>: At the beginning of RS, there is no historical data in the database and thus the parameters of RS are randomly initialized. The exposure items <span class="inline-equation"><span class="tex">$\mathcal {I}_i^0$</span></span> to user <em>u<sub>i</sub></em> at time step <em>t</em> = 0 is randomly chosen, and the training dataset <span class="inline-equation"><span class="tex">$D_{train}^0 = \emptyset$</span></span>.<br /></li> 
+       <li id="list5" label="•"><strong>Step2</strong>: At the current time step <em>t</em>, we use the RS to expose <em>L</em> items for every user <em>u<sub>i</sub></em> time step <em>t</em>, denoting <span class="inline-equation"><span class="tex">$\mathcal {I}_i^t$</span></span> as the recommended item set. Then we make use of the simulator to get the user feedback as <span class="inline-equation"><span class="tex">$f_{sim}(\mathcal {I}_i^t, u_i)$</span></span>. The RS perceives the user's interaction with the exposed items, and generates the accumulated training dataset as <span class="inline-equation"><span class="tex">$D_{train}^{t+1}=D_{train}^{t} \cup \lbrace (user_j, item_j) | user_j \in \mathcal {U}, item_j \in f_{sim}(\mathcal {I}_j^t, user_j)\rbrace$</span></span>. If we introduce the exposure strategy, then the additional exposure edges set <span class="inline-equation"><span class="tex">$\mathcal {E}_t$</span></span> is also added to the <span class="inline-equation"><span class="tex">$D_{train}^{t+1}$</span></span>.<br /></li> 
+       <li id="list6" label="•"><strong>Step3</strong>: We evaluate the performance of RS and the community-aware metrics, which will have a further discussion next.<br /></li> 
+       <li id="list7" label="•"><strong>Step4</strong>: We train the RS model with the new interactions <span class="inline-equation"><span class="tex">$D_{train}^{t+1}$</span></span>, and update the parameters to get the state-of-art RS model. Then, we repeat <strong>Step2</strong> to <strong>Step4</strong>.<br /></li> 
+      </ul> 
+      <p>Furthermore, to more accurately evaluate the performance of different methods in <strong>Step3</strong>, we randomly select an independent test set <em>D<sub>test</sub></em>, where the user-item pairs in <em>D<sub>test</sub></em> remain unchanged for evaluating the precision or recall metrics at a different time step. In this way, we can make a fair comparison between time steps. Note that our simulation system is different from the existing recommendation simulators such as Virtual-Taobao&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0027">27</a>], since our work mainly focuses on the user-item feedback.</p> 
+     </section> 
+     <section id="sec-7"> 
+      <header> 
+       <div class="title-info"> 
+        <h3> <span class="section-number">4.2</span> Exposure strategy</h3> 
+       </div> 
+      </header> 
+      <p>Next, we introduce the controlling component into the simulation process. According to motivation in Sec.<a class="sec" href="#sec-3">2</a>, we design the controlled exposure strategy to consider the intervention, aiming at controlling the RS towards a direction of decentralized recommendation.</p> 
+      <p>There are various communities in the user-item graph, which indicates the shared interests and strong connections among the user and item groups. Without the loss of generality, we use Louvain&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0004">4</a>], an unsupervised approach that has been widely used for community detection.</p> 
+      <p>In order to break the closeness of different communities, we introduce our heuristic exposure method to increase the connectivity of the entire graph by exposing items in one community to users in another community. Specifically, we consider users with the most diverse set of interacted items as the representatives of their community. These users have a wide range of interests, and are more likely to be interested in items from other communities. What's more, the item set interacted by these users is more diverse and probably includes unpopular products on the fringes of the community.</p> 
+      <p>Here we use the intra-list similarity (ILS) as the diversity score of one user's item set. If a recommendation system is recommending lists of very similar items, the ILS score will be high. </p>
+      <div class="table-responsive" id="Xeq1"> 
+       <div class="display-equation"> <span class="tex mytex">\begin{equation} \operatorname{ILS}(\mathcal {I})=\frac{2}{k(k-1)} \sum _{i \in \mathcal {I}} \sum _{j \ne i \in \mathcal {I}} \operatorname{Sim}(i, j) \end{equation} </span> 
+        <br /> <span class="equation-number">(1)</span> 
+       </div> 
+      </div> 
+      <p></p> 
+      <p>where the similarity between two items is calculated by the inner product of the two item embedding. Therefore, the exposure strategy first chooses several communities to get their most diverse users. For each selected user, we randomly choose their historical items to get user-item pairs in different communities. These pairs are heuristically generated by exposure strategy and added to the training set for the next time step as described in <strong>Step 2</strong>.</p> 
+     </section> 
+     <section id="sec-8"> 
+      <header> 
+       <div class="title-info"> 
+        <h3> <span class="section-number">4.3</span> Our reinforcement learning-based methodology</h3> 
+       </div> 
+      </header> 
+      <p>We further design an RL based exposure method to mine the promising edges between communities. The edges can be regarded as the environment defined in RL. Moreover, RL follows a Markov Decision Process while interactions can construct a user-item graph. In this case, our RL approach can learn from the sequential edges exposure to produce more effective recommendations.</p> 
+      <p>Note that graph neural network-based methods have become the state-of-the-art approaches in multiple recommendation tasks&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0009">9</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0034">34</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0035">35</a>]. We leveraged GCN&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0016">16</a>] to encode the graph structural information into the <em>p</em>-dimensional embedding space.</p> 
+      <p>Initialized by RS user and item embedding, the message passing between nodes and their neighbors as: </p>
+      <div class="table-responsive" id="eq1"> 
+       <div class="display-equation"> <span class="tex mytex">\begin{equation} \mathbf {x}_i^{(l+1)}=\operatorname{ReLU}\left(\sum _{j \in \mathcal {N}_i \cup \lbrace i\rbrace } \frac{1}{\sqrt {\operatorname{deg}(i)} \cdot \sqrt {\operatorname{deg}(j)}}\left(\mathbf {x}_j^{(l)} \mathbf {W}^{(l)}+\mathbf {b}^{(l)}\right)\right) \end{equation} </span> 
+        <br /> <span class="equation-number">(2)</span> 
+       </div> 
+      </div> where <span class="inline-equation"><span class="tex">$x_i^{(l)}$</span></span> is the embedding of the node <em>i</em> at layer <em>l</em>, <span class="inline-equation"><span class="tex">$\mathcal {N}_i$</span></span> is the neighbors of the node <em>i</em>, <span class="inline-equation"><span class="tex">$\operatorname{deg}(i)$</span></span> is the degree number of the node <em>i</em>, and <strong>W</strong><sup>(<em>l</em>)</sup> and <strong>b</strong><sup>(<em>l</em>)</sup> are the parameters of convolution layer <em>l</em>. Instead of simply average pooling all nodes’ embeddings, we add a virtual node <em>s</em> that connects all the nodes to capture the complex information of the entire graph. After updating several iterations, the GCN aggregates the embedding of multi-hop neighbors and we get the representation <strong>z</strong><sub><em>i</em></sub> for each node <em>i</em>.
+      <p></p> 
+      <p>Since we have already represented every node in the graph with their representations, we can formalize the RL method with quadruple <span class="inline-equation"><span class="tex">$(\mathcal {S}, \mathcal {A}, \mathcal {P}, \mathcal {R})$</span></span> as follows:</p> 
+      <ul class="list-no-style"> 
+       <li id="list8" label="•"><strong>State</strong> The state <em>s<sub>i</sub></em> is defined as the current user-item graph at step <em>i</em>. After propagation on the graph, the representation of the virtual node <strong>z</strong><sub><em>s</em></sub> can be utilized as the state representation.<br /></li> 
+       <li id="list9" label="•"><strong>Action</strong> The action <em>a<sub>i</sub></em> = (<em>u</em>, <em>v</em>) exposes an edge between user <em>u</em> and item <em>v</em>, and corresponding action space <span class="inline-equation"><span class="tex">$A_{s_i}$</span></span> for a state <em>s<sub>i</sub></em> is the set of candidate exposure edges in the graph. Due to the large action space of all user-item pairs, we select top <em>N</em> similar items for every user as the candidate exposure edges.<br /></li> 
+       <li id="list10" label="•"><strong>Transition</strong> The transition <span class="inline-equation"><span class="tex">$\mathcal {P}$</span></span> is the probability that the state changes from <em>s<sub>i</sub></em> to <em>s</em><sub><em>i</em> + 1</sub>. The policy network encodes the state to output a probability distribution <span class="inline-equation"><span class="tex">$\mathcal {P}(s_{i+1} | s_i, a_i)$</span></span>, where <span class="inline-equation"><span class="tex">$a_i \in A_{s_i}$</span></span>.<br /></li> 
+       <li id="list11" label="•"><strong>Reward</strong> The reward <em>r<sub>i</sub></em> = <em>R</em>(<em>s<sub>i</sub></em>, <em>a<sub>i</sub></em>) is defined as the increase of the community-aware metric. Given the exposure edge (<em>u</em>, <em>v</em>), we calculate the community number before and after adding the edge. Then the reward is the difference between the reciprocal of the number of communities.<br /></li> 
+      </ul> 
+      <p>We use the Q-network to estimate the cumulative rewards from the current state-action pair (<em>s</em>, <em>a</em>). It takes state <em>s</em> and action <em>a</em> as input and outputs the Q-value <em>Q</em>(<em>s</em>, <em>a</em>). Each action is an exposure edge (<em>u</em>, <em>v</em>) between user node <em>u</em> and item node <em>v</em>. Our Q-network has two parts: the encoding part and the estimation part. The encoding part is parameterized by the GCN as <strong>W</strong><sup>(<em>l</em>)</sup> and <strong>b</strong><sup>(<em>l</em>)</sup>. And the estimation part is the mapping from state-action pair (<em>s</em>, <em>a</em>) to a scalar value <em>Q</em>(<em>s</em>, <em>a</em>) by using MLP. </p>
+      <div class="table-responsive" id="Xeq2"> 
+       <div class="display-equation"> <span class="tex mytex">\begin{equation} Q(s, a) = \mathbf {W}_0^T \text{ReLU} (\text{CONCAT}(\mathbf {z}_u, \mathbf {z}_v, \mathbf {z}_s) \cdot \mathbf {W}_1) \end{equation} </span> 
+        <br /> <span class="equation-number">(3)</span> 
+       </div> 
+      </div> 
+      <p></p> 
+      <p>where <span class="inline-equation"><span class="tex">$\mathbf {W}_0 \in \mathbb {R}^{p \times 1}$</span></span>, <span class="inline-equation"><span class="tex">$\mathbf {W}_1 \in \mathbb {R}^{3p \times 1}$</span></span> are weight parameters of MLPs, <span class="inline-equation"><span class="tex">$\mathbf {z}_u, \mathbf {z}_v, \mathbf {z}_s \in \mathbb {R}^{p \times 1}$</span></span> are the representations of user node, item node and virtual node respectively.</p> 
+      <p>For every time step <em>t</em> in <strong>Step2</strong>, we build the game environment with the initial user-item graph <em>G</em><sub>0</sub>, where every edge is in <span class="inline-equation"><span class="tex">$D_{train}^t$</span></span>. Beginning with the initial graph, the agent uses ϵ -greedy strategy to take the highest Q-value action with probability 1 − ϵ or take a random action. Each action <em>a<sub>k</sub></em> will add an edge to the current graph <em>G</em><sub><em>k</em> − 1</sub> and retrieve the next graph <em>G<sub>k</sub></em>. For better mining the exposure edges, we initialize the action by the heuristic method at the beginning of the game. Along with the game processing, we gradually increase the exposure edge set step by step until the game ends, which means whether the game exceeds the max step or the rewards continue to decline in consecutive steps.</p> 
+      <p>Because adding few edges has little effect on the community detection, we adopt the <em>n</em>-step DQN&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0029">29</a>] for better approximation. When the game step exceeds the <em>n</em>, we get the transitions (<em>s<sub>i</sub></em>, <em>a<sub>i</sub></em>, <em>r</em><sub><em>i</em>, <em>i</em> + <em>n</em></sub>, <em>s</em><sub><em>i</em> + <em>n</em></sub>, <em>G<sub>i</sub></em>, <em>G</em><sub><em>i</em> + <em>n</em></sub>), where <span class="inline-equation"><span class="tex">$r_{i, i+n}=\sum _{k=0}^{n-1} R\left(s_{i+k}, a_{i+k}\right)$</span></span> is the truncated <em>n</em>-step reward from given state <em>s<sub>i</sub></em>. These collected transitions are stored in the experience replay buffer <span class="inline-equation"><span class="tex">$\mathcal {B}$</span></span>.</p> 
+      <p>What's more, the DQN&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0022">22</a>] use two Q-network as the target network <span class="inline-equation"><span class="tex">$\hat{Q}(s, a;\hat{\Theta })$</span></span> and evaluation network <em>Q</em>(<em>s</em>, <em>a</em>;Θ). And the <span class="inline-equation"><span class="tex">$\hat{\Theta }$</span></span>, the parameters of target network, is periodically copied from the evaluate network parameters Θ. It will enable a stable learning Q-value for better performance.</p> 
+      <p>Hence the loss function is Eq.&nbsp;<a class="eqn" href="#eq2">4</a> and we perform stochastic gradient descents (SGD) over it to update the model parameters. </p>
+      <div class="table-responsive" id="eq2"> 
+       <div class="display-equation"> <span class="tex mytex">\begin{equation} L(\Theta) = E_{U(\mathcal {B}) } \left[\left(\left(r_{i, i+n}+\gamma \max _a \hat{Q}\left(s_{i+n}, a ; \hat{\Theta }\right)\right)-Q\left(s_i, a_i ; \Theta \right)\right)^2\right] \end{equation} </span> 
+        <br /> <span class="equation-number">(4)</span> 
+       </div> 
+      </div> where <em>γ</em> denotes the reward factor.
+      <p></p> 
+      <p>The overall framework of our proposed method is shown in Algorithm 1, for a better understanding.</p> 
+     </section> 
+    </section> 
+    <section id="sec-9"> 
+     <header> 
+      <div class="title-info"> 
+       <h2> <span class="section-number">5</span> EXPERIMENTS</h2> 
+      </div> 
+     </header> 
+     <figure id="fig3"> 
+      <img src="https://dl.acm.org/cms/attachment/html/10.1145/3543507.3583856/assets/html/images/www23-366-fig3.jpg" class="img-responsive" alt="Accuracy result on Gowalla" aria-describedby="fig004" /> 
+      <p style="display:none" id="fig004">Accuracy performance of different methods on the Gowalla dataset. This shows that our method is superior to other methods in terms of recall, precision and NDCG.</p> 
+      <figcaption> <span class="figure-number">Figure 3:</span> <span class="figure-title">Accuracy performance on the Gowalla dataset.</span> 
+      </figcaption> 
+     </figure> 
+     <figure id="fig4"> 
+      <img src="https://dl.acm.org/cms/attachment/html/10.1145/3543507.3583856/assets/html/images/www23-366-fig4.jpg" class="img-responsive" alt="Accuracy result on Yelp2018" aria-describedby="fig005" /> 
+      <p style="display:none" id="fig005">Accuracy performance of different methods on the Yelp2018 dataset. This shows that our method is superior to other methods in terms of recall, precision and NDCG.</p> 
+      <figcaption> <span class="figure-number">Figure 4:</span> <span class="figure-title">Accuracy performance on the Yelp2018 dataset.</span> 
+      </figcaption> 
+     </figure> 
+     <figure id="fig5"> 
+      <img src="https://dl.acm.org/cms/attachment/html/10.1145/3543507.3583856/assets/html/images/www23-366-fig5.jpg" class="img-responsive" alt="Community-aware mesures in different time steps" aria-describedby="fig006" /> 
+      <p style="display:none" id="fig006">Community-aware measures on Gowalla and Yelp2018 datasets. This shows that our method can have better performance with fewer steps.</p> 
+      <figcaption> <span class="figure-number">Figure 5:</span> <span class="figure-title">Community-aware measures on Gowalla and Yelp2018 datasets.</span> 
+      </figcaption> 
+     </figure> 
+     <section id="sec-10"> 
+      <header> 
+       <div class="title-info"> 
+        <h3> <span class="section-number">5.1</span> Experimental settings</h3> 
+       </div> 
+      </header> 
+      <p>In order to reduce the workload of implementation and adjuration in experiments’ parameters, we use LightGCN [<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0013">13</a>] with the model that was retrained by ourselves according to the settings in LightGCN as the simulator of our exposure initialization. We utilize the officially released datasets (train and test lists) from LightGCN, and the quantity details are shown in table <a class="tbl" href="#tab2">2</a>. The Gowalla and Yelp2018 are the same as those used in LightGCN <a class="fn" href="#fn3" id="foot-fn3"><sup>1</sup></a>, so we take the advantage of the statistical results in the paper. To compare the effevtiveness with related works, we introduce precision and connectivity-aware metric to evaluate the model performances and the extent our method can control the RS.</p> 
+      <p> <span class="inline-equation"></span></p>
+      <center>
+       <img src="https://dl.acm.org/cms/attachment/html/10.1145/3543507.3583856/assets/html/images/www23-366-img1.svg" class="img-responsive" alt="Algorithm 1" />
+      </center> 
+      <p></p> 
+      <section id="sec-11"> 
+       <p><em><span class="section-number">5.1.1</span> Datasets.</em> We employ two widely used datasets, Gowalla [<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0007">7</a>] and Yelp2018, in our experiments. Gowalla is a US friend relationship dataset, containing 950,327 friend relationships among 196591 users, and each record represents a pairwise friend relationship. Yelp, the largest review website in US, published its internal dataset Yelp2018, including 4.7 million user reviews, more than 150,000 merchant profiles, 200,000 images, and 12 metropolitan areas. In addition, there are 1 million tips from 1.1 million users and over 1.2 million merchant properties. To accurately compare with LightGCN in our study, we completely adhere to its settings.</p> 
+       <div class="table-responsive" id="tab2"> 
+        <div class="table-caption"> <span class="table-number">Table 2:</span> <span class="table-title">Statistics of the two datasets used in experiments.</span> 
+        </div> 
+        <table class="table"> 
+         <thead> 
+          <tr> 
+           <th style="text-align:center;">Dataset</th> 
+           <th style="text-align:center;">Users</th> 
+           <th style="text-align:center;">Items</th> 
+           <th style="text-align:center;">Interaction</th> 
+           <th style="text-align:center;">Density</th> 
+          </tr> 
+         </thead> 
+         <tbody> 
+          <tr> 
+           <td style="text-align:center;"> Gowalla</td> 
+           <td style="text-align:center;">29,858</td> 
+           <td style="text-align:center;">40,981</td> 
+           <td style="text-align:center;">1,027,370</td> 
+           <td style="text-align:center;">0.00084</td> 
+          </tr> 
+          <tr style="border-bottom: 2pt solid #000000;"> 
+           <td style="text-align:center;">Yelp2018</td> 
+           <td style="text-align:center;">31,668</td> 
+           <td style="text-align:center;">38,048</td> 
+           <td style="text-align:center;">1,561,406</td> 
+           <td style="text-align:center;">0.00130</td> 
+          </tr> 
+         </tbody> 
+        </table> 
+       </div> 
+      </section> 
+      <section id="sec-12"> 
+       <p><em><span class="section-number">5.1.2</span> Evaluation Metrics.</em> We evaluate the overall performance in terms of commonly used precision metrics in addition to our proposed connectivity-aware and diversity metrics.</p> 
+       <ul class="list-no-style"> 
+        <li id="list12" label="•"><strong>Precision.</strong> To evaluate the model's predict items for several certain users, we adopt top-N metrics, including Precision, Normalized Discounted Cumulative Gain (NDCG) and Recall, following existing works&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0014">14</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0018">18</a>]. We set <em>N</em> = 20 in our experiments. To be more specific, we produce predictions on the full test dataset [<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0037">37</a>] and rank the candidate items for each user, thereby enhancing the solidity of our experimental results.<br /></li> 
+        <li id="list13" label="•"><strong>Connectivity-aware Metric and Diversity.</strong> To describe the connectivity of the whole user-item graph, we assumed that the number of communities that are involved in the graph is a direct way to demonstrate it. The phenomenon of users’ centralized recommendation can be referred to as the compacting of the items around specific users. Consequently, the complete graph is tend to be divided into several sub-graphs, that raising up the number of communities <em>N<sub>comm</sub></em> and decline the connectivity. Furthermore, we define the diversity metric on the community numbers. For the reason that the growth of centralization can aggregate the top-k similar items around one user, and that can block the user from getting in touch with other types of items, reducing the diversity of items for each user. We simply propose 1/<em>N<sub>comm</sub></em> as the diversity metric. To fairly compare the performance, we calculate the average community number of last three time steps.<br /></li> 
+        <li id="list14" label="•"><strong>Aggregate degree connectivity.</strong> Another proper dimension to measure the connectivity is the degree of nodes from the whole graph. The degree connectivity can be regarded as a more accurate version of the diversity, that can only illustrate the feature of the micro aspect of the graph. However, we formulate the centralization problem as directly related to the connectivity of each node, which refers to the calculation of degree. By increasing the nodes’ degree via our methods, more edges will be established between the communities, resulting the boost of connectivity in the whole graph. In detail, we define the degree of <em>i<sup>th</sup></em> node is <em>k<sub>i</sub></em> with its neighbor nodes set <span class="inline-equation"><span class="tex">$\mathcal {N}_i$</span></span>, the aggregate degree <em>d<sub>i</sub></em> can be described as follows, 
+         <div class="table-responsive" id="eq3"> 
+          <div class="display-equation"> <span class="tex mytex">\begin{align} d_{i} = \frac{1}{s_i} \sum _{j \in \mathcal {N}_i} w_{ij} s_j \end{align} </span> 
+           <br /> <span class="equation-number">(5)</span> 
+          </div> 
+         </div> <br /> where <em>s<sub>i</sub></em> represents the degree of <em>i<sup>th</sup></em> node, and <em>w<sub>ij</sub></em> refer to the edge weight between <em>i<sup>th</sup></em> and <em>j<sup>th</sup></em> nodes. Lastly, <em>d<sub>i</sub></em> of the whole graph <em>D<sup>t</sup></em>(<em>G</em>) at time step <em>t</em> can be defined as 
+         <div class="table-responsive" id="eq4"> 
+          <div class="display-equation"> <span class="tex mytex">\begin{align} D^t(G) = \sum _{k \in D_{train}^t} d_k \end{align} </span> 
+           <br /> <span class="equation-number">(6)</span> 
+          </div> 
+         </div> <br /></li> 
+       </ul> 
+      </section> 
+      <section id="sec-13"> 
+       <p><em><span class="section-number">5.1.3</span> Simulator.</em> The basic assumption of collaborative filtering is that similar users will show similar preferences for items&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0017">17</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0031">31</a>]. Since the entry of deep learning into the field, it is generally important to first learn the embedding of users and items in the hidden space, and then reconstruct the interaction between them. LightGCN [<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0013">13</a>] followed the definition above, and it is known as a highly efficient and simple algorithm. In light of the features of LightGCN and their effectiveness in evaluating the effectiveness of our framework, we choose it as our simulator to model users and items for better explicit representations.</p> 
+      </section> 
+      <section id="sec-14"> 
+       <p><em><span class="section-number">5.1.4</span> Hyper-parameters Settings.</em> The agent we have set to choose edges has similar structures with DQN [<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0023">23</a>], which is stacked by several MLPs. The size of embedding-use MLPs is fixed to 64 for evaluation and target net in DQN. All the user and item embeddings are obtained from the parameters in the pretrained LightGCN simulator weights file. We optimize DQN parameters with Adam [<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0015">15</a>] and use the default initial learning rate 0.001 with a batch size of 8 for all datasets. The reward coefficient <em>γ</em> is set to 0.9. The agent chooses <em>N</em> = 100 items for each user while the maximum capacity of memory buffer is <em>M</em> = 100. The optimization steps of the target net and accumulated rewards for back propagation are <em>C</em> = 5 and <em>n</em> = 15, respectively.</p> 
+      </section> 
+      <section id="sec-15"> 
+       <p><em><span class="section-number">5.1.5</span> Baselines.</em> We implement basic models as baselines to make comparisons and to better emphasize the performance of our proposed methods.</p> 
+       <p>At first, the baselines are mainly constructed into train and test parts. Beginning with an empty training graph, the test starts to generate new user-item edges, which will be added to the training graph after every 20 epochs of the train process. In the training stage, we randomly sample a set of edges uniformly to train our recommender model. As for testing, the purpose is to generate new edges and add them to the train graph.</p> 
+       <p>Overall, the baselines include the framework without extra exposed edges, random and heuristic exposure methods. The strategies of test process depend on different methods that we have produced; for instance, the baselines only contain the selection of top-k items for each user while the additional edges are exposed in our heuristic and RL frameworks. Random and heuristic exposure methods both supply more edges to the above top-k items. As for the the rest of methods, we constantly choose two from all the communities which are derived from the Louvain community detection algorithm [<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0004">4</a>]. After the selection of communities, we separately utilize random and heuristic method to choose users in one community and items in another, which refer to the random selection and top-k ILS diversity-based selection, respectively.</p> 
+      </section> 
+     </section> 
+     <section id="sec-16"> 
+      <header> 
+       <div class="title-info"> 
+        <h3> <span class="section-number">5.2</span> Overall performance comparison</h3> 
+       </div> 
+      </header> 
+      <p>We compare the proposed method on two large-scale benchmark datasets, based on the above simulator framework. We first present the performance of recommendation precision on the Gowalla dataset and the Yelp2018 dataset in Figure&nbsp;<a class="fig" href="#fig3">3</a> and Figure&nbsp;<a class="fig" href="#fig4">4</a>, respectively. We also present the community-aware measures and degree connectivity on two datasets in Figure&nbsp;<a class="fig" href="#fig5">5</a>, in which we evaluate the user-item graph with the community detection algorithms mentioned in Section&nbsp;<a class="sec" href="#sec-3">2</a>. Based on the experimental results, we make the following observations and conclusions.</p> 
+      <ul class="list-no-style"> 
+       <li id="list15" label="•">Our method achieves the best recommendation accuracy. As time evolves, the proposed method outperforms the other two baselines on all five metrics (Precision, Recall, NDCG, 1/<em>N<sub>comm</sub></em>, Aggregate degree connectivity) and two utilized datasets. For a detailed comparison, we further present the performance at the last hop on the two datasets in Table&nbsp;<a class="tbl" href="#tab3">3</a> and Table&nbsp;<a class="tbl" href="#tab4">4</a>, respectively.<br /></li> 
+       <li id="list16" label="•">Our methods achieve good performance on community-aware measures. With the controlled exposure strategies based on the proposed reinforcement learning algorithms, the results of community detection find that the user-item interaction graph (triggered and induced by user-item exposure and users’ decision process) is less centralized. In other words, the filter bubble issue is partly alleviated. Note that in this paper, our exposure strategy only takes into account a few parts of exposure traffic compared with the original recommendation algorithms, and thus the performance improvement will be more significant if we increase the traffic of controlled recommendation.<br /></li> 
+      </ul> 
+      <div class="table-responsive" id="tab3"> 
+       <div class="table-caption"> <span class="table-number">Table 3:</span> <span class="table-title">The overall performance among baseline and our methods on the Gowalla dataset.</span> 
+       </div> 
+       <table class="table"> 
+        <thead> 
+         <tr> 
+          <th style="text-align:left;">Method</th> 
+          <th style="text-align:center;"><strong>Precision</strong></th> 
+          <th style="text-align:center;"><strong>Recall</strong></th> 
+          <th style="text-align:center;"><strong>NDCG</strong></th> 
+          <th style="text-align:center;"><strong>Avg <strong>N</strong><sub><em>comm</em></sub></strong></th> 
+          <th style="text-align:center;"><strong>1/<strong>N</strong><sub><em>comm</em></sub></strong></th> 
+          <th style="text-align:center;"><strong>Degree</strong></th> 
+         </tr> 
+        </thead> 
+        <tbody> 
+         <tr> 
+          <td style="text-align:left;"> w/o expo.</td> 
+          <td style="text-align:center;">0.0477</td> 
+          <td style="text-align:center;">0.00160</td> 
+          <td style="text-align:center;">0.0620</td> 
+          <td style="text-align:center;">203</td> 
+          <td style="text-align:center;">0.00492</td> 
+          <td style="text-align:center;">634.45</td> 
+         </tr> 
+         <tr> 
+          <td style="text-align:left;">Random expo.</td> 
+          <td style="text-align:center;">0.0411</td> 
+          <td style="text-align:center;">0.00138</td> 
+          <td style="text-align:center;">0.0511</td> 
+          <td style="text-align:center;">180</td> 
+          <td style="text-align:center;">0.00556</td> 
+          <td style="text-align:center;">619.42</td> 
+         </tr> 
+         <tr> 
+          <td style="text-align:left;">Heuristic expo.</td> 
+          <td style="text-align:center;">0.0415</td> 
+          <td style="text-align:center;">0.00140</td> 
+          <td style="text-align:center;">0.0520</td> 
+          <td style="text-align:center;">165</td> 
+          <td style="text-align:center;">0.00606</td> 
+          <td style="text-align:center;">621.63</td> 
+         </tr> 
+         <tr style="border-bottom: 2pt solid #000000;"> 
+          <td style="text-align:left;">RL expo.</td> 
+          <td style="text-align:center;">0.0420</td> 
+          <td style="text-align:center;">0.00142</td> 
+          <td style="text-align:center;">0.0531</td> 
+          <td style="text-align:center;">167</td> 
+          <td style="text-align:center;">0.00599</td> 
+          <td style="text-align:center;">641.36</td> 
+         </tr> 
+        </tbody> 
+       </table> 
+      </div> 
+      <div class="table-responsive" id="tab4"> 
+       <div class="table-caption"> <span class="table-number">Table 4:</span> <span class="table-title">The overall performance among baseline and our methods on the Yelp2018 dataset.</span> 
+       </div> 
+       <table class="table"> 
+        <thead> 
+         <tr> 
+          <th style="text-align:left;">Method</th> 
+          <th style="text-align:center;"><strong>Precision</strong></th> 
+          <th style="text-align:center;"><strong>Recall</strong></th> 
+          <th style="text-align:center;"><strong>NDCG</strong></th> 
+          <th style="text-align:center;"><strong>Avg <strong>N</strong><sub><em>comm</em></sub></strong></th> 
+          <th style="text-align:center;"><strong>1/<strong>N</strong><sub><em>comm</em></sub></strong></th> 
+          <th style="text-align:center;"><strong>Degree</strong></th> 
+         </tr> 
+        </thead> 
+        <tbody> 
+         <tr> 
+          <td style="text-align:left;"> w/o expo.</td> 
+          <td style="text-align:center;">0.0586</td> 
+          <td style="text-align:center;">0.00159</td> 
+          <td style="text-align:center;">0.0680</td> 
+          <td style="text-align:center;">132</td> 
+          <td style="text-align:center;">0.00757</td> 
+          <td style="text-align:center;">1158.56</td> 
+         </tr> 
+         <tr> 
+          <td style="text-align:left;">Random expo.</td> 
+          <td style="text-align:center;">0.0586</td> 
+          <td style="text-align:center;">0.00159</td> 
+          <td style="text-align:center;">0.0679</td> 
+          <td style="text-align:center;">173</td> 
+          <td style="text-align:center;">0.00578</td> 
+          <td style="text-align:center;">1136.35</td> 
+         </tr> 
+         <tr> 
+          <td style="text-align:left;">Heuristic expo.</td> 
+          <td style="text-align:center;">0.0591</td> 
+          <td style="text-align:center;">0.00160</td> 
+          <td style="text-align:center;">0.0671</td> 
+          <td style="text-align:center;">120</td> 
+          <td style="text-align:center;">0.00833</td> 
+          <td style="text-align:center;">1127.34</td> 
+         </tr> 
+         <tr style="border-bottom: 2pt solid #000000;"> 
+          <td style="text-align:left;">RL expo.</td> 
+          <td style="text-align:center;">0.0593</td> 
+          <td style="text-align:center;">0.00161</td> 
+          <td style="text-align:center;">0.0687</td> 
+          <td style="text-align:center;">104</td> 
+          <td style="text-align:center;">0.00962</td> 
+          <td style="text-align:center;">1166.73</td> 
+         </tr> 
+        </tbody> 
+       </table> 
+      </div> 
+     </section> 
+     <section id="sec-17"> 
+      <header> 
+       <div class="title-info"> 
+        <h3> <span class="section-number">5.3</span> Ablation study of our proposed method</h3> 
+       </div> 
+      </header> 
+      <p>To further evaluate the rationality of the designed components in our method, we conduct ablation studies for a deeper analysis as follows.</p> 
+      <p>Specifically, we compare our full framework with a degenerated model in which the main RL module or the edges initialization are removed, which refers to the first line of each dataset, showing that only the heuristic exposure method is in use. The experimental settings keep the same as above and the results shown in Tab.<a class="tbl" href="#tab5">5</a>, illustrating various prior methods to initial RL actions. We can observe from the results that heuristic action initially outperforms others. The third row performs better than the first row indicate that the effectiveness of the RL decision model. Comparing the second and third row, we can see that heuristic initial a more accurate action space to RL, which promotes its outcomes.</p> 
+      <div class="table-responsive" id="tab5"> 
+       <div class="table-caption"> <span class="table-number">Table 5:</span> <span class="table-title">Ablation study of only heuristic exposure, heuristic and random initialized DQN on Gowalla and Yelp2018 datasets.</span> 
+       </div> 
+       <table class="table"> 
+        <thead> 
+         <tr> 
+          <th style="text-align:center;border-right: 2pt solid #000000;">Dataset</th> 
+          <th style="text-align:center;">only heur</th> 
+          <th style="text-align:center;">heur init.</th> 
+          <th style="text-align:center;border-right: 2pt solid #000000;">rand init.</th> 
+          <th style="text-align:center;"><strong>Precision</strong></th> 
+          <th style="text-align:center;"><strong>Recall</strong></th> 
+          <th style="text-align:center;"><strong>NDCG</strong></th> 
+          <th style="text-align:center;"><strong>Avg <strong>N</strong><sub><em>comm</em></sub></strong></th> 
+          <th style="text-align:center;"><strong>1/<strong>N</strong><sub><em>comm</em></sub></strong></th> 
+          <th style="text-align:center;"><strong>Degree</strong></th> 
+         </tr> 
+        </thead> 
+        <tbody> 
+         <tr> 
+          <td style="text-align:center;border-right: 2pt solid #000000;"> Gowalla</td> 
+          <td style="text-align:center;">✓</td> 
+          <td style="text-align:center;">✗</td> 
+          <td style="text-align:center;border-right: 2pt solid #000000;">✗</td> 
+          <td style="text-align:center;">0.0415</td> 
+          <td style="text-align:center;">0.00140</td> 
+          <td style="text-align:center;">0.0520</td> 
+          <td style="text-align:center;">165</td> 
+          <td style="text-align:center;">0.00606</td> 
+          <td>621.63</td> 
+         </tr> 
+         <tr> 
+          <td style="text-align:center;border-right: 2pt solid #000000;"></td> 
+          <td style="text-align:center;">✗</td> 
+          <td style="text-align:center;">✗</td> 
+          <td style="text-align:center;border-right: 2pt solid #000000;">✓</td> 
+          <td style="text-align:center;">0.0418</td> 
+          <td style="text-align:center;">0.00141</td> 
+          <td style="text-align:center;">0.0528</td> 
+          <td style="text-align:center;">240</td> 
+          <td style="text-align:center;">0.00416</td> 
+          <td>613.80</td> 
+         </tr> 
+         <tr> 
+          <td style="text-align:center;border-right: 2pt solid #000000;"></td> 
+          <td style="text-align:center;">✗</td> 
+          <td style="text-align:center;">✓</td> 
+          <td style="text-align:center;border-right: 2pt solid #000000;">✗</td> 
+          <td style="text-align:center;">0.0420</td> 
+          <td style="text-align:center;">0.00142</td> 
+          <td style="text-align:center;">0.0531</td> 
+          <td style="text-align:center;">167</td> 
+          <td style="text-align:center;">0.00599</td> 
+          <td>641.36</td> 
+         </tr> 
+         <tr> 
+          <td style="text-align:center;border-right: 2pt solid #000000;"> Yelp2018</td> 
+          <td style="text-align:center;">✓</td> 
+          <td style="text-align:center;">✗</td> 
+          <td style="text-align:center;border-right: 2pt solid #000000;">✗</td> 
+          <td style="text-align:center;">0.0591</td> 
+          <td style="text-align:center;">0.00160</td> 
+          <td style="text-align:center;">0.0671</td> 
+          <td style="text-align:center;">120</td> 
+          <td style="text-align:center;">0.00833</td> 
+          <td>1127.34</td> 
+         </tr> 
+         <tr> 
+          <td style="text-align:center;border-right: 2pt solid #000000;"></td> 
+          <td style="text-align:center;">✗</td> 
+          <td style="text-align:center;">✗</td> 
+          <td style="text-align:center;border-right: 2pt solid #000000;">✓</td> 
+          <td style="text-align:center;">0.0591</td> 
+          <td style="text-align:center;">0.00161</td> 
+          <td style="text-align:center;">0.0683</td> 
+          <td style="text-align:center;">145</td> 
+          <td style="text-align:center;">0.00689</td> 
+          <td>1161.26</td> 
+         </tr> 
+         <tr style="border-bottom: 2pt solid #000000;"> 
+          <td style="text-align:center;border-right: 2pt solid #000000;"></td> 
+          <td style="text-align:center;">✗</td> 
+          <td style="text-align:center;">✓</td> 
+          <td style="text-align:center;border-right: 2pt solid #000000;">✗</td> 
+          <td style="text-align:center;">0.0593</td> 
+          <td style="text-align:center;">0.00161</td> 
+          <td style="text-align:center;">0.0687</td> 
+          <td style="text-align:center;">104</td> 
+          <td style="text-align:center;">0.00962</td> 
+          <td>1166.73</td> 
+         </tr> 
+        </tbody> 
+       </table> 
+      </div> 
+     </section> 
+    </section> 
+    <section id="sec-18"> 
+     <header> 
+      <div class="title-info"> 
+       <h2> <span class="section-number">6</span> RELATED WORK</h2> 
+      </div> 
+     </header> 
+     <p>We would like to discuss the related work from the following three aspects, the diversity issue in recommender system, controllable recommender system, and reinforcement learning-based recommender system.</p> 
+     <section id="sec-19"> 
+      <header> 
+       <div class="title-info"> 
+        <h3> <span class="section-number">6.1</span> Low-diversity Issue and Filter Bubble in Recommendation</h3> 
+       </div> 
+      </header> 
+      <p>The recommender systems largely determine the exposure, <em>i.e.</em>, what the users can access is the ranking list generated by the recommendation algorithms, and in turn the user provides feedback on the recommended items, also known as a <em>feedback loop</em> in recommender system. Most recommender systems are optimized towards higher accuracy, and due to feedback loop, the recommended items always only cover a small fraction of item categories, which leads to a low-diversity recommendation&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0003">3</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0019">19</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0029">29</a>]. The low-diversity and centralized recommendation will narrow the horizons of users, and users are trapped in the so-called filter bubble&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0008">8</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0024">24</a>]. Nguyen&nbsp;<em>et al.</em>&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0024">24</a>] quantify the filter bubble using the diversity of user ratings, and the results show that the item sets become more and more narrow as time proceeds. Cinelli&nbsp;<em>et al.</em>&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0008">8</a>] further found the filter bubble caused by recommendation algorithms to have a long-term negative impact on the Web platform of social media, leading to homophilic opinion clusters about several controversial topics. In short, the existing works on low-diversity issue or filter bubble in recommendation aims to improve the accuracy-oriented algorithm, while our work approaches the problem from a more general perspective by controlling and guiding the recommendation algorithms.</p> 
+     </section> 
+     <section id="sec-20"> 
+      <header> 
+       <div class="title-info"> 
+        <h3> <span class="section-number">6.2</span> Controllable Recommender System</h3> 
+       </div> 
+      </header> 
+      <p>Existing works of controllable recommendation&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0025">25</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0026">26</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0030">30</a>] typically refer to mechanisms in which the user can control the system. Parra&nbsp;<em>et al.</em>&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0025">25</a>] investigated the role of user controllability in recommender systems by letting the user control how different recommendation algorithms or strategies are fused. Rahdari&nbsp;<em>et al.</em>&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0026">26</a>] developed an interactive recommender system in which the users can select some keywords to filter and control the recommendation results. Wang&nbsp;<em>et al.</em>&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0030">30</a>] considers a scenario wherein users aim to explore diverse items and can provide such feedback to the recommender system. A recent work&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0005">5</a>] also used the term “controllable recommendation”, but the definition of “control” refers only to using a hyper-parameter to balance two recommendation algorithms. Different from these existing works, in this paper, we aim to consider a more general platform-side framework to control the algorithms in recommender systems and to avoid the creation of isolated communities and the filter bubble effect.</p> 
+     </section> 
+     <section id="sec-21"> 
+      <header> 
+       <div class="title-info"> 
+        <h3> <span class="section-number">6.3</span> Reinforcement Learning-based Recommendation</h3> 
+       </div> 
+      </header> 
+      <p>RL methods have been exploited in recommendation based on two aspects as follows&nbsp;[<a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0001">1</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0006">6</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0012">12</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0020">20</a>, <a class="bib" data-trigger="hover" data-toggle="popover" data-placement="top" href="#BibPLXBIB0032">32</a>]. The first category of RL research considers the sequential modeling of user behaviors in recommendation, and then designs sequential-decision models based on reinforcement learning. The second category of RL research for recommendation considers the multiple objectives, especially for those long-term optimization goals, and then develops reinforcement learning methods to maximize rewards that cannot be used in traditional supervision-learning methods. In this paper, we approach a different problem of controlling recommendation algorithms from a third-party view, and design a reinforcement learning-based framework based on graph neural networks. We aim to achieve the long-term controlling goal of alleviating the filter bubble in the user-item graph, while preserving similar or even better performance in terms of recommendation accuracy.</p> 
+     </section> 
+    </section> 
+    <section id="sec-22"> 
+     <header> 
+      <div class="title-info"> 
+       <h2> <span class="section-number">7</span> CONCLUSION AND FUTURE WORK</h2> 
+      </div> 
+     </header> 
+     <p>In this paper, we consider the filter bubble issue that arises due to the feedback loop in a traditional recommender systems, and we illustrate its existence via empirical analysis of real-world datasets. To address this issue, we propose a general and easy-to-use framework for controllable recommendation, under which the simulator based on offline datasets explains how the filter bubble is formed. We develop a reinforcement learning-based method combined with a graph neural network. The graph neural network module can learn from user-item interaction, well coupled with recommendation models. The reinforcement learning method can determine which kind of auxiliary exposure should be made to alleviate the isolated and large-sized communities. Results on two datasets show that our method can break the bubble while keeping or even boosting the recommendation performance.</p> 
+     <p>As for the future plan, the first follow-up work we plan to do is to test the proposed approach's performance via online A/B test on real-world Web service providers. Finally, we plan to conduct experiments on more datasets, especially for those in which users are more active but the interactions are more centralized, such as user-video interaction datasets in short-video platforms where users spend plenty of time every day.</p> 
+    </section> 
+   </section> 
+   <section class="back-matter"> 
+    <section id="sec-23"> 
+     <header> 
+      <div class="title-info"> 
+       <h2>ACKNOWLEDGMENTS</h2> 
+      </div> 
+     </header> 
+     <p>This work is supported by Shenzhen Science and Technology Program (Grant No. RCYX20200714114523079), the Key-Area Research and Development Program of Guangdong Province under the grant 2020B0909050003, the National Key Research and Development Program of China under 2022YFB3104702, the National Natural Science Foundation of China under 62272262 and the Fellowship of China Postdoctoral Science Foundation under 2021TQ0027 and 2022M710006.</p> 
+    </section> 
+    <section id="ref-001"> 
+     <header> 
+      <div class="title-info"> 
+       <h2 class="page-brake-head">REFERENCES</h2> 
+      </div> 
+     </header> 
+     <ul class="bibUl"> 
+      <li id="BibPLXBIB0001" label="[1]">M&nbsp;Mehdi Afsar, Trafford Crump, and Behrouz Far. 2021. Reinforcement learning based recommender systems: A survey. <em><em>ACM Computing Surveys (CSUR)</em></em> (2021).</li> 
+      <li id="BibPLXBIB0002" label="[2]">Guy Aridor, Duarte Goncalves, and Shan Sikdar. 2020. Deconstructing the filter bubble: User decision-making and recommender systems. In <em>Fourteenth ACM Conference on Recommender Systems</em>. 82–91.</li> 
+      <li id="BibPLXBIB0003" label="[3]">Azin Ashkan, Branislav Kveton, Shlomo Berkovsky, and Zheng Wen. 2015. Optimal greedy diversity for recommendation. In <em>Twenty-Fourth International Joint Conference on Artificial Intelligence</em>.</li> 
+      <li id="BibPLXBIB0004" label="[4]">Vincent&nbsp;D Blondel, Jean-Loup Guillaume, Renaud Lambiotte, and Etienne Lefebvre. 2008. Fast unfolding of communities in large networks. <em><em>Journal of statistical mechanics: theory and experiment</em></em> 2008, 10 (2008), P10008.</li> 
+      <li id="BibPLXBIB0005" label="[5]">Yukuo Cen, Jianwei Zhang, Xu Zou, Chang Zhou, Hongxia Yang, and Jie Tang. 2020. Controllable multi-interest framework for recommendation. In <em>Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery &amp; Data Mining</em>. 2942–2951.</li> 
+      <li id="BibPLXBIB0006" label="[6]">Xinshi Chen, Shuang Li, Hui Li, Shaohua Jiang, Yuan Qi, and Le Song. 2019. Generative adversarial user model for reinforcement learning based recommendation system. In <em>International Conference on Machine Learning</em>. PMLR, 1052–1061.</li> 
+      <li id="BibPLXBIB0007" label="[7]">Eunjoon Cho, Seth&nbsp;A Myers, and Jure Leskovec. 2011. Friendship and mobility: Friendship and mobility: User movement in location-based social networksfriendship and mobility. In <em>User Movement in Location-Based Social Networks ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD)</em>.</li> 
+      <li id="BibPLXBIB0008" label="[8]">Matteo Cinelli, Gianmarco De&nbsp;Francisci&nbsp;Morales, Alessandro Galeazzi, Walter Quattrociocchi, and Michele Starnini. 2021. The echo chamber effect on social media. <em><em>Proceedings of the National Academy of Sciences</em></em> 118, 9 (2021), e2023301118.</li> 
+      <li id="BibPLXBIB0009" label="[9]">Wenqi Fan, Yao Ma, Qing Li, Yuan He, Eric Zhao, Jiliang Tang, and Dawei Yin. 2019. Graph neural networks for social recommendation. In <em>The world wide web conference</em>. 417–426.</li> 
+      <li id="BibPLXBIB0010" label="[10]">Chen Gao, Yu Zheng, Nian Li, Yinfeng Li, Yingrong Qin, Jinghua Piao, Yuhan Quan, Jianxin Chang, Depeng Jin, Xiangnan He, and Yong Li. 2021. A Survey of Graph Neural Networks for Recommender Systems: Challenges, Methods, and Directions. <em><em>ACM Transactions on Recommender Systems (TORS)</em></em> (2021).</li> 
+      <li id="BibPLXBIB0011" label="[11]">Zhaolin Gao, Tianshu Shen, Zheda Mai, Mohamed&nbsp;Reda Bouadjenek, Isaac Waller, Ashton Anderson, Ron Bodkin, and Scott Sanner. 2022. Mitigating the Filter Bubble while Maintaining Relevance: Targeted Diversification with VAE-based Recommender Systems. In <em>Proceedings of the 45th International ACM SIGIR Conference on Research and Development in Information Retrieval</em>. 2524–2531.</li> 
+      <li id="BibPLXBIB0012" label="[12]">Yingqiang Ge, Xiaoting Zhao, Lucia Yu, Saurabh Paul, Diane Hu, Chu-Cheng Hsieh, and Yongfeng Zhang. 2022. Toward Pareto Efficient Fairness-Utility Trade-off in Recommendation through Reinforcement Learning. In <em>Proceedings of the Fifteenth ACM International Conference on Web Search and Data Mining</em>. 316–324.</li> 
+      <li id="BibPLXBIB0013" label="[13]">Xiangnan He, Kuan Deng, Xiang Wang, Yan Li, Yongdong Zhang, and Meng Wang. 2020. Lightgcn: Simplifying and powering graph convolution network for recommendation. In <em>Proceedings of the 43rd International ACM SIGIR Conference on Research and Development in Information Retrieval</em>. 639–648.</li> 
+      <li id="BibPLXBIB0014" label="[14]">Xiangnan He, Lizi Liao, Hanwang Zhang, Liqiang Nie, Xia Hu, and Tat-Seng Chua. 2017. Neural collaborative filtering. In <em>Proceedings of the 26th international conference on world wide web</em>. 173–182.</li> 
+      <li id="BibPLXBIB0015" label="[15]">Diederik&nbsp;P Kingma and Jimmy Ba. 2014. Adam: A method for stochastic optimization. <em><em>arXiv preprint arXiv:<a class="link-inline force-break" href="https://arXiv.org/abs/1412.6980">1412.6980</a></em></em> (2014).</li> 
+      <li id="BibPLXBIB0016" label="[16]">Thomas&nbsp;N. Kipf and Max Welling. 2017. Semi-Supervised Classification with Graph Convolutional Networks. In <em>International Conference on Learning Representations (ICLR)</em>.</li> 
+      <li id="BibPLXBIB0017" label="[17]">Yehuda Koren, Robert Bell, and Chris Volinsky. 2009. Matrix factorization techniques for recommender systems. <em><em>Computer</em></em> 42, 8 (2009), 30–37.</li> 
+      <li id="BibPLXBIB0018" label="[18]">Walid Krichene and Steffen Rendle. 2022. On sampled metrics for item recommendation. <em><em>Commun. ACM</em></em> 65, 7 (2022), 75–83.</li> 
+      <li id="BibPLXBIB0019" label="[19]">Matevž Kunaver and Tomaž Požrl. 2017. Diversity in recommender systems–A survey. <em><em>Knowledge-based systems</em></em> 123 (2017), 154–162.</li> 
+      <li id="BibPLXBIB0020" label="[20]">Feng Liu, Ruiming Tang, Xutao Li, Weinan Zhang, Yunming Ye, Haokun Chen, Huifeng Guo, and Yuzhou Zhang. 2018. Deep reinforcement learning based recommendation with explicit user-item interactions modeling. <em><em>arXiv preprint arXiv:<a class="link-inline force-break" href="https://arXiv.org/abs/1810.12027">1810.12027</a></em></em> (2018).</li> 
+      <li id="BibPLXBIB0021" label="[21]">Masoud Mansoury, Himan Abdollahpouri, Mykola Pechenizkiy, Bamshad Mobasher, and Robin Burke. 2020. Feedback loop and bias amplification in recommender systems. In <em>Proceedings of the 29th ACM international conference on information &amp; knowledge management</em>. 2145–2148.</li> 
+      <li id="BibPLXBIB0022" label="[22]">Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Andrei&nbsp;A Rusu, Joel Veness, Marc&nbsp;G Bellemare, Alex Graves, Martin Riedmiller, Andreas&nbsp;K Fidjeland, Georg Ostrovski, <em>et al.</em> 2015. Human-level control through deep reinforcement learning. <em><em>nature</em></em> 518, 7540 (2015), 529–533.</li> 
+      <li id="BibPLXBIB0023" label="[23]">Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Andrei&nbsp;A Rusu, Joel Veness, Marc&nbsp;G Bellemare, Alex Graves, Martin Riedmiller, Andreas&nbsp;K Fidjeland, Georg Ostrovski, <em>et al.</em> 2015. Human-level control through deep reinforcement learning. <em><em>nature</em></em> (2015).</li> 
+      <li id="BibPLXBIB0024" label="[24]">Tien&nbsp;T Nguyen, Pik-Mai Hui, F&nbsp;Maxwell Harper, Loren Terveen, and Joseph&nbsp;A Konstan. 2014. Exploring the filter bubble: the effect of using recommender systems on content diversity. In <em>Proceedings of the 23rd international conference on World wide web</em>. 677–686.</li> 
+      <li id="BibPLXBIB0025" label="[25]">Denis Parra and Peter Brusilovsky. 2015. User-controllable personalization: A case study with SetFusion. <em><em>International Journal of Human-Computer Studies</em></em> 78 (2015), 43–67.</li> 
+      <li id="BibPLXBIB0026" label="[26]">Behnam Rahdari, Peter Brusilovsky, and Alireza Javadian&nbsp;Sabet. 2021. Connecting students with research advisors through user-controlled recommendation. In <em>Fifteenth ACM Conference on Recommender Systems</em>. 745–748.</li> 
+      <li id="BibPLXBIB0027" label="[27]">Jing-Cheng Shi, Yang Yu, Qing Da, Shi-Yong Chen, and An-Xiang Zeng. 2019. Virtual-taobao: Virtualizing real-world online retail environment for reinforcement learning. In <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>, Vol.&nbsp;33. 4902–4909.</li> 
+      <li id="BibPLXBIB0028" label="[28]">Wenlong Sun, Sami Khenissi, Olfa Nasraoui, and Patrick Shafto. 2019. Debiasing the human-recommender system feedback loop in collaborative filtering. In <em>Companion Proceedings of The 2019 World Wide Web Conference</em>. 645–651.</li> 
+      <li id="BibPLXBIB0029" label="[29]">Richard&nbsp;S Sutton. 1988. Learning to predict by the methods of temporal differences. <em><em>Machine learning</em></em> 3, 1 (1988), 9–44.</li> 
+      <li id="BibPLXBIB0030" label="[30]">Wenjie Wang, Fuli Feng, Liqiang Nie, and Tat-Seng Chua. 2022. User-controllable Recommendation Against Filter Bubbles. <em><em>arXiv preprint arXiv:<a class="link-inline force-break" href="https://arXiv.org/abs/2204.13844">2204.13844</a></em></em> (2022).</li> 
+      <li id="BibPLXBIB0031" label="[31]">Xiang Wang, Xiangnan He, Meng Wang, Fuli Feng, and Tat-Seng Chua. 2019. Neural graph collaborative filtering. In <em>Proceedings of the 42nd international ACM SIGIR conference on Research and development in Information Retrieval</em>. 165–174.</li> 
+      <li id="BibPLXBIB0032" label="[32]">Xiting Wang, Kunpeng Liu, Dongjie Wang, Le Wu, Yanjie Fu, and Xing Xie. 2022. Multi-level recommendation reasoning over knowledge graphs with reinforcement learning. In <em>Proceedings of the ACM Web Conference 2022</em>. 2098–2108.</li> 
+      <li id="BibPLXBIB0033" label="[33]">Le Wu, Xiangnan He, Xiang Wang, Kun Zhang, and Meng Wang. 2022. A survey on accuracy-oriented neural recommendation: From collaborative filtering to information-rich recommendation. <em><em>IEEE Transactions on Knowledge and Data Engineering</em></em> (2022).</li> 
+      <li id="BibPLXBIB0034" label="[34]">Shu Wu, Yuyuan Tang, Yanqiao Zhu, Liang Wang, Xing Xie, and Tieniu Tan. 2019. Session-based recommendation with graph neural networks. In <em>Proceedings of the AAAI conference on artificial intelligence</em>, Vol.&nbsp;33. 346–353.</li> 
+      <li id="BibPLXBIB0035" label="[35]">Mengqi Zhang, Shu Wu, Xueli Yu, Qiang Liu, and Liang Wang. 2022. Dynamic graph neural networks for sequential recommendation. <em><em>IEEE Transactions on Knowledge and Data Engineering</em></em> (2022).</li> 
+      <li id="BibPLXBIB0036" label="[36]">Shuai Zhang, Lina Yao, Aixin Sun, and Yi Tay. 2019. Deep learning based recommender system: A survey and new perspectives. <em><em>ACM Computing Surveys (CSUR)</em></em> 52, 1 (2019), 1–38.</li> 
+      <li id="BibPLXBIB0037" label="[37]">Wayne&nbsp;Xin Zhao, Junhua Chen, Pengfei Wang, Qi Gu, and Ji-Rong Wen. 2020. Revisiting Alternative Experimental Settings for Evaluating Top-N Item Recommendation Algorithms. In <em>Proceedings of the 29th ACM International Conference on Information &amp; Knowledge Management</em>.</li> 
+     </ul> 
+    </section> 
+   </section> 
+   <section id="foot-001" class="footnote"> 
+    <header> 
+     <div class="title-info"> 
+      <h2>FOOTNOTE</h2> 
+     </div> 
+    </header> 
+    <p id="fn1"> <a href="#foot-fn1"><sup>⁎</sup></a>Contribution equally</p> 
+    <p id="fn2"> <a href="#foot-fn2"><sup>†</sup></a>Corresponding author</p> 
+    <p id="fn3"> <a href="#foot-fn3"><sup>1</sup></a> <a class="link-inline force-break" href="https://github.com/gusye1234/LightGCN-PyTorch">https://github.com/gusye1234/LightGCN-PyTorch</a> </p> 
+    <div class="bibStrip"> 
+     <p> <img src="https://www.acm.org/binaries/content/gallery/acm/publications/cc-by/cc-by.jpg" class="img-responsive" alt="CC-BY license image" /> <br /> This work is licensed under a <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution International 4.0 License</a>.</p> 
+     <p><em>WWW '23, April 30–May 04, 2023, Austin, TX, USA</em></p> 
+     <p>© 2023 Copyright held by the owner/author(s).<br /> ACM ISBN 978-1-4503-9416-1/23/04.<br />DOI: <a class="link-inline force-break" target="_blank" href="https://doi.org/10.1145/3543507.3583856">https://doi.org/10.1145/3543507.3583856</a> </p> 
+    </div> 
+   </section> 
+  </main>  
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93342cd62e0b8f13',t:'MTc0NTE0NzIxNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"93342cd62e0b8f13","serverTiming":{"name":{"cfExtPri":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.4.0-1-g37f21b1","token":"b7f168b3cd354a55a4dd51b513830799"}' crossorigin="anonymous"></script>
+</body>
+</html>

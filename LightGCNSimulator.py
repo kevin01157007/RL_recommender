@@ -1,8 +1,6 @@
 import torch
 class LightGCNSimulator:
-    def __init__(self, user_num, item_num, model, data):
-        self.user_num = user_num
-        self.item_num = item_num
+    def __init__(self, model, data):
         self.model = model
         self.model.eval()
         self.data = data
@@ -21,4 +19,11 @@ class LightGCNSimulator:
     def score(self, user_id, item_id):
         users_emb = self.get_user_embedding(user_id, self.model, self.data)
         items_emb = self.get_item_embedding(item_id, self.model, self.data)
-        return  self.model.f(torch.matmul(users_emb, items_emb.t()))
+        
+        # print("User Embedding:", users_emb)
+        # print("Item Embedding:", items_emb)
+        
+        score_value = torch.matmul(users_emb, items_emb.t())
+        # print("Score Value before Sigmoid:", score_value)
+        
+        return self.model.f(score_value)
