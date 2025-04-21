@@ -1,29 +1,49 @@
 import torch
+from torch import Tensor
+from typing import List, Dict
+
 class LightGCNSimulator:
-    def __init__(self, model, data):
-        self.model = model
+    def __init__(self,
+                 model,                  # 已初始化好的 LightGCN
+                 data: Dict,             # {"edge_index": ..., "users": [...], "items":[...]}
+                 device="cuda"):
+        self.device = device
+        self.model  = model.to(device).eval()
+        self.data   = data
+        self.update_all_emb()            # 先把全圖 embedding 算好並快取
+
+    # ------------------------------------------------------------------
+    def update_all_emb(self) -> None:
         self.model.eval()
-        self.data = data
-    def get_user_embedding(self, user_id, model, data):
-        all_users_items = model(model.embedding_user_item.weight.clone(),
-                            data["edge_index"])
-        all_users = all_users_items[:len(data["users"])]
-        users_emb = all_users[user_id]
-        return users_emb
-    def get_item_embedding(self, item_id, model, data):
-        all_users_items = model(model.embedding_user_item.weight.clone(),
-                            data["edge_index"])
-        all_items = all_users_items[len(data["users"]):]
-        item_emb = all_items[item_id]
-        return item_emb
-    def score(self, user_id, item_id):
-        users_emb = self.get_user_embedding(user_id, self.model, self.data)
-        items_emb = self.get_item_embedding(item_id, self.model, self.data)
-        
-        # print("User Embedding:", users_emb)
-        # print("Item Embedding:", items_emb)
-        
-        score_value = torch.matmul(users_emb, items_emb.t())
-        # print("Score Value before Sigmoid:", score_value)
-        
-        return self.model.f(score_value)
+        with torch.no_grad():
+            all_emb: Tensor = self.model(
+                self.model.embedding_user_item.weight,
+                self.data["edge_index"].to(self.device)
+            )
+        n_user = len(self.data["users"])
+        self.users_emb: Tensor = all_emb[:n_user]        # (U, d)
+        self.items_emb: Tensor = all_emb[n_user:]        # (I, d)
+
+    # ------------------------------------------------------------------
+    #  Embedding 讀取
+    def get_user_emb(self, uid: int) -> Tensor:
+        return self.users_emb[uid]
+
+    def get_item_emb(self, iid: int) -> Tensor:
+        return self.items_emb[iid]
+
+    def score(self, uid: int, iid: int, sigmoid: bool = True) -> Tensor:
+        s: Tensor = torch.matmul(self.get_user_emb(uid),self.get_item_emb(iid).t())
+        return torch.sigmoid(s) if sigmoid else s         # shape = ()
+
+    def recommend(self, uid: int, k: int = 20,
+                  exclude: set = None) -> List[int]:
+        """
+        回傳 uid 的 top‑k item id list
+        exclude: 不放入已互動/曝光商品
+        """
+        u: Tensor = self.get_user_emb(uid)                # (d,)
+        scores: Tensor = torch.matmul(self.items_emb, u)  # (I,)
+        if exclude:
+            scores[list(exclude)] = -1e9
+        return torch.topk(scores, k).indices.cpu().tolist()

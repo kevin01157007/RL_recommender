@@ -226,7 +226,9 @@ def personalized_topk(pred, K, user_indices, edge_index):
     """
     per_user_preds = collections.defaultdict(list)
     for index, user in enumerate(user_indices):
-        per_user_preds[user.item()].append(pred[index].item())
+        # 获取该用户的前 K 个评分
+        top_k_scores, _ = torch.topk(pred[index], K)  # 获取用户的前 K 个评分
+        per_user_preds[user.item()].extend(top_k_scores.tolist())  # 转换为列表并扩展
     precisions = 0.0
     recalls = 0.0
     for user, preds in per_user_preds.items():
@@ -244,11 +246,11 @@ movielens = MovieLens(root=root, transform=trans_ml)
 data = movielens.get()
 simulator = LightGCNSimulator(model=model, data=data)
 user_indices = torch.linspace(start=0,
-                                       end=200 - 1, steps=200).long()
+                                       end=20 - 1, steps=20).long()
 item_indices = torch.linspace(start=0,
                                        end=3883 - 1, steps=3883).long()
 # ... existing code ...
-# score = simulator.score(37,1141)
+# score = simulator.score(30,1101)
 # print(score)
 score = simulator.score(user_indices, item_indices)
 
@@ -257,3 +259,4 @@ score_df = pd.DataFrame(score.detach().cpu().numpy(), columns=[f"Score_{i}" for 
 
 # 将 DataFrame 写入 CSV 文件
 score_df.to_csv("scores.csv", index=False)  # 不写入行索引
+
