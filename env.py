@@ -13,6 +13,8 @@ class RecSimEnv:
                  n_user,
                  n_item,
                  agent,
+                 rec_model,
+                 sim,
                  device="cuda"):
         self.device   = device
         self.n_user   = n_user
@@ -23,24 +25,8 @@ class RecSimEnv:
         self.edge_index = init_edge_index.clone().to(device)
 
         # 2) 建立 LightGCN + Simulator
-        model = torch.load("model.pth", weights_only=False)
-        model_config = {
-            "n_users": 200,
-            "m_items": 3883,
-            "embedding_size": 64,
-            "num_layers": 3,
-        }
-        rs = LightGCN(model_config, device=device)
-        self.rec_model = LightGCNRS(rs, {
-            "edge_index": self.edge_index,
-            "users":      list(range(n_user)),
-            "items":      list(range(n_item))
-        })
-        self.sim = LightGCNSimulator(model, {
-            "edge_index": self.edge_index,
-            "users":      list(range(n_user)),
-            "items":      list(range(n_item))
-        })
+        self.rec_model = rec_model
+        self.sim = sim
 
     # ---------------- 主流程 ----------------
     def run(self, n_round=5, k_rec=20):

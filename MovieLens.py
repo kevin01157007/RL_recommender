@@ -11,6 +11,32 @@ pd.options.display.max_rows = 10
 import torch
 from torch_geometric.data import Dataset, Data, download_url, extract_zip
 from torch_geometric.data import Data, Dataset
+rating_threshold = 3  #@param {type: "integer"}: Ratings equal to or greater than 3 are positive items.
+
+config_dict = {
+    "num_samples_per_user": 500,
+    "num_users": 200,
+
+    "epochs": 100,
+    "batch_size": 128,
+    "lr": 0.001,
+    "weight_decay": 0.1,
+
+    "embedding_size": 64,
+    "num_layers": 5,
+    "K": 10,
+    "mf_rank": 8,
+
+    "minibatch_per_print": 100,
+    "epochs_per_print": 1,
+
+    "val_frac": 0.2,
+    "test_frac": 0.1,
+
+    "model_name": "model.pth"
+}
+DATA_PATH = "https://files.grouplens.org/datasets/movielens/ml-1m.zip"
+
 class MovieLens(Dataset):
     def __init__(self, root, transform=None, pre_transform=None,
             transform_args=None, pre_transform_args=None):
