@@ -4,6 +4,8 @@ from torch_geometric.utils import add_self_loops
 from torch_geometric.loader import NeighborLoader
 from LightGCNSimulator import LightGCNSimulator
 from LightGCNRS import LightGCNRS
+from LightGCN import LightGCN
+from LightGCNConv import LightGCNConv
 import pandas as pd
 class RecSimEnv:
     def __init__(self,
@@ -22,7 +24,14 @@ class RecSimEnv:
 
         # 2) 建立 LightGCN + Simulator
         model = torch.load("model.pth", weights_only=False)
-        self.rec_model = LightGCNRS(model, {
+        model_config = {
+            "n_users": 200,
+            "m_items": 3883,
+            "embedding_size": 64,
+            "num_layers": 3,
+        }
+        rs = LightGCN(model_config, device=device)
+        self.rec_model = LightGCNRS(rs, {
             "edge_index": self.edge_index,
             "users":      list(range(n_user)),
             "items":      list(range(n_item))
