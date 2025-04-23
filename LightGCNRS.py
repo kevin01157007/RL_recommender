@@ -5,7 +5,7 @@ from typing import List, Dict
 class LightGCNRS:
     def __init__(self,
                  model,                  # 已初始化好的 LightGCN
-                 data: Dict,             # {"edge_index": ..., "users": [...], "items":[...]}
+                 data,             # {"edge_index": ..., "users": [...], "items":[...]}
                  device="cuda"):
         self.device = device
         self.model  = model.to(device).eval()
