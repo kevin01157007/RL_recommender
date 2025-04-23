@@ -252,11 +252,12 @@ item_indices = torch.linspace(start=0,
 # ... existing code ...
 # score = simulator.score(30,1101)
 # print(score)
-score = simulator.score(user_indices, item_indices)
+score = simulator.score(100, item_indices)
+topk = torch.topk(score, 20).indices.cpu().tolist()
+print(topk)
+# # 将 score 转换为 DataFrame，确保列名与评分数量匹配
+# score_df = pd.DataFrame(score.detach().cpu().numpy(), columns=[f"Score_{i}" for i in range(score.shape[1])])
 
-# 将 score 转换为 DataFrame，确保列名与评分数量匹配
-score_df = pd.DataFrame(score.detach().cpu().numpy(), columns=[f"Score_{i}" for i in range(score.shape[1])])
-
-# 将 DataFrame 写入 CSV 文件
-score_df.to_csv("scores.csv", index=False)  # 不写入行索引
+# # 将 DataFrame 写入 CSV 文件
+# score_df.to_csv("scores.csv", index=False)  # 不写入行索引
 
