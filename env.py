@@ -32,21 +32,22 @@ class RecSimEnv:
     def run(self, n_round=5, k_rec=20):
         hist_metrics = []
         rec_items_list=[]
-
+        new_interactions = []
+        seen = {u: set() for u in range(5)}
         for t in range(n_round):
             print(f"===== Time step {t} =====")
 
             # (Step2) 產生推薦 + 使用 simulator 回饋
-            new_interactions = []
-            for u in range(self.n_user):
-                seen = set()   # 用來排除已推薦的
-                rec_items = self.rec_model.recommend(u, k=k_rec, exclude=seen)
+            for u in range(5):
+                rec_items = self.rec_model.recommend(u, k=k_rec, exclude=seen[u])
                 for item in rec_items:
                     rec_items_list.append((u, t, item))  # (user_id, time_step, recommended_item)
+                    seen[u].add(item)
                 for i in rec_items:
                     p = self.sim.score(u, i).item()
                     if torch.rand(1).item() < p:
                         new_interactions.append((u, i))
+            print(seen)
 
             # # (Step2‑b) Agent 決策額外曝光
             # extra_edges = self.agent.select_edges(self)
@@ -59,7 +60,8 @@ class RecSimEnv:
                     self.edge_index[u][i] = 1
         rec_items_df = pd.DataFrame(rec_items_list, columns=['user_id', 'time_step', 'recommended_item'])
         rec_items_df.to_csv('rec_items11.csv', index=False)
-
+        in_df = pd.DataFrame(new_interactions, columns=['u', 'i'])
+        in_df.to_csv('new_interactions.csv', index=False)
             # # (Step3) 評估
             # metrics = self.evaluate()
             # hist_metrics.append(metrics)
