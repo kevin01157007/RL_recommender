@@ -1,76 +1,44 @@
+# lightgcn.py
 import torch
 import torch.nn as nn
-from typing import List
 from torch import Tensor
-from LightGCNConv import LightGCNConv
 from torch_geometric.typing import Adj
+from LightGCNConv import LightGCNConv
 
 class LightGCN(nn.Module):
-    def __init__(self,
-                 config: dict,
-                 device=None,
-                 **kwargs):
+    def __init__(self, config: dict, device=None):
         super().__init__()
-
-        self.num_users  = config["n_users"]
-        self.num_items  = config["m_items"]
+        self.num_users = config["n_users"]
+        self.num_items = config["m_items"]
         self.embedding_size = config["embedding_size"]
-        self.in_channels = self.embedding_size
-        self.out_channels = self.embedding_size
         self.num_layers = config["num_layers"]
 
-        # 0-th layer embedding.
-        self.embedding_user_item = torch.nn.Embedding(
-            num_embeddings=self.num_users + self.num_items,
-            embedding_dim=self.embedding_size)
-        self.alpha = None
+        self.embedding = nn.Embedding(self.num_users + self.num_items, self.embedding_size)
+        nn.init.normal_(self.embedding.weight, std=0.1)
+        print('Use normal distribution initializer')
 
-        # random normal init seems to be a better choice when lightGCN actually
-        # don't use any non-linear activation function
-        nn.init.normal_(self.embedding_user_item.weight, std=0.1)
-        print('use NORMAL distribution initilizer')
+        self.convs = nn.ModuleList([LightGCNConv() for _ in range(self.num_layers)])
+        self.device = device
+        if device:
+            self.to(device)
 
-        self.f = nn.Sigmoid()
+    def forward(self, edge_index: Adj) -> Tensor:
+        x = self.embedding.weight
+        all_embeddings = [x]
 
-        self.convs = nn.ModuleList()
-        self.convs.append(LightGCNConv(
-                self.embedding_size, self.embedding_size,
-                num_users=self.num_users, num_items=self.num_items, **kwargs))
-
-        for _ in range(1, self.num_layers):
-            self.convs.append(
-                LightGCNConv(
-                        self.embedding_size, self.embedding_size,
-                        num_users=self.num_users, num_items=self.num_items,
-                        **kwargs))
-
-        self.device = None
-        if device is not None:
-            self.convs.to(device)
-            self.device = device
-
-    def reset_parameters(self):
         for conv in self.convs:
-            conv.reset_parameters()
+            x = conv(x, edge_index)
+            all_embeddings.append(x)
 
-    def forward(self, x: Tensor, edge_index: Adj, *args, **kwargs) -> Tensor:
-        xs: List[Tensor] = []
+        all_embeddings = torch.stack(all_embeddings, dim=0)  # [num_layers+1, num_nodes, dim]
+        out = torch.mean(all_embeddings, dim=0)  # average over all layers
+        return out
 
-        edge_index = torch.nonzero(edge_index)
-        for i in range(self.num_layers):
-            x = self.convs[i](x, edge_index, *args, **kwargs)
-            if self.device is not None:
-                x = x.to(self.device)
-            xs.append(x)
-        xs = torch.stack(xs)
+    def get_user_item_embeddings(self):
+        out = self.forwarded_embedding
+        user_emb = out[:self.num_users]
+        item_emb = out[self.num_users:]
+        return user_emb, item_emb
 
-        self.alpha = 1 / (1 + self.num_layers) * torch.ones(xs.shape)
-        if self.device is not None:
-            self.alpha = self.alpha.to(self.device)
-            xs = xs.to(self.device)
-        x = (xs * self.alpha).sum(dim=0)  # Sum along K layers.
-        return x
-
-    def __repr__(self) -> str:
-        return (f'{self.__class__.__name__}({self.in_channels}, '
-                f'{self.out_channels}, num_layers={self.num_layers})')
+    def __repr__(self):
+        return f'LightGCN(num_users={self.num_users}, num_items={self.num_items}, embedding_size={self.embedding_size})'
