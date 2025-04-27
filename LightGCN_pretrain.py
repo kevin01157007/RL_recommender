@@ -46,10 +46,10 @@ ratings_high['i'] = ratings_high.movie_id.map(mid_map)
 # 2. Split last‑k per user → val / test (k=5 here) ; rest = train
 # ────────────────────────────────────────────────────────────────────────────────
 inter_df = ratings_high[['u','i','timestamp']].sort_values(['u','timestamp'])
-test_idx       = inter_df.groupby('u').tail(5).index
+test_idx       = inter_df.groupby('u').tail(1).index
 test_df        = inter_df.loc[test_idx].reset_index(drop=True)
 train_val_df   = inter_df.drop(test_idx).reset_index(drop=True)
-val_idx        = train_val_df.groupby('u').tail(5).index
+val_idx        = train_val_df.groupby('u').tail(1).index
 val_df         = train_val_df.loc[val_idx].reset_index(drop=True)
 train_df       = train_val_df.drop(val_idx).reset_index(drop=True)
 print(f"train {len(train_df):,} | val {len(val_df):,} | test {len(test_df):,}")
@@ -96,7 +96,7 @@ def sample_pos_neg(train_pairs, num_users, num_items, num_negatives=1, seed=None
         if not pos_items: continue
         for _ in range(num_negatives):
             p=random.choice(pos_items)
-            n=random.choice(list(all_items-user2pos[u]))
+            n=random.choice(list(all_items-user2pos[u]-user2exclude[u]))
             samples.append((u,p,n))
     return torch.tensor(samples, dtype=torch.long)
 
@@ -189,7 +189,7 @@ batch_size=1024
 num_neg_per_u=50
 
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model=LightGCN(num_users,num_items,emb_size=64,n_layers=2).to(device)
+model=LightGCN(num_users,num_items,emb_size=64,n_layers=3).to(device)
 opt=optim.Adam(model.parameters(), lr=1e-3)
 train_edge_index=train_edge_index.to(device)
 val_edge_index=val_edge_index.to(device)
