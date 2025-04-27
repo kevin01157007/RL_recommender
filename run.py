@@ -2,7 +2,7 @@ from env import RecSimEnv      # 你自己的實作
 import torch
 from LightGCNSimulator import LightGCNSimulator
 from LightGCNRS import LightGCNRS
-from lightgcn import LightGCN
+from LightGCN import LightGCN
 from LightGCNConv import LightGCNConv
 from MovieLens import MovieLens
 import os

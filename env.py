@@ -4,7 +4,7 @@ from torch_geometric.utils import add_self_loops
 from torch_geometric.loader import NeighborLoader
 from LightGCNSimulator import LightGCNSimulator
 from LightGCNRS import LightGCNRS
-from lightgcn import LightGCN
+from LightGCN import LightGCN
 from LightGCNConv import LightGCNConv
 import pandas as pd
 class RecSimEnv:

@@ -16,14 +16,13 @@ class LightGCNRS:
     def update_all_emb(self) -> None:
         self.model.eval()
         with torch.no_grad():
-            # 直接调用 forward(edge_index)：
             all_emb: Tensor = self.model(
+                self.model.embedding_user_item.weight,
                 self.data["edge_index"].to(self.device)
             )
         n_user = len(self.data["users"])
-        self.users_emb: Tensor = all_emb[:n_user]
-        self.items_emb: Tensor = all_emb[n_user:]
-       # (I, d)
+        self.users_emb: Tensor = all_emb[:n_user]        # (U, d)
+        self.items_emb: Tensor = all_emb[n_user:]        # (I, d)
 
     # ------------------------------------------------------------------
     #  Embedding 讀取
