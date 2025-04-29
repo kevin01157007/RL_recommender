@@ -29,15 +29,14 @@ ratings = pd.read_csv('data_split/train.dat', sep=',', names=['user_id', 'movie_
 movies  = pd.read_csv('raw/ml-1m/movies.dat', sep='::', names=['movie_id', 'title', 'genres'],   engine='python', encoding='latin-1')
 users   = pd.read_csv('raw/ml-1m/users.dat',  sep='::', names=['user_id', 'gender', 'age', 'occupation', 'zip'], engine='python', encoding='latin-1')
 
-# keep first 1 000 users for quick experiments
-selected_user_ids = users.user_id.tolist()[:5000]
-uid_map = {old: new for new, old in enumerate(selected_user_ids)}
+# selected_user_ids = users.user_id.tolist()[:5000]
+uid_map = {old: new for new, old in enumerate(sorted(ratings.user_id.unique()))}
 mid_map = {old: new for new, old in enumerate(sorted(movies.movie_id.unique()))}
 num_users, num_items = len(uid_map), len(mid_map)
 print(f"Users: {num_users}, Items: {num_items}")
 
 # high‑rating implicit positives
-ratings = ratings[ratings.user_id.isin(selected_user_ids)]
+# ratings = ratings[ratings.user_id.isin(selected_user_ids)]
 ratings_high = ratings[ratings.rating >= 4].copy()
 ratings_high['u'] = ratings_high.user_id.map(uid_map)
 ratings_high['i'] = ratings_high.movie_id.map(mid_map)
@@ -46,10 +45,10 @@ ratings_high['i'] = ratings_high.movie_id.map(mid_map)
 # 2. Split last‑k per user → val / test (k=5 here) ; rest = train
 # ────────────────────────────────────────────────────────────────────────────────
 inter_df = ratings_high[['u','i','timestamp']].sort_values(['u','timestamp'])
-test_idx       = inter_df.groupby('u').tail(1).index
+test_idx       = inter_df.groupby('u').tail(3).index
 test_df        = inter_df.loc[test_idx].reset_index(drop=True)
 train_val_df   = inter_df.drop(test_idx).reset_index(drop=True)
-val_idx        = train_val_df.groupby('u').tail(1).index
+val_idx        = train_val_df.groupby('u').tail(3).index
 val_df         = train_val_df.loc[val_idx].reset_index(drop=True)
 train_df       = train_val_df.drop(val_idx).reset_index(drop=True)
 print(f"train {len(train_df):,} | val {len(val_df):,} | test {len(test_df):,}")
@@ -186,7 +185,7 @@ def precision_recall_ndcg_at_k(model, edge_index_train, test_pairs, train_pairs=
 K = 10
 num_epochs=100
 batch_size=1024
-num_neg_per_u=50
+num_neg_per_u=5
 
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model=LightGCN(num_users,num_items,emb_size=64,n_layers=3).to(device)
