@@ -2,15 +2,16 @@ import torch
 from torch import Tensor
 from typing import List, Dict
 from LightGCN import LightGCN
+
 class LightGCNRS:
-    def __init__(self, n_users, model,device="cuda"):
-        self.device = device
+    def __init__(self, n_users, model, device="cuda"):
+        self.device  = device
         self.n_users = n_users
-        self.model = model.to(device).eval() 
+        self.model   = model.to(device).eval()
 
     def recommend(self, uid, k=20, exclude=None):
         """
-        回傳 uid 的 top‑k item id list
+        回傳 uid 的 top-k item id list
         exclude: set() -> 不推薦已互動商品
         """
         user_emb = self.model.embedding.weight[:self.n_users]
@@ -21,9 +22,10 @@ class LightGCNRS:
             scores[list(exclude)] = -1e9
         topk = torch.topk(scores, k).indices.cpu().tolist()
         return topk
-device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-rs = LightGCN(5000,3883).to(device)
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+rs = LightGCN(5000, 3883).to(device)
 rec_model = LightGCNRS(n_users=5000, model=rs, device=device)
 
-print(rec_model.recommend(0))
+
+

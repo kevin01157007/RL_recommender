@@ -1,76 +1,88 @@
-import torch, copy, collections
+import torch
+import pandas as pd
 from torch_geometric.data import Data
 from torch_geometric.utils import add_self_loops
 from torch_geometric.loader import NeighborLoader
-from LightGCNSimulator import LightGCNSimulator
 from LightGCNRS import LightGCNRS
 from LightGCN import LightGCN
-from LightGCNConv import LightGCNConv
-import pandas as pd
+
 class RecSimEnv:
     def __init__(self,
-                 init_edge_index,      # tensor([2,E])
+                 init_edge_index,  # tensor([2,E])
                  n_user,
                  n_item,
                  agent,
                  rec_model,
                  sim,
                  device="cuda"):
-        self.device   = device
+        self.device   = torch.device(device)
         self.n_user   = n_user
         self.n_item   = n_item
         self.agent    = agent
 
         # 1) 建立動態圖
-        self.edge_index = init_edge_index.clone().to(device)
+        self.edge_index = init_edge_index.clone().to(self.device)
 
-        # 2) 建立 LightGCN + Simulator
+        # 2) 建立推薦與 Simulator（可先保留）
         self.rec_model = rec_model
-        self.sim = sim
+        self.sim       = sim
 
-    # ---------------- 主流程 ----------------
+        # 3) **載入 pre-saver 的 embeddings**
+        self.user_emb = torch.load("user_emb.pt", map_location=self.device)  # [n_user, d]
+        self.item_emb = torch.load("item_emb.pt", map_location=self.device)  # [n_item, d]
+
     def run(self, n_round=5, k_rec=20):
-        hist_metrics = []
-        rec_items_list=[]
+        rec_items_list  = []
         new_interactions = []
-        seen = {u: set() for u in range(5)}
+        seen = {u: set() for u in range(self.n_user)}
+
         for t in range(n_round):
             print(f"===== Time step {t} =====")
-
-            # (Step2) 產生推薦 + 使用 simulator 回饋
-            for u in range(5):
+            for u in range(self.n_user):
+                # 1) 取得 Top-k 推薦
                 rec_items = self.rec_model.recommend(u, k=k_rec, exclude=seen[u])
-                for item in rec_items:
-                    rec_items_list.append((u, t, item))  # (user_id, time_step, recommended_item)
-                    seen[u].add(item)
-                for i in rec_items:
-                    p = self.sim.score(u, i).item()
-                    if torch.rand(1).item() < p:
-                        new_interactions.append((u, i))
-            print(seen)
+                print(f"[User {u}] Recommended {len(rec_items)} items (k_rec={k_rec})")
 
-            # # (Step2‑b) Agent 決策額外曝光
-            # extra_edges = self.agent.select_edges(self)
-            # new_interactions.extend(extra_edges)
+                # 2) **用 raw dot-product 打分，不用 sim.score**
+                rec_with_scores = [
+                    (item_id, (self.user_emb[u] @ self.item_emb[item_id]).item())
+                    for item_id in rec_items
+                ]
 
-            # (Step2‑c) 更新 edge_index
-            ei_extra = torch.tensor(new_interactions, dtype=torch.long).T.to(self.device)
-            if ei_extra.numel() > 0:
-                for u, i in new_interactions:
-                    self.edge_index[u][i] = 1
-        rec_items_df = pd.DataFrame(rec_items_list, columns=['user_id', 'time_step', 'recommended_item'])
-        rec_items_df.to_csv('rec_items11.csv', index=False)
-        in_df = pd.DataFrame(new_interactions, columns=['u', 'i'])
-        in_df.to_csv('new_interactions.csv', index=False)
-            # # (Step3) 評估
-            # metrics = self.evaluate()
-            # hist_metrics.append(metrics)
-            # print(metrics)
+                for item_id, score_val in rec_with_scores:
+                    print(f"[User {u}] Item {item_id} RawScore = {score_val:.4f}")
 
-            # # (Step4) 重新訓練 LightGCN（可微調幾 epoch 就行）
-            # self.finetune_lightgcn(epochs=3, batch_size=2048)
+                new_interactions.extend([
+                    (u, i_id)
+                    for i_id, _ in rec_with_scores
+                    if torch.rand(1).item() < self.sim.score(u, i_id).item()
+                ])
 
-        # return hist_metrics
+                # 標記為已推薦
+                seen[u].update(rec_items)
+
+                # 收集推薦記錄
+                rec_items_list.extend([(u, t, item_id, item_raw_score) for item_id, item_raw_score in rec_with_scores])
+
+            # (Step2-c) 更新 edge_index
+            if new_interactions:
+                ei_extra = torch.tensor(new_interactions, dtype=torch.long).T.to(self.device)
+                
+                if ei_extra.numel() > 0:
+                    self.edge_index = torch.cat([self.edge_index, ei_extra], dim=1)
+
+        # 最後存檔
+        print(f"Attempting to save rec_items.csv with {len(rec_items_list)} entries.")
+        if rec_items_list:
+            print(f"First entry in rec_items_list: {rec_items_list[0]} (should have 4 elements)")
+        pd.DataFrame(rec_items_list,
+                 columns=['user_id', 'time_step', 'item', 'score']
+                ).to_csv('rec_items.csv', index=False)
+        
+        print(f"Attempting to save new_interactions.csv with {len(new_interactions)} entries.")
+        pd.DataFrame(new_interactions, columns=['u','i']).to_csv('new_interactions.csv', index=False)
+        print("CSV files saving process finished.")
+
 
     # ---------------- 內部工具 ----------------
     def finetune_lightgcn(self, epochs=3, batch_size=2048):
@@ -102,13 +114,87 @@ class RecSimEnv:
 
 
     def evaluate(self):
-        # 簡易統計：社群數量 ＆ 平均度數
-        import community as community_louvain, networkx as nx
+        import networkx as nx
+        import community as community_louvain
+        import torch
+        import numpy as np
+        from collections import defaultdict
+        from torch.nn.functional import softplus
+
+        # 1. 圖結構指標：社群數 & 平均度數
         g = nx.Graph()
-        g.add_nodes_from(range(self.n_user + self.n_item))
-        g.add_edges_from(self.edge_index.t().tolist())
+        n_nodes = self.n_user + self.n_item
+        g.add_nodes_from(range(n_nodes))
+        # edge_index shape = [2, E]
+        edges = self.edge_index.t().tolist()
+        g.add_edges_from(edges)
         part = community_louvain.best_partition(g, resolution=1.0)
         n_comm = len(set(part.values()))
         degs = dict(g.degree())
-        avg_deg = sum(degs.values()) / len(degs)
-        return {"n_comm": n_comm, "avg_deg": avg_deg}
+        avg_deg = sum(degs.values()) / n_nodes
+
+        # 2. 推薦模型嵌入 & BPR loss
+        #    2.1 取出所有 user/item 嵌入
+        user_emb, item_emb = self.rec_model.model.get_user_item(self.edge_index)
+        #    2.2 隨機負採樣測試 BPR
+        samples = []
+        for u, i in self.test_data:
+            # 以每個測試正例配一個隨機負例
+            neg = np.random.choice(self.n_item)
+            samples.append((u, i, neg))
+        users, pos, neg = zip(*samples)
+        users = torch.tensor(users, dtype=torch.long, device=self.rec_model.device)
+        pos   = torch.tensor(pos,   dtype=torch.long, device=self.rec_model.device)
+        neg   = torch.tensor(neg,   dtype=torch.long, device=self.rec_model.device)
+
+        #    2.3 計算 BPR 損失
+        u_e = user_emb[users]
+        p_e = item_emb[pos]
+        n_e = item_emb[neg]
+        pos_scores = torch.sum(u_e * p_e, dim=1)
+        neg_scores = torch.sum(u_e * n_e, dim=1)
+        loss_bpr = torch.mean(softplus(neg_scores - pos_scores))
+        #    正則項：對第0層嵌入做 L2
+        e0 = self.rec_model.model.embedding.weight
+        reg = (e0[users].norm(2).pow(2)
+            + e0[pos + self.n_user].norm(2).pow(2)
+            + e0[neg + self.n_user].norm(2).pow(2)) / users.size(0)
+        loss = loss_bpr + self.lambda_reg * reg
+
+        # 3. Top-K 指標：Precision, Recall, NDCG
+        K = self.k_eval
+        #    3.1 計算所有 user-item 原始分數矩陣
+        all_u, all_i = user_emb, item_emb
+        scores = torch.matmul(all_u, all_i.t())  # shape = (U, I)
+        #    3.2 對每個 user 排序、計算 metrics
+        precisions, recalls, ndcgs = [], [], []
+        test_pos = defaultdict(set)
+        for u, i in self.test_data:
+            test_pos[u].add(i)
+
+        for u in range(self.n_user):
+
+            topk = torch.topk(scores[u], K).indices.tolist()
+            hits = [1 if i in test_pos[u] else 0 for i in topk]
+            tp = sum(hits)
+            precisions.append(tp / K)
+            recalls.append(tp / max(1, len(test_pos[u])))
+            # NDCG
+            dcg = sum(h / np.log2(idx+2) for idx, h in enumerate(hits))
+            ideal = min(len(test_pos[u]), K)
+            idcg = sum(1 / np.log2(i+2) for i in range(ideal)) or 1.0
+            ndcgs.append(dcg / idcg)
+
+        prec = float(np.mean(precisions))
+        rec  = float(np.mean(recalls))
+        ndcg = float(np.mean(ndcgs))
+
+        # 4. 返回所有統計指標
+        return {
+            "n_comm":   n_comm,
+            "avg_deg":  avg_deg,
+            "bpr_loss": float(loss.item()),
+            "precision": prec,
+            "recall":    rec,
+            "ndcg":      ndcg
+        }

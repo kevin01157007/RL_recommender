@@ -116,4 +116,4 @@ class MovieLens(Dataset):
 root = os.getcwd()
 movielens = MovieLens(root=root)
 data = movielens.get()
-print(data.edge_index)
+
