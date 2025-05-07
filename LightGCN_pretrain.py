@@ -29,9 +29,8 @@ ratings = pd.read_csv('data_split/train.dat', sep=',', names=['user_id', 'movie_
 movies  = pd.read_csv('raw/ml-1m/movies.dat', sep='::', names=['movie_id', 'title', 'genres'],   engine='python', encoding='latin-1')
 users   = pd.read_csv('raw/ml-1m/users.dat',  sep='::', names=['user_id', 'gender', 'age', 'occupation', 'zip'], engine='python', encoding='latin-1')
 
-# selected_user_ids = users.user_id.tolist()[:5000]
 uid_map = {old: new for new, old in enumerate(sorted(ratings.user_id.unique()))}
-mid_map = {old: new for new, old in enumerate(sorted(movies.movie_id.unique()))}
+mid_map = {old: new for new, old in enumerate(sorted(ratings.movie_id.unique()))}
 num_users, num_items = len(uid_map), len(mid_map)
 print(f"Users: {num_users}, Items: {num_items}")
 
@@ -51,6 +50,7 @@ train_val_df   = inter_df.drop(test_idx).reset_index(drop=True)
 val_idx        = train_val_df.groupby('u').tail(3).index
 val_df         = train_val_df.loc[val_idx].reset_index(drop=True)
 train_df       = train_val_df.drop(val_idx).reset_index(drop=True)
+print(train_df.head())
 print(f"train {len(train_df):,} | val {len(val_df):,} | test {len(test_df):,}")
 
 def pairs_from(df):
