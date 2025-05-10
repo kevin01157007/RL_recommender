@@ -182,10 +182,10 @@ def precision_recall_ndcg_at_k(model, edge_index_train, test_pairs, train_pairs=
 # ────────────────────────────────────────────────────────────────────────────────
 # 8. Training loop
 # ────────────────────────────────────────────────────────────────────────────────
-K = 10
-num_epochs=100
+K = 20
+num_epochs=1000
 batch_size=1024
-num_neg_per_u=5
+num_neg_per_u=10
 
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model=LightGCN(num_users,num_items,emb_size=64,n_layers=3).to(device)

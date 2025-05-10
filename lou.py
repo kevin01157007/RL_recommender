@@ -15,13 +15,14 @@ try:
     ratings = pd.read_csv(ratings_file,
                           sep=',',
                           engine='python', # 需要 python engine 來處理 '::'
-                          header=None,
+                        #   header=None,
                           names=['UserID', 'MovieID', 'Rating', 'Timestamp'],
                           encoding='ISO-8859-1') # 有些檔案可能需要指定編碼
 except FileNotFoundError:
     print(f"錯誤：找不到檔案 {ratings_file}")
     print("請確認 ml_1m_path 是否設定正確，且 ratings.dat 存在於該路徑下。")
     exit()
+ratings = ratings[ratings.Rating > 3]
 
 print(f"成功載入 {len(ratings)} 筆評分資料。")
 print(ratings.head())
@@ -75,7 +76,7 @@ else:
 # 使用 best_partition 找到最佳的社群劃分
 # 注意：python-louvain 的 best_partition 會將圖視為 unipartite 進行處理
 # 它會回傳一個字典 {node: community_id}
-partition = community_louvain.best_partition(graph_to_process)
+partition = community_louvain.best_partition(graph_to_process, resolution=2)
 
 end_time = time.time()
 print(f"Louvain 執行完成。耗時: {end_time - start_time:.2f} 秒")
