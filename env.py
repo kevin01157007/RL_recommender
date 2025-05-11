@@ -31,10 +31,11 @@ class RecSimEnv:
         self.user_emb = torch.load("user_emb.pt", map_location=self.device)  # [n_user, d]
         self.item_emb = torch.load("item_emb.pt", map_location=self.device)  # [n_item, d]
 
-    def run(self, n_round=5, k_rec=20):
+    def run(self, n_round, k_rec):
         rec_items_list  = []
         new_interactions = []
         seen = {u: set() for u in range(self.n_user)}
+        sim_scores_list = []
 
         for t in range(n_round):
             print(f"===== Time step {t} =====")
@@ -57,6 +58,12 @@ class RecSimEnv:
                     for i_id, _ in rec_with_scores
                     if torch.rand(1).item() < self.sim.score(u, i_id).item()
                 ])
+
+                # 新增：記錄模擬器分數
+                for item_id in rec_items:
+                    sim_score = self.sim.score(u, item_id).item()
+                    sim_scores_list.append((u, t, item_id, sim_score))
+                    print(f"[User {u}] Item {item_id} SimScore = {sim_score:.4f}")
 
                 # 標記為已推薦
                 seen[u].update(rec_items)
@@ -81,6 +88,15 @@ class RecSimEnv:
         
         print(f"Attempting to save new_interactions.csv with {len(new_interactions)} entries.")
         pd.DataFrame(new_interactions, columns=['u','i']).to_csv('new_interactions.csv', index=False)
+        
+       
+        print(f"Attempting to save rec_items_sim_scores.csv with {len(sim_scores_list)} entries.")
+        if sim_scores_list:
+            print(f"First entry in sim_scores_list: {sim_scores_list[0]} (should have 4 elements)")
+        pd.DataFrame(sim_scores_list,
+                     columns=['user_id', 'time_step', 'item', 'sim_score']
+                    ).to_csv('rec_items_sim_scores.csv', index=False)
+        
         print("CSV files saving process finished.")
 
 

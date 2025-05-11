@@ -37,6 +37,7 @@ if __name__ == "__main__":
 
     # 在創建 Simulator 和 Env 之前加載嵌入
     try:
+        
         print("Loading pre-trained embeddings...")
         user_embeddings = torch.load("user_emb.pt", map_location=device, weights_only=True)
         item_embeddings = torch.load("item_emb.pt", map_location=device, weights_only=True)
@@ -46,6 +47,7 @@ if __name__ == "__main__":
                   f"do not match config ({n_user} users, {n_item} items).")
             n_user = user_embeddings.shape[0]
             n_item = item_embeddings.shape[0]
+             
             print(f"Adjusted n_user={n_user}, n_item={n_item} based on loaded embeddings.")
     except Exception as e:
         print(f"Error loading embeddings: {e}")
