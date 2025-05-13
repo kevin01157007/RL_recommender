@@ -36,8 +36,14 @@ B = nx.Graph()
 # 添加節點，並標記節點類型 (bipartite=0 for users, bipartite=1 for movies)
 users = ratings['UserID'].unique()
 movies = ratings['MovieID'].unique()
-B.add_nodes_from(users, bipartite=0) # 添加使用者節點
-B.add_nodes_from(movies, bipartite=1) # 添加電影節點
+# 添加用戶節點
+for i in range(len(users)):
+    B.add_node(i, bipartite=0)
+
+# 添加項目節點
+for i in range(len(users),len(users)+len(movies)):
+    B.add_node(i, bipartite=1)
+
 
 # 添加邊 (使用者和電影之間的評分代表一條邊)
 # 我們這裡不考慮評分值作為權重，僅代表有互動
@@ -71,12 +77,29 @@ else:
     # 找到最大的連通元件
     largest_cc = max(nx.connected_components(B), key=len)
     graph_to_process = B.subgraph(largest_cc).copy() # 使用子圖
+    # 找出所有節點
+    all_nodes = set(B.nodes())
+
+    # 找出最大連通元件的節點
+    largest_cc_nodes = set(largest_cc)
+
+    # 取差集：這些是沒有被包含進最大連通元件的節點
+    excluded_nodes = all_nodes - largest_cc_nodes
+
+    print(f"\n不在最大連通元件中的節點數量：{len(excluded_nodes)}")
+    print("其中前 10 個節點為：")
+    print(list(excluded_nodes)[:10])
+    print("\n前 10 個被排除節點的類型：")
+    for node in list(excluded_nodes)[:10]:
+        node_type = B.nodes[node].get('bipartite')
+        type_str = "User" if node_type == 0 else "Movie"
+        print(f"節點 {node} 類型: {type_str}")
     print(f"最大連通元件包含 {graph_to_process.number_of_nodes()} 個節點 和 {graph_to_process.number_of_edges()} 條邊。")
 
 # 使用 best_partition 找到最佳的社群劃分
 # 注意：python-louvain 的 best_partition 會將圖視為 unipartite 進行處理
 # 它會回傳一個字典 {node: community_id}
-partition = community_louvain.best_partition(graph_to_process, resolution=2)
+partition = community_louvain.best_partition(graph_to_process, resolution=2, random_state=42)
 
 end_time = time.time()
 print(f"Louvain 執行完成。耗時: {end_time - start_time:.2f} 秒")
@@ -118,21 +141,21 @@ for i, (comm_id, size) in enumerate(sorted_sizes[:10]):
      print(f"  社群 {comm_id}: 大小={size}, 使用者={users_in_comm}, 電影={movies_in_comm}")
 
 
-# (可選) 視覺化 (對於 MovieLens 1M 這種大小的圖可能很慢且混亂)
-print("\n(可選) 嘗試繪製圖與社群... (可能需要較長時間)")
-try:
-    pos = nx.spring_layout(graph_to_process, k=0.1, iterations=20) # 計算節點位置，耗時
-    plt.figure(figsize=(15, 15))
-    # 根據社群 ID 著色
-    cmap = plt.cm.get_cmap('viridis', num_communities)
-    nx.draw_networkx_nodes(graph_to_process, pos, partition.keys(), node_size=10,
-                           cmap=cmap, node_color=list(partition.values()))
-    nx.draw_networkx_edges(graph_to_process, pos, alpha=0.1)
-    plt.title("Louvain Communities in MovieLens 1M (Largest Component)")
-    plt.axis('off')
-    # plt.savefig("movielens_louvain.png") # 可以取消註解來儲存圖片
-    plt.show()
-except MemoryError:
-     print("記憶體不足，無法繪製完整圖形。")
-except Exception as e:
-     print(f"繪圖時發生錯誤: {e}")
+# # (可選) 視覺化 (對於 MovieLens 1M 這種大小的圖可能很慢且混亂)
+# print("\n(可選) 嘗試繪製圖與社群... (可能需要較長時間)")
+# try:
+#     pos = nx.spring_layout(graph_to_process, k=0.1, iterations=20) # 計算節點位置，耗時
+#     plt.figure(figsize=(15, 15))
+#     # 根據社群 ID 著色
+#     cmap = plt.cm.get_cmap('viridis', num_communities)
+#     nx.draw_networkx_nodes(graph_to_process, pos, partition.keys(), node_size=10,
+#                            cmap=cmap, node_color=list(partition.values()))
+#     nx.draw_networkx_edges(graph_to_process, pos, alpha=0.1)
+#     plt.title("Louvain Communities in MovieLens 1M (Largest Component)")
+#     plt.axis('off')
+#     # plt.savefig("movielens_louvain.png") # 可以取消註解來儲存圖片
+#     plt.show()
+# except MemoryError:
+#      print("記憶體不足，無法繪製完整圖形。")
+# except Exception as e:
+#      print(f"繪圖時發生錯誤: {e}")

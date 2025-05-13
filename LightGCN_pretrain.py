@@ -1,16 +1,3 @@
-#!/usr/bin/env python3
-# coding: utf-8
-"""
-LightGCN training script (MovieLens‑1M subset) with:
-  • Training BPR loss
-  • Validation BPR loss per epoch
-  • Precision / Recall / **NDCG** @K for val & test
-  • Final Test BPR loss
-  • Curves for Loss, P@K, R@K, NDCG@K
-
-Run:
-    python LightGCN_pretrain_test_with_val_test_loss.py
-"""
 import os, random, time
 from collections import defaultdict
 import numpy as np
@@ -103,10 +90,10 @@ def sample_pos_neg(train_pairs, num_users, num_items, num_negatives=1, seed=None
 # 5. LightGCN
 # ────────────────────────────────────────────────────────────────────────────────
 class LightGCNConv(MessagePassing):
-    def __init__(self): super().__init__(aggr='add')
+    def __init__(self): super().__init__(aggr='add') #指定使用加和方式聚合鄰居節點的消息
     def forward(self, x, edge_index):
         row,col=edge_index
-        deg=torch.bincount(row, minlength=x.size(0)).float()
+        deg=torch.bincount(row, minlength=x.size(0)).float() #統計每個節點的度（連接數）
         deg_inv_sqrt=deg.pow(-0.5); deg_inv_sqrt[deg_inv_sqrt==float('inf')]=0
         norm=deg_inv_sqrt[row]*deg_inv_sqrt[col]
         return self.propagate(edge_index,x=x,norm=norm)
