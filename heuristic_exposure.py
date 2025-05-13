@@ -58,19 +58,10 @@ def heuristic_exposure_strategy(user_item_graph, rec_item_set, item_emb,
     print("正在檢測社群...")
 
     # 分別對每個連通元件進行 Louvain，並整合
-    all_partition = {}
     connected_components = list(nx.connected_components(user_item_graph))
     print(f"總共有 {len(connected_components)} 個連通元件")
 
-    next_community_id = 0
-    for component in connected_components:
-        subgraph = user_item_graph.subgraph(component)
-        sub_partition = community_louvain.best_partition(subgraph, resolution=2, random_state=42)
-        
-        # 避免社群 ID 重複，加上偏移量
-        offset_partition = {node: comm + next_community_id for node, comm in sub_partition.items()}
-        all_partition.update(offset_partition)
-        next_community_id += max(sub_partition.values()) + 1
+    all_partition = community_louvain.best_partition(user_item_graph, resolution=2, random_state=42)
 
     communities = all_partition
     print(f"總社群數量: {len(set(communities.values()))}")
@@ -119,50 +110,42 @@ def heuristic_exposure_strategy(user_item_graph, rec_item_set, item_emb,
                                             size=n_selected_communities, 
                                             replace=False)
         
-    # 建立真實userID對應社群裡userID中的對應
-    user_id_list = sorted([n for n in user_item_graph.nodes if user_item_graph.nodes[n].get('bipartite') == 0])
-    user_id_to_index = {user_id: idx for idx, user_id in enumerate(user_id_list)}
 
     all_selected_items = []
-    # 為每對社群創建曝光邊
+    # 從被選到的社群創建曝光邊
     for i in range(len(selected_indices)):
-        for j in range(i+1, len(selected_indices)):
-            source_idx = selected_indices[i]
+        source_idx = selected_indices[i]
+
+        # 計算社群中每個用戶的交互項目集合的多樣性得分(ILS)
+        user_diversity_scores = {}
+        for user in community_users[source_idx]:
+            user_items = rec_item_set[user]
+            if len(user_items) > 1:
+                user_diversity_scores[user] = calculate_ILS(item_emb, user_items)
+        
+        if not user_diversity_scores:
+            continue
+        
+        # 選擇ILS最低的用戶(最多樣化的用戶)
+        diverse_users = sorted(user_diversity_scores.keys(), 
+                                key=lambda u: user_diversity_scores[u])
+        diverse_users = diverse_users[:min(n_diverse_users_per_community, len(diverse_users))]
+
+        # 為每個多樣化用戶選擇歷史交互項目
+        for user in diverse_users:
+            user_items = list(user_item_graph.neighbors(user))
             
-            # 計算源社群中每個用戶的交互項目集合的多樣性得分(ILS)
-            user_diversity_scores = {}
-            for user in community_users[source_idx]:
-                if user not in user_id_to_index:
-                    continue  # 避免找不到對應
-                user_index = user_id_to_index[user]
-                user_items = rec_item_set[user_index]
-                if len(user_items) > 1:
-                    user_diversity_scores[user] = calculate_ILS(item_emb, user_items)
-            
-            if not user_diversity_scores:
+            if len(user_items) == 0:
                 continue
             
-            # 選擇ILS最低的用戶(最多樣化的用戶)
-            diverse_users = sorted(user_diversity_scores.keys(), 
-                                    key=lambda u: user_diversity_scores[u])
-            diverse_users = diverse_users[:min(n_diverse_users_per_community, len(diverse_users))]
+            # 隨機選擇一些項目
+            selected_items = np.random.choice(user_items, 
+                                            size=min(n_items_per_user, len(user_items)), 
+                                            replace=False)
+            for item_node_id in selected_items:
+                item_node_id = item_node_id - len(users)  # 減去user長度
+                all_selected_items.append((user, item_node_id))  
 
-            
-            
-            # 為每個多樣化用戶選擇歷史交互項目
-            for user in diverse_users:
-                user_items = list(user_item_graph.neighbors(user))
-                
-                if len(user_items) == 0:
-                    continue
-                
-                # 隨機選擇一些項目
-                selected_items = np.random.choice(user_items, 
-                                                size=min(n_items_per_user, len(user_items)), 
-                                                replace=False)
-                for item_node_id in selected_items:
-                    item_node_id = item_node_id - len(user_id_list)  # 對應 item_embeddings 中的 index
-                    all_selected_items.append((user, item_node_id))  
     print(f"已生成 {len(all_selected_items)} 條曝光邊")
     return all_selected_items
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

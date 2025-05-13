@@ -28,9 +28,19 @@ def build_nx_graph():
 
     B = nx.Graph()
 
+    uid_map = {old: new for new, old in enumerate(sorted(ratings.UserID.unique()))}
+    mid_map = {old: new for new, old in enumerate(sorted(ratings.MovieID.unique()))}
+
+    
+    ratings['UserID'] = ratings.UserID.map(uid_map)
+    ratings['MovieID'] = ratings.MovieID.map(mid_map)
+
     # 添加節點，並標記節點類型 (bipartite=0 for users, bipartite=1 for movies)
-    users = ratings['UserID'].unique()
-    movies = ratings['MovieID'].unique()
+    users = sorted(ratings['UserID'].unique())
+    movies = sorted(ratings['MovieID'].unique())
+    # print(movies)
+    # # print(users)
+    # print(movies)
     # 添加用戶節點
     for i in range(len(users)):
         B.add_node(i, bipartite=0)
@@ -43,10 +53,12 @@ def build_nx_graph():
     # 我們這裡不考慮評分值作為權重，僅代表有互動
     movie_offset = len(users)
     movie_id_map = {m: movie_offset + idx for idx, m in enumerate(movies)}
+    # print(movie_id_map)
 
     edges = [(row['UserID'],
             movie_id_map[row['MovieID']])
             for _, row in ratings.iterrows()]
+    # print(edges[:10])
     B.add_edges_from(edges)
     end_time = time.time()
     print(f"圖建立完成。耗時: {end_time - start_time:.2f} 秒")
@@ -55,31 +67,14 @@ def build_nx_graph():
 
     start_time = time.time()
 
-    # 檢查圖是否連通，Louvain 通常在連通圖或最大連通元件上執行
+    # 檢查圖是否連通
     if nx.is_connected(B):
         print("圖是連通的。")
-        graph_to_process = B
     else:
-        print("圖不是連通的。將在最大的連通元件上執行 Louvain。")
-        # 找到最大的連通元件
-        largest_cc = max(nx.connected_components(B), key=len)
-        graph_to_process = B.subgraph(largest_cc).copy() # 使用子圖
-        # # 找出所有節點
-        # all_nodes = set(B.nodes())
-
-        # # 找出最大連通元件的節點
-        # largest_cc_nodes = set(largest_cc)
-
-        # # 取差集：這些是沒有被包含進最大連通元件的節點
-        # excluded_nodes = all_nodes - largest_cc_nodes
-
-        # print(f"\n不在最大連通元件中的節點數量：{len(excluded_nodes)}")
-        # print("其中前 10 個節點為：")
-        # print(list(excluded_nodes)[:10])
-        # print("\n前 10 個被排除節點的類型：")
-        # for node in list(excluded_nodes)[:10]:
-        #     node_type = B.nodes[node].get('bipartite')
-        #     type_str = "User" if node_type == 0 else "Movie"
-        #     print(f"節點 {node} 類型: {type_str}")
-        # print(f"最大連通元件包含 {graph_to_process.number_of_nodes()} 個節點 和 {graph_to_process.number_of_edges()} 條邊。")
+        print("圖不是連通的。將個別偵測社群")
     return B
+# user_item_graph = build_nx_graph()
+# if not user_item_graph.has_edge(0, 6890):
+#     print(f"錯誤")
+# else:
+#     print("正常")

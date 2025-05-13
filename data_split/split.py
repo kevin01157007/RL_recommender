@@ -24,8 +24,8 @@ while True:
     user_counts = ratings_filtered['user_id'].value_counts() 
     movie_counts = ratings_filtered['movie_id'].value_counts()
 
-    valid_users = user_counts[user_counts > 9].index # 獲取評分數量大於等於 10 的使用者 ID
-    valid_movies = movie_counts[movie_counts > 3].index # 獲取被評分數量大於等於 4 的電影 ID
+    valid_users = user_counts[user_counts > 9].index # 獲取評分數量大於 9 的使用者 ID
+    valid_movies = movie_counts[movie_counts > 3].index # 獲取被評分數量大於 3 的電影 ID
 
     ratings_filtered = ratings_filtered[
         ratings_filtered['user_id'].isin(valid_users) &
