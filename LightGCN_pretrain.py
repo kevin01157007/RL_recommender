@@ -12,36 +12,33 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 # ────────────────────────────────────────────────────────────────────────────────
 # 1. Load ratings / movies / users (MovieLens‑1M)
 # ────────────────────────────────────────────────────────────────────────────────
-ratings = pd.read_csv('data_split/train.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
+ratings_train = pd.read_csv('data_split/train.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
+ratings_val = pd.read_csv('data_split/val.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
+ratings_test = pd.read_csv('data_split/test.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
+
 movies  = pd.read_csv('raw/ml-1m/movies.dat', sep='::', names=['movie_id', 'title', 'genres'],   engine='python', encoding='latin-1')
 users   = pd.read_csv('raw/ml-1m/users.dat',  sep='::', names=['user_id', 'gender', 'age', 'occupation', 'zip'], engine='python', encoding='latin-1')
 
-uid_map = {old: new for new, old in enumerate(sorted(ratings.user_id.unique()))}
-mid_map = {old: new for new, old in enumerate(sorted(ratings.movie_id.unique()))}
-num_users, num_items = len(uid_map), len(mid_map)
+num_users, num_items = 5950, 3201
 print(f"Users: {num_users}, Items: {num_items}")
 
 # high‑rating implicit positives
 # ratings = ratings[ratings.user_id.isin(selected_user_ids)]
-ratings_high = ratings[ratings.rating >= 4].copy()
-ratings_high['u'] = ratings_high.user_id.map(uid_map)
-ratings_high['i'] = ratings_high.movie_id.map(mid_map)
+# ratings_high = ratings[ratings.rating >= 4].copy()
+# ratings_high['u'] = ratings_high.user_id.map(uid_map)
+# ratings_high['i'] = ratings_high.movie_id.map(mid_map)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 2. Split last‑k per user → val / test (k=5 here) ; rest = train
 # ────────────────────────────────────────────────────────────────────────────────
-inter_df = ratings_high[['u','i','timestamp']].sort_values(['u','timestamp'])
-test_idx       = inter_df.groupby('u').tail(3).index
-test_df        = inter_df.loc[test_idx].reset_index(drop=True)
-train_val_df   = inter_df.drop(test_idx).reset_index(drop=True)
-val_idx        = train_val_df.groupby('u').tail(3).index
-val_df         = train_val_df.loc[val_idx].reset_index(drop=True)
-train_df       = train_val_df.drop(val_idx).reset_index(drop=True)
+test_df        = ratings_test
+val_df         = ratings_val
+train_df       = ratings_train
 print(train_df.head())
 print(f"train {len(train_df):,} | val {len(val_df):,} | test {len(test_df):,}")
 
 def pairs_from(df):
-    return list(zip(df.u, df.i))
+    return list(zip(df.user_id, df.movie_id))
 train_inter, val_inter, test_inter = map(pairs_from, (train_df, val_df, test_df))
 # ────────────────────────────────────────────────────────────────────────────────
 # 3. Graph helpers
@@ -80,8 +77,8 @@ def sample_pos_neg(train_pairs, num_users, num_items, num_negatives=1, seed=None
     for u in range(num_users):
         pos_items=list(user2pos[u])
         if not pos_items: continue
-        for _ in range(num_negatives):
-            p=random.choice(pos_items)
+        for t in pos_items:
+            p=t
             n=random.choice(list(all_items-user2pos[u]-user2exclude[u]))
             samples.append((u,p,n))
     return torch.tensor(samples, dtype=torch.long)
@@ -170,12 +167,12 @@ def precision_recall_ndcg_at_k(model, edge_index_train, test_pairs, train_pairs=
 # 8. Training loop
 # ────────────────────────────────────────────────────────────────────────────────
 K = 20
-num_epochs=1000
+num_epochs=200
 batch_size=1024
 num_neg_per_u=10
 
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model=LightGCN(num_users,num_items,emb_size=64,n_layers=3).to(device)
+model=LightGCN(num_users,num_items,emb_size=64,n_layers=4).to(device)
 opt=optim.Adam(model.parameters(), lr=1e-3)
 train_edge_index=train_edge_index.to(device)
 val_edge_index=val_edge_index.to(device)

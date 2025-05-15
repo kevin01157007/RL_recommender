@@ -34,15 +34,43 @@ while True:
     if ratings_filtered.shape[0] == old_shape:
         break
 
+uid_map = {old: new for new, old in enumerate(sorted(ratings_filtered.user_id.unique()))}
+mid_map = {old: new for new, old in enumerate(sorted(ratings_filtered.movie_id.unique()))}
+ratings_filtered['user_id'] = ratings_filtered.user_id.map(uid_map)
+ratings_filtered['movie_id'] = ratings_filtered.movie_id.map(mid_map)
 # 使用這些有效的使用者 ID 來過濾原始的評分數據
 # ratings_filtered = ratings[(ratings['user_id'].isin(valid_users)) & (ratings['movie_id'].isin(valid_movies))].copy()
 print(len(ratings_filtered.user_id.unique()))
 print(len(ratings_filtered.movie_id.unique()))
 inter_df = ratings_filtered[['user_id', 'movie_id', 'rating', 'timestamp']].sort_values(['user_id','timestamp'])
-test_idx       = inter_df.groupby('user_id').tail(1).index
-test_df        = inter_df.loc[test_idx].reset_index(drop=True)
+test_indices = []
+
+# 每位使用者個別處理
+for uid, group in inter_df.groupby('user_id'):
+    n = len(group)
+    k = max(1, int(n * 0.2))  # 至少取 1 筆
+    test_indices.extend(group.tail(k).index)
+
+test_idx = pd.Index(test_indices)
+test_df = inter_df.loc[test_idx].reset_index(drop=True)
+
+train_val_df = inter_df.drop(test_idx).reset_index(drop=True)
+
+# val: 每位 user 最後 20%
+val_indices = []
+for uid, group in train_val_df.groupby('user_id'):
+    n = len(group)
+    k = max(1, int(n * 0.1))
+    val_indices.extend(group.tail(k).index)
+
+val_idx = pd.Index(val_indices)
+val_df = train_val_df.loc[val_idx].reset_index(drop=True)
+
+train_df = train_val_df.drop(val_idx).reset_index(drop=True)
+
 test_df.to_csv("test.dat", sep=',', index=False, header=False)
-train_df   = ratings_filtered.drop(test_idx).reset_index(drop=True)
+val_df.to_csv("val.dat", sep=',', index=False, header=False)
 train_df.to_csv("train.dat", sep=',', index=False, header=False)
+
 # print(test_df.head())
 # print(train_df.head())
