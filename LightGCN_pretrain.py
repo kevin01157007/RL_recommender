@@ -19,7 +19,7 @@ ratings_test = pd.read_csv('data_split/test.dat', sep=',', names=['user_id', 'mo
 movies  = pd.read_csv('raw/ml-1m/movies.dat', sep='::', names=['movie_id', 'title', 'genres'],   engine='python', encoding='latin-1')
 users   = pd.read_csv('raw/ml-1m/users.dat',  sep='::', names=['user_id', 'gender', 'age', 'occupation', 'zip'], engine='python', encoding='latin-1')
 
-num_users, num_items = 5950, 3201
+num_users, num_items = 5950, 3191
 print(f"Users: {num_users}, Items: {num_items}")
 
 # high‑rating implicit positives

@@ -28,12 +28,6 @@ def build_nx_graph():
 
     B = nx.Graph()
 
-    uid_map = {old: new for new, old in enumerate(sorted(ratings.UserID.unique()))}
-    mid_map = {old: new for new, old in enumerate(sorted(ratings.MovieID.unique()))}
-
-    
-    ratings['UserID'] = ratings.UserID.map(uid_map)
-    ratings['MovieID'] = ratings.MovieID.map(mid_map)
 
     # 添加節點，並標記節點類型 (bipartite=0 for users, bipartite=1 for movies)
     users = sorted(ratings['UserID'].unique())

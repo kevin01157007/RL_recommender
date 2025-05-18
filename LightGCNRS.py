@@ -23,9 +23,9 @@ class LightGCNRS:
         topk = torch.topk(scores, k).indices.cpu().tolist()
         return topk
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-rs = LightGCN(5000, 3883).to(device)
-rec_model = LightGCNRS(n_users=5000, model=rs, device=device)
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# rs = LightGCN(5000, 3883).to(device)
+# rec_model = LightGCNRS(n_users=5000, model=rs, device=device)
 
 
 

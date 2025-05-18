@@ -1,5 +1,5 @@
 import pandas as pd
-
+import pickle
 
 ratings = pd.read_csv('../raw/ml-1m/ratings.dat', sep='::', names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
 movies  = pd.read_csv('../raw/ml-1m/movies.dat', sep='::', names=['movie_id', 'title', 'genres'],   engine='python', encoding='latin-1')
@@ -34,10 +34,6 @@ while True:
     if ratings_filtered.shape[0] == old_shape:
         break
 
-uid_map = {old: new for new, old in enumerate(sorted(ratings_filtered.user_id.unique()))}
-mid_map = {old: new for new, old in enumerate(sorted(ratings_filtered.movie_id.unique()))}
-ratings_filtered['user_id'] = ratings_filtered.user_id.map(uid_map)
-ratings_filtered['movie_id'] = ratings_filtered.movie_id.map(mid_map)
 # 使用這些有效的使用者 ID 來過濾原始的評分數據
 # ratings_filtered = ratings[(ratings['user_id'].isin(valid_users)) & (ratings['movie_id'].isin(valid_movies))].copy()
 print(len(ratings_filtered.user_id.unique()))
@@ -68,9 +64,37 @@ val_df = train_val_df.loc[val_idx].reset_index(drop=True)
 
 train_df = train_val_df.drop(val_idx).reset_index(drop=True)
 
+# 找出 train 中出現過的 movie_id
+train_movie_ids = set(train_df['movie_id'])
+
+# 過濾掉 test 中沒有在 train 中出現過的 movie_id
+test_df = test_df[test_df['movie_id'].isin(train_movie_ids)].reset_index(drop=True)
+
+# 同樣處理 val 資料
+val_df = val_df[val_df['movie_id'].isin(train_movie_ids)].reset_index(drop=True)
+
+combined = pd.concat([train_df, val_df, test_df])
+
+uid_map = {old: new for new, old in enumerate(sorted(combined['user_id'].unique()))}
+mid_map = {old: new for new, old in enumerate(sorted(combined['movie_id'].unique()))}
+
+with open('uid_map.pkl', 'wb') as f:
+    pickle.dump(uid_map, f)
+with open('mid_map.pkl', 'wb') as f:
+    pickle.dump(mid_map, f)
+
+train_df['movie_id'] = train_df['movie_id'].map(mid_map)
+val_df['movie_id'] = val_df['movie_id'].map(mid_map)
+test_df['movie_id'] = test_df['movie_id'].map(mid_map)
+
+train_df['user_id'] = train_df['user_id'].map(uid_map)
+val_df['user_id'] = val_df['user_id'].map(uid_map)
+test_df['user_id'] = test_df['user_id'].map(uid_map)
+
 test_df.to_csv("test.dat", sep=',', index=False, header=False)
 val_df.to_csv("val.dat", sep=',', index=False, header=False)
 train_df.to_csv("train.dat", sep=',', index=False, header=False)
-
+print(len(train_df.user_id.unique()))
+print(len(train_df.movie_id.unique()))
 # print(test_df.head())
 # print(train_df.head())
