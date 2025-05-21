@@ -167,17 +167,20 @@ def precision_recall_ndcg_at_k(model, edge_index_train, test_pairs, train_pairs=
 # 8. Training loop
 # ────────────────────────────────────────────────────────────────────────────────
 K = 20
-num_epochs=200
-batch_size=1024
+num_epochs=10
+batch_size=2048
 num_neg_per_u=10
 
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model=LightGCN(num_users,num_items,emb_size=64,n_layers=4).to(device)
-opt=optim.Adam(model.parameters(), lr=1e-3)
+opt=optim.Adam(model.parameters(), lr=1e-2)
 train_edge_index=train_edge_index.to(device)
 val_edge_index=val_edge_index.to(device)
 
 loss_hist=[]; val_loss_hist=[]; val_prec_hist=[]; val_rec_hist=[]; val_ndcg_hist=[]
+best_val_ndcg = 0
+patience_counter = 0
+patience = 10 # 如果连续10个epoch没有提升则停止
 
 for epoch in range(1,num_epochs+1):
     model.train(); t0=time.time()
@@ -188,7 +191,7 @@ for epoch in range(1,num_epochs+1):
         batch=samples[st:st+batch_size]
         u,p,n=batch[:,0],batch[:,1],batch[:,2]
         opt.zero_grad()
-        loss,_,_=bpr_loss(model,u,p,n,train_edge_index)
+        loss,_,_=bpr_loss(model,u,p,n,train_edge_index,lambda_reg=5e-4)
         loss.backward(); opt.step()
         total_loss += loss.item()*u.size(0)
     avg_train_loss=total_loss/len(samples)
@@ -202,6 +205,18 @@ for epoch in range(1,num_epochs+1):
         prec,rec,ndcg = precision_recall_ndcg_at_k(model,train_edge_index,val_inter,train_inter,K)
     val_prec_hist.append(prec); val_rec_hist.append(rec); val_ndcg_hist.append(ndcg)
     print(f"Epoch {epoch:02d} | {time.time()-t0:.1f}s | TrainLoss {avg_train_loss:.4f} | ValLoss {val_loss:.4f} | P@{K} {prec:.4f} R@{K} {rec:.4f} NDCG@{K} {ndcg:.4f}")
+
+    if ndcg > best_val_ndcg:
+        best_val_ndcg = ndcg
+        patience_counter = 0
+        # Optionally save the model weights here if it's the best so far
+        # torch.save(model.state_dict(), "best_lightgcn_model.pth")
+    else:
+        patience_counter += 1
+
+    if patience_counter >= patience:
+        print(f"Early stopping at epoch {epoch} due to no improvement in Val NDCG for {patience} epochs.")
+        break
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 9. Final Test evaluation
