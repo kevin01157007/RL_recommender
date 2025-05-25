@@ -40,9 +40,7 @@ class RecSimEnv:
         self.val_data = val_data if val_data is not None else []   # 儲存 val_data
         self.test_data = test_data if test_data is not None else [] # 儲存 test_data
         self.k_eval = k_eval # 儲存 k_eval
-        # 假設 test_data 是一個 (user, item) 元組的列表，類似 pretrain.py 中的 val_inter 或 test_inter
-        # 如果 bpr_loss 直接需要 lambda_reg，請確保其可用或傳遞它。utilis 中的 bpr_loss 有一個預設值。
-        # self.lambda_reg = 1e-4 # 範例，如果 bpr_loss 直接需要（若不使用 utilis 中的那個）
+
 
     def run(self, n_round, k_rec):
         rec_items_list  = []
@@ -51,7 +49,7 @@ class RecSimEnv:
         sim_scores_list = []
 
         for t in range(n_round):
-            print(f"===== 時間步 {t} =====")
+            print(f"===== Time step{t} =====")
             current_round_interactions = []
             for u in range(self.n_user):
                 # 1) 取得 Top-k 推薦
@@ -143,7 +141,7 @@ class RecSimEnv:
                                    val_interactions,       
                                    num_epochs=200,          
                                    batch_size=2048,        
-                                   lr=1e-3,               
+                                   lr=1e-4,               
                                    lambda_reg=5e-4,        
                                    k_eval=20,               
                                    num_neg_per_interaction=10, # 在 pretrain 中是 num_neg_per_u，現在是每個互動

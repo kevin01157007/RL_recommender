@@ -8,8 +8,8 @@ import pandas as pd
 from simulator import SimpleSimulator 
 # --- 配置 ---
 rec_model_config = {
-    "n_users": 500,
-    "m_items": 2000,
+    # "n_users": 500, # 已移除，n_user 由 user_emb.pt 決定
+    # "m_items": 2000, # 已移除，n_item 由 item_emb.pt 決定
     "embedding_size": 64,
     "num_layers": 3,
 }
@@ -62,14 +62,13 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    n_user = rec_model_config["n_users"]
-    n_item = rec_model_config["m_items"]
+    # n_user 和 n_item 將在加載嵌入後根據嵌入文件確定
 
     # --- 初始化組件 ---
 
     # 1. 初始圖結構
     init_edge_index = torch.empty((2, 0), dtype=torch.long, device=device)
-    print(f"Initial edge_index shape: {init_edge_index.shape}")
+    # print(f"Initial edge_index shape: {init_edge_index.shape}") # 可以取消註釋以調試
 
     # 檢查預訓練嵌入文件是否存在
     if not os.path.exists("user_emb.pt") or not os.path.exists("item_emb.pt"):
@@ -77,80 +76,78 @@ if __name__ == "__main__":
         print("Please run LightGCN_pretrain.py first to generate embeddings.")
         exit()
 
-    # 在創建 Simulator 和 Env 之前加載嵌入
+    n_user, n_item = None, None # 初始化為 None
     try:
-        
-        print("Loading pre-trained embeddings...")
+        print("Loading pre-trained user embeddings...")
         user_embeddings = torch.load("user_emb.pt", map_location=device, weights_only=True)
+        n_user = user_embeddings.shape[0]
+        print(f"User embeddings loaded. n_user set to {n_user} based on user_emb.pt.")
+
+        print("Loading pre-trained item embeddings...")
         item_embeddings = torch.load("item_emb.pt", map_location=device, weights_only=True)
-        print("Embeddings loaded successfully.")
-        if user_embeddings.shape[0] != n_user or item_embeddings.shape[0] != n_item:
-            print(f"Warning: Loaded embedding dimensions ({user_embeddings.shape[0]} users, {item_embeddings.shape[0]} items) "
-                  f"do not match config ({n_user} users, {n_item} items).")
-            n_user = user_embeddings.shape[0]
-            n_item = item_embeddings.shape[0]
-             
-            print(f"Adjusted n_user={n_user}, n_item={n_item} based on loaded embeddings.")
+        n_item = item_embeddings.shape[0]
+        print(f"Item embeddings loaded. n_item set to {n_item} based on item_emb.pt.")
+            
     except Exception as e:
         print(f"Error loading embeddings: {e}")
         exit()
-
+    
+    if n_user is None or n_item is None:
+        print("Error: Failed to determine n_user or n_item from embeddings.")
+        exit()
 
     # 2. 推薦模型
     lightgcn_model = LightGCN(
-        num_users=n_user,
-        num_items=n_item,
+        num_users=n_user, 
+        num_items=n_item, 
         emb_size=rec_model_config["embedding_size"],
         n_layers=rec_model_config["num_layers"]
     ).to(device)
     rec_model = LightGCNRS(n_user, lightgcn_model, device)
-    print("LightGCN and LightGCNRS initialized.")
+    # print("LightGCN and LightGCNRS initialized.") # 可以取消註釋以調試
 
-    # 3. Agent
+    # 3. Agent (目前未使用，設為0)
     agent = 0
 
-    # 4. 創建 Simulator 實例 (從導入的類創建)
-    print("Creating Simulator...")
+    # 4. 創建 Simulator 實例
+    # print("Creating Simulator...") # 可以取消註釋以調試
     simulator = SimpleSimulator(user_embeddings, item_embeddings, device)
-    print("Simulator created.")
+    # print("Simulator created.") # 可以取消註釋以調試
 
-    # --- 修改：從 val.dat 和 test.dat 加載數據 ---
+    # --- 從 val.dat 和 test.dat 加載數據 ---
     val_dat_path = "data_split/val.dat"
     test_dat_path = "data_split/test.dat"
     
-    print(f"Loading validation interactions from {val_dat_path} for RecSimEnv val_data...")
-    val_interactions_for_env = load_dat_file_to_interactions(val_dat_path, n_user, n_item) # 使用調整後的 n_user, n_item
+    # print(f"Loading validation interactions from {val_dat_path} for RecSimEnv val_data...") # 可以取消註釋以調試
+    val_interactions_for_env = load_dat_file_to_interactions(val_dat_path, n_user, n_item) 
     
-    print(f"Loading test interactions from {test_dat_path} for RecSimEnv test_data...")
-    test_interactions_for_env = load_dat_file_to_interactions(test_dat_path, n_user, n_item) # 使用調整後的 n_user, n_item
+    # print(f"Loading test interactions from {test_dat_path} for RecSimEnv test_data...") # 可以取消註釋以調試
+    test_interactions_for_env = load_dat_file_to_interactions(test_dat_path, n_user, n_item)
 
-    k_eval_for_env = 20 # 可以保留或根據需要配置
+    k_eval_for_env = 20 
 
     # --- 創建環境 ---
-    print("Creating RecSimEnv...")
+    # print("Creating RecSimEnv...") # 可以取消註釋以調試
     try:
         env = RecSimEnv(
             init_edge_index=init_edge_index,
-            n_user=n_user, # 使用基於嵌入調整後的 n_user
-            n_item=n_item, # 使用基於嵌入調整後的 n_item
+            n_user=n_user, 
+            n_item=n_item, 
             agent=agent,
             rec_model=rec_model,
             sim=simulator,
             device=device,
-            val_data=val_interactions_for_env,    # <-- 傳遞從 val.dat 加載的數據
-            test_data=test_interactions_for_env,  # <-- 傳遞從 test.dat 加載的數據
+            val_data=val_interactions_for_env,    
+            test_data=test_interactions_for_env,  
             k_eval=k_eval_for_env      
         )
-        print("RecSimEnv created successfully.")
+        # print("RecSimEnv created successfully.") # 可以取消註釋以調試
     except Exception as e:
         print(f"Error creating RecSimEnv: {e}")
         exit()
 
     print("Starting environment run...")
-
     env.run(n_round=5, k_rec=10)
     print("Environment run finished.")
-
-
     print("Script finished.")
 
