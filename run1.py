@@ -4,6 +4,7 @@ from env import RecSimEnv          # 從你的 env.py 導入
 from LightGCNRS import LightGCNRS  # 假設你有這個文件
 from LightGCN import LightGCN      # 假設你有這個文件
 import os
+import pandas as pd
 from simulator import SimpleSimulator 
 # --- 配置 ---
 rec_model_config = {
@@ -14,6 +15,47 @@ rec_model_config = {
 }
 
 # SimpleSimulator 類的定義已移至 simulator.py
+
+def load_dat_file_to_interactions(file_path, n_user_config, n_item_config):
+    """
+    從 .dat 文件加載交互數據，並返回 (user, item) 元組列表。
+    同時檢查 user_id 和 movie_id 是否越界。
+    """
+    interactions = []
+    print(f"Attempting to load interactions from: {file_path}")
+    
+        # 假設 .dat 文件格式與 LightGCN_pretrain.py 中讀取的 ratings 文件類似
+        # 通常第一列是 user_id，第二列是 movie_id
+        # 如果您的 .dat 文件沒有表頭且直接是 user_id, movie_id, ...
+        # 並且是以逗號分隔的
+    df = pd.read_csv(file_path, sep=',', header=None, names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
+    
+    # 確保列存在
+    if 'user_id' not in df.columns or 'movie_id' not in df.columns:
+        print(f"錯誤: 文件 {file_path} 缺少 'user_id' 或 'movie_id' 列。")
+        return []
+
+    valid_interactions = 0
+    skipped_out_of_bounds = 0
+    for _, row in df.iterrows():
+
+            user = int(row['user_id'])
+            item = int(row['movie_id'])
+            if 0 <= user < n_user_config and 0 <= item < n_item_config:
+                interactions.append((user, item))
+                valid_interactions += 1
+            else:
+                skipped_out_of_bounds += 1
+        
+    if skipped_out_of_bounds > 0:
+        print(f"警告: 從 {file_path} 加載時，由於超出配置的 n_user/n_item 範圍，跳過了 {skipped_out_of_bounds} 筆互動。")
+    
+    if not interactions:
+        print(f"警告: 從 {file_path} 加載的有效互動數據為空。")
+    else:
+        print(f"從 {file_path} 成功加載 {len(interactions)} 筆有效互動。")
+   
+    return interactions
 
 if __name__ == "__main__":
     # --- 設置 ---
@@ -72,46 +114,32 @@ if __name__ == "__main__":
     simulator = SimpleSimulator(user_embeddings, item_embeddings, device)
     print("Simulator created.")
 
-    # Load validation data for post-simulation training
-    val_interactions_path = "val_interactions.pt"
-    test_data_for_env = []
-    k_eval_for_env = 20 # Default k_eval, can be configured if needed or loaded from elsewhere
-    if os.path.exists(val_interactions_path):
-        try:
-            print(f"Loading validation interactions from {val_interactions_path}...")
-            # Assuming val_interactions.pt contains a list of tuples or a tensor [N, 2]
-            loaded_val_data = torch.load(val_interactions_path, map_location=device)
-            if isinstance(loaded_val_data, torch.Tensor) and loaded_val_data.dim() == 2 and loaded_val_data.size(1) == 2:
-                # Convert tensor to list of tuples
-                test_data_for_env = [(u.item(), i.item()) for u, i in loaded_val_data]
-                print(f"Successfully loaded and processed {len(test_data_for_env)} validation interactions.")
-            elif isinstance(loaded_val_data, list) and all(isinstance(item, tuple) and len(item) == 2 for item in loaded_val_data):
-                # Ensure it's a list of (user, item) tuples
-                test_data_for_env = loaded_val_data
-                print(f"Successfully loaded {len(test_data_for_env)} validation interactions (as list).")
-            else:
-                print(f"Warning: {val_interactions_path} contains data in an unrecognized format. Expected a list of (user, item) tuples or a [N,2] tensor.")
-                print("Post-simulation training will be skipped if validation data is not correctly loaded or is empty.")
-        except Exception as e:
-            print(f"Error loading validation interactions from {val_interactions_path}: {e}")
-            print("Post-simulation training will be skipped due to error in loading validation data.")
-    else:
-        print(f"Warning: Validation interaction file '{val_interactions_path}' not found.")
-        print("Post-simulation training will be skipped as no validation data is provided.")
+    # --- 修改：從 val.dat 和 test.dat 加載數據 ---
+    val_dat_path = "data_split/val.dat"
+    test_dat_path = "data_split/test.dat"
+    
+    print(f"Loading validation interactions from {val_dat_path} for RecSimEnv val_data...")
+    val_interactions_for_env = load_dat_file_to_interactions(val_dat_path, n_user, n_item) # 使用調整後的 n_user, n_item
+    
+    print(f"Loading test interactions from {test_dat_path} for RecSimEnv test_data...")
+    test_interactions_for_env = load_dat_file_to_interactions(test_dat_path, n_user, n_item) # 使用調整後的 n_user, n_item
+
+    k_eval_for_env = 20 # 可以保留或根據需要配置
 
     # --- 創建環境 ---
     print("Creating RecSimEnv...")
     try:
         env = RecSimEnv(
             init_edge_index=init_edge_index,
-            n_user=n_user,
-            n_item=n_item,
+            n_user=n_user, # 使用基於嵌入調整後的 n_user
+            n_item=n_item, # 使用基於嵌入調整後的 n_item
             agent=agent,
             rec_model=rec_model,
             sim=simulator,
             device=device,
-            test_data=test_data_for_env, # Pass the loaded validation data
-            k_eval=k_eval_for_env      # Pass k_eval
+            val_data=val_interactions_for_env,    # <-- 傳遞從 val.dat 加載的數據
+            test_data=test_interactions_for_env,  # <-- 傳遞從 test.dat 加載的數據
+            k_eval=k_eval_for_env      
         )
         print("RecSimEnv created successfully.")
     except Exception as e:

@@ -18,7 +18,8 @@ class RecSimEnv:
                  rec_model,
                  sim,
                  device="cuda",
-                 test_data=None, # 為微調期間的驗證新增 test_data
+                 val_data=None,  # 新增：用於微調期間的驗證數據
+                 test_data=None, # 用於微調後的最終測試
                  k_eval=20):      # 為評估一致性新增 k_eval
         self.device   = torch.device(device)
         self.n_user   = n_user
@@ -36,6 +37,7 @@ class RecSimEnv:
         self.user_emb = torch.load("user_emb.pt", map_location=self.device)  # [n_user, d]
         self.item_emb = torch.load("item_emb.pt", map_location=self.device)  # [n_item, d]
         
+        self.val_data = val_data if val_data is not None else []   # 儲存 val_data
         self.test_data = test_data if test_data is not None else [] # 儲存 test_data
         self.k_eval = k_eval # 儲存 k_eval
         # 假設 test_data 是一個 (user, item) 元組的列表，類似 pretrain.py 中的 val_inter 或 test_inter
@@ -54,16 +56,10 @@ class RecSimEnv:
             for u in range(self.n_user):
                 # 1) 取得 Top-k 推薦
                 rec_items = self.rec_model.recommend(u, k=k_rec, exclude=seen[u])
-                print(f"[用戶 {u}] 推薦 {len(rec_items)} 個物品 (k_rec={k_rec})")
-
-                # 2) **用原始點積打分，不用 sim.score**
                 rec_with_scores = [
                     (item_id, (self.user_emb[u] @ self.item_emb[item_id]).item())
                     for item_id in rec_items
                 ]
-
-                for item_id, score_val in rec_with_scores:
-                    print(f"[用戶 {u}] 物品 {item_id} 原始分數 = {score_val:.4f}")
 
                
                 user_new_interactions = []
@@ -75,73 +71,66 @@ class RecSimEnv:
                 
                 current_round_interactions.extend(user_new_interactions)
                 new_interactions.extend(user_new_interactions) # 累積所有新的互動
-
-                # 新增：記錄模擬器分數
-                # for item_id in rec_items:
-                #     sim_score = self.sim.score(u, item_id).item()
-                #     sim_scores_list.append((u, t, item_id, sim_score))
-                # print(f"[用戶 {u}] 物品 {item_id} 模擬器分數 = {sim_score:.4f}")
-
-                # 標記為已推薦
                 seen[u].update(rec_items)
 
                 # 收集推薦記錄
                 rec_items_list.extend([(u, t, item_id, item_raw_score) for item_id, item_raw_score in rec_with_scores])
-
-        
+            # End of the for u in range(self.n_user) loop for round t
+            
+            # 在處理完一輪中的所有用戶後，更新全局 edge_index (每輪一次)
+            if current_round_interactions: # 只有當這一輪有新的互動時才更新
                 delta_edge_index = build_edge_index(current_round_interactions, self.n_user).to(self.device)
                 
-                if delta_edge_index.numel() > 0:
+                if delta_edge_index.numel() > 0: # 確保 delta_edge_index 確實包含邊
                     self.edge_index = torch.cat([self.edge_index, delta_edge_index], dim=1)
-                    # 可選：如果初始 edge_index 和新生成的 delta_edge_index 之間可能存在重疊，
-                    # 並且您希望確保邊的唯一性，可以取消下面這行的註解：
-                    # self.edge_index = torch.unique(self.edge_index, dim=1)
-                    print(f"全局 edge_index 已更新，目前總邊數 (單向視角): {self.edge_index.size(1) // 2}") # 因為 build_edge_index 創建雙向邊
-                else:
-                    print("從 current_round_interactions 生成的 delta_edge_index 為空，未更新全局 edge_index。")
+                    self.edge_index = torch.unique(self.edge_index, dim=1)
+                    message = f"時間步 {t}: 全局 edge_index 已更新。目前總邊數 (單向視角): {self.edge_index.size(1) // 2}"
+                    print(f"\r{message:<100}", end="") # 更新並填充到100字符
+                
+          
 
-        # 最後存檔
-        #print(f"嘗試儲存 rec_items.csv，包含 {len(rec_items_list)} 筆記錄。")
-        #if rec_items_list:
-        #    print(f"{rec_items_list[0]}")
-        #pd.DataFrame(rec_items_list,
-         #        columns=['user_id', 'time_step', 'item', 'score']
-          #      ).to_csv('rec_items.csv', index=False)
-        
-        print(f" {len(new_interactions)}")
+        print() # 在循環結束後換行，為後續打印做準備
+
+
         pd.DataFrame(new_interactions, columns=['u','i']).to_csv('new_interactions.csv', index=False)
         
 
         # 模擬結束後，在收集到的 new_interactions 上訓練模型
         if new_interactions:
-            train_data_for_fine_tuning = []
-            val_data_for_fine_tuning = []
-            can_proceed_to_train = False
+            train_data_for_fine_tuning = list(new_interactions) # 使用所有 new_interactions 進行訓練
+            val_data_for_fine_tuning = self.test_data         # 使用 self.test_data (在 __init__ 中設置) 進行驗證
 
-            # 直接嘗試將 new_interactions 分割為訓練集和驗證集
-            print(f"收集到 {len(new_interactions)} 筆新互動。")
-            if len(new_interactions) >= 5: 
-                shuffled_interactions = list(new_interactions) 
-                split_idx = int(0.8 * len(shuffled_interactions))
-                train_data_for_fine_tuning = shuffled_interactions[:split_idx]
-                val_data_for_fine_tuning = shuffled_interactions[split_idx:]
+            print(f"收集到 {len(train_data_for_fine_tuning)} 筆新互動將用於訓練。")
 
-                if train_data_for_fine_tuning and val_data_for_fine_tuning:
-                    print(f"分割成功：訓練集 {len(train_data_for_fine_tuning)} 筆，內部驗證集 {len(val_data_for_fine_tuning)} 筆。")
-                    can_proceed_to_train = True
-                else:
-                    print(f"警告：新互動數據分割後，訓練集或驗證集為空 (訓練: {len(train_data_for_fine_tuning)}, 驗證: {len(val_data_for_fine_tuning)})。跳過此次訓練。")
+            if val_data_for_fine_tuning: # 檢查列表是否為空
+                print(f"將使用 {len(val_data_for_fine_tuning)} 筆來自初始 test_data 的互動進行驗證。")
             else:
-                print(f"新互動數量 ({len(new_interactions)}) 過少 (少於5筆)，無法進行有效的80/20分割。跳過此次訓練。")
-            
-            if can_proceed_to_train:
-                print(f"開始模擬後訓練：使用 {len(train_data_for_fine_tuning)} 筆互動進行訓練，{len(val_data_for_fine_tuning)} 筆互動進行驗證。")
-                self.train_model_on_collected_data(
-                    training_interactions=train_data_for_fine_tuning,
-                    val_interactions=val_data_for_fine_tuning, 
-                    k_eval=self.k_eval 
-                )
-            # 如果不能進行訓練，相關的跳過信息已在上面打印
+                print("警告：初始 test_data (用於驗證) 為空。驗證集將為空。")
+            self.train_model_on_collected_data(
+                training_interactions=train_data_for_fine_tuning,
+                val_interactions=self.val_data, 
+                k_eval=self.k_eval 
+            )
+
+            # self.test_data 最終評估
+            if self.test_data:
+                print(f"\n完成微調後，在 {len(self.test_data)} 筆來自初始 test_data 的互動上進行最終測試評估...")
+                model_to_evaluate = self.rec_model.model # LightGCN 實例
+                model_to_evaluate.eval()
+                with torch.no_grad():
+                    # 使用 self.edge_index，因為它包含了模擬中收集到的所有互動
+                    current_graph_edge_index = self.edge_index.to(self.device)
+                    
+                    test_prec, test_rec, test_ndcg = precision_recall_ndcg_at_k(
+                        model_to_evaluate,
+                        current_graph_edge_index, 
+                        self.test_data,  # 使用 self.test_data
+                        train_pairs=train_data_for_fine_tuning + self.val_data, # 從推薦中排除訓練和驗證集中的物品
+                        K=self.k_eval
+                    )
+                    print(f"最終測試結果: P@{self.k_eval} {test_prec:.4f} R@{self.k_eval} {test_rec:.4f} NDCG@{self.k_eval} {test_ndcg:.4f}")
+            else:
+                print("\n警告：初始 test_data 為空，跳過最終測試評估。")
 
         elif not new_interactions:
             print("模擬期間未收集到新的互動。跳過模擬後訓練。")
@@ -152,7 +141,7 @@ class RecSimEnv:
     def train_model_on_collected_data(self,
                                    training_interactions, # (u,i) 元組列表
                                    val_interactions,       
-                                   num_epochs=10,          
+                                   num_epochs=200,          
                                    batch_size=2048,        
                                    lr=1e-3,               
                                    lambda_reg=5e-4,        
