@@ -1,6 +1,17 @@
 import pandas as pd
 import pickle
+import torch
 
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+
+USER_EMB = torch.load("user_emb.pt", map_location=DEVICE)
+ITEM_EMB = torch.load("item_emb.pt", map_location=DEVICE)
+
+
+EMB_DIM = USER_EMB.size(1)
+NUM_USERS = USER_EMB.shape[0]
+NUM_ITEMS = ITEM_EMB.shape[0]
 # 讀取資料
 train_df = pd.read_csv('data_split/train.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'])
 movies = pd.read_csv('raw/ml-1m/movies.dat', sep='::', names=['movie_id', 'title', 'genres'], engine='python', encoding='latin-1')
@@ -40,6 +51,21 @@ def get_user_interactions(user_id):
     
     return result
 
+def convert_recommendations_to_original_ids(userid):
+
+    # 使用之前載入的 reverse_mid_map 進行轉換
+    with torch.no_grad():
+        score = USER_EMB[userid] @ ITEM_EMB.t()
+        TOP_K = 10
+        _, topk_idx = torch.topk(score, TOP_K)
+        recommendations = topk_idx.cpu().tolist()
+    original_ids = [reverse_mid_map[item_id] for item_id in recommendations]
+    recommendations_with_titles = pd.DataFrame({
+        'Original ID': original_ids,
+        'Title': [movies[movies['movie_id'] == mid]['title'].values[0] for mid in original_ids],
+        'Genres': [movies[movies['movie_id'] == mid]['genres'].values[0] for mid in original_ids]
+    })
+    print(recommendations_with_titles)
 # 使用範例
 user_id = int(input("請輸入要查詢的用戶ID: "))
 original_user_id = reverse_uid_map[user_id]
@@ -50,3 +76,4 @@ result = get_user_interactions(user_id)
 if result is not None:
     print(f"\n用戶 {user_id} 的交互記錄：")
     print(result)
+convert_recommendations_to_original_ids(user_id)

@@ -167,7 +167,7 @@ def precision_recall_ndcg_at_k(model, edge_index_train, test_pairs, train_pairs=
 # 8. Training loop
 # ────────────────────────────────────────────────────────────────────────────────
 K = 20
-num_epochs=200
+num_epochs=100
 batch_size=1024
 num_neg_per_u=10
 

@@ -11,3 +11,5 @@ rating > 3 => users:6038 movies:3533
 過濾掉出現在test.dat但沒出現在train.dat => users:5950 movies:3191
 
 train.dat => users:5950 movies:3191
+
+Final Test | P@20 0.0709 | R@20 0.1142 | NDCG@20 0.1062 | BPR Loss 0.3488
