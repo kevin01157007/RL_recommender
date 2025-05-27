@@ -55,23 +55,45 @@ class RLAgent:
             q_vals = self.q_net(edge_index, u_idx, v_idx)
             return q_vals.argmax().item()
 
-    def update(self, edge_index):
+    def update(self, u_batch, i_batch):
         if len(self.buffer) < self.batch:
             return
+
         batch = random.sample(self.buffer, self.batch)
-        s_batch, a_batch, r_batch, s_next_batch, G_prev_batch, G_next_batch, done_batch = zip(*batch)
-        u_idx = torch.tensor([a[0] for a in a_batch]).to(self.device)
-        v_idx = torch.tensor([a[1] for a in a_batch]).to(self.device)
+        s_batch, a_batch, r_batch, s_next_batch, _, _, done_batch = zip(*batch)
+
+        u_idx_all = torch.tensor([a[0] for a in a_batch], device=self.device)
+        v_idx_all = torch.tensor([a[1] for a in a_batch], device=self.device)
         r = torch.tensor(r_batch, dtype=torch.float32, device=self.device)
         done_mask = torch.tensor(done_batch, dtype=torch.float32, device=self.device)
-        q_pred = self.q_net(edge_index, u_idx, v_idx)
-        with torch.no_grad():
-            q_next = self.target_net(edge_index, u_idx, v_idx)
-            target = r + (1 - done_mask) * (self.gamma ** self.n_step) * q_next
-        loss = nn.MSELoss()(q_pred, target)
+
+        q_pred_list = []
+        q_next_list = []
+
+        for i in range(self.batch):
+            # --- Q(s, a) ---
+            edge_index = s_batch[i].to(self.device)
+            q_pred = self.q_net(edge_index, u_idx_all[i].unsqueeze(0), v_idx_all[i].unsqueeze(0))
+            q_pred_list.append(q_pred)
+
+            # --- Q(s', a')，max over all a' ---
+            edge_index_next = s_next_batch[i].to(self.device)
+            with torch.no_grad():
+                q_vals = self.target_net(edge_index_next, u_batch, i_batch)
+                q_next  = q_vals.max()
+
+            q_next_list.append(q_next)
+
+        q_pred = torch.cat(q_pred_list, dim=0)
+        q_next = torch.stack(q_next_list, dim=0)
+
+        target = r + (1 - done_mask) * (self.gamma ** self.n_step) * q_next
+
+        loss = nn.MSELoss()(q_pred, target.detach())
         self.optim.zero_grad()
         loss.backward()
         self.optim.step()
+
         self.step += 1
         if self.step % self.tu_freq == 0:
             self.target_net.load_state_dict(self.q_net.state_dict())
