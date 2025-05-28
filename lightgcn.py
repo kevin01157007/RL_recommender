@@ -1,4 +1,4 @@
-# lightgcn.py
+# LightGCN.py
 import torch
 import torch.nn as nn
 from LightGCNConv import LightGCNConv

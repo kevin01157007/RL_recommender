@@ -39,22 +39,19 @@ class RecSimEnv:
         
         self.val_data = val_data if val_data is not None else []   # 儲存 val_data
         self.test_data = test_data if test_data is not None else [] # 儲存 test_data
-        self.k_eval = k_eval # 儲存 k_eval
+        self.k_eval = k_eval # 儲存 k_eval(TOPK)
 
 
     def run(self, n_round, k_rec):
-        rec_items_list  = []
         new_interactions = [] # 這將是一個 (u,i) 元組的列表，累積所有輪次的互動
         seen = {u: set() for u in range(self.n_user)}
 
         for t in range(n_round):
             print(f"===== Time step{t} =====")
-            current_round_interactions = [] # 當前回合收集的互動
+            current_round_interactions = [] # 當前timestep收集的互動
             for u in range(self.n_user):
                 # 1) 取得 Top-k 推薦
                 rec_items = self.rec_model.recommend(u, k=k_rec, exclude=seen[u]) # rec_items 是 I_i^t
-               
-
                
                 user_new_interactions = []
                 # rec_items  推薦的 item_ids
@@ -63,14 +60,15 @@ class RecSimEnv:
                     if simulator_score > 0.7:   
                         user_new_interactions.append((u, item_id_recommended))
                 
-                current_round_interactions.extend(user_new_interactions) # 累積當前回合的真實互動
-                new_interactions.extend(user_new_interactions) 
+                current_round_interactions.extend(user_new_interactions) # 累積當前timestep的真實互動
+                new_interactions.extend(user_new_interactions)
                 seen[u].update(rec_items) # 用戶看過了所有推薦物品
             if current_round_interactions: 
                 delta_edge_index = build_edge_index(current_round_interactions, self.n_user).to(self.device)
                 if delta_edge_index.numel() > 0:
                     self.edge_index = torch.cat([self.edge_index, delta_edge_index], dim=1)
                     self.edge_index = torch.unique(self.edge_index, dim=1)
+
             # --- 每輪結束後進行訓練 ---
             if new_interactions: 
                 current_num_epochs = 10 + t * 10
@@ -81,52 +79,35 @@ class RecSimEnv:
                     k_eval=self.k_eval,                  
                     num_epochs=current_num_epochs 
                 )
-          
-            # 在模型訓練完成後，更新模擬器的嵌入
-            if new_interactions: 
-                
-                updated_user_embs, updated_item_embs = self.rec_model.model.get_user_item(self.edge_index)
-                self.sim.update_embeddings(updated_user_embs.detach(), updated_item_embs.detach())
-                print("Simulator embeddings updated with the latest model embeddings after training.")
-
-        print() # 所有輪次處理完畢後換行
+    
+            print() # 所有輪次處理完畢後換行
 
 
-        pd.DataFrame(new_interactions, columns=['u','i']).to_csv('new_interactions.csv', index=False)
+            pd.DataFrame(new_interactions, columns=['u','i']).to_csv('new_interactions.csv', index=False)
         
 
         # --- 最終測試評估 ---
-        # 此評估在所有輪次和所有增量訓練步驟之後進行一次。
-        # 它使用最後一次訓練會話後的模型狀態。
-        if self.test_data and new_interactions: # 檢查 test_data 是否存在且是否有進行過訓練
-            print(f"\n===== {n_round} 輪模擬結束後，於測試集上進行最終評估 =====")
-            print(f"將使用初始測試集中的 {len(self.test_data)} 筆互動進行最終評估...")
-            model_to_evaluate = self.rec_model.model # LightGCN 實例
-            model_to_evaluate.eval()
-            with torch.no_grad():
-                # 使用最終的 self.edge_index，它包含所有輪次的所有互動
-                final_graph_edge_index = self.edge_index.to(self.device)
-                
-                # 對於最終評估，'train_pairs' 應排除所有訓練階段看到的項目（所有 new_interactions）
-                # 以及驗證集中的項目（如果 val_data 在增量訓練中使用過）。
-                all_seen_interactions_for_exclusion = list(new_interactions) + (self.val_data if self.val_data else [])
-                
-                test_prec, test_rec, test_ndcg = precision_recall_ndcg_at_k(
-                    model_to_evaluate,
-                    final_graph_edge_index,
-                    self.test_data,  # 在保留的 test_data 上評估
-                    train_pairs=all_seen_interactions_for_exclusion, # 從推薦中排除所有訓練和驗證互動
-                    K=self.k_eval
-                )
-                print(f"最終測試結果: P@{self.k_eval} {test_prec:.4f} R@{self.k_eval} {test_rec:.4f} NDCG@{self.k_eval} {test_ndcg:.4f}")
-        elif not new_interactions:
-            print("\n模擬完成，但未收集到任何新互動。由於模型未經訓練，跳過最終測試評估。")
-        elif not self.test_data: # 此條件意味著可能存在 new_interactions，但沒有 test_data 可供評估
-            print("\n模擬完成。警告：初始測試數據為空，跳過最終測試評估。")
+        print(f"\n===== {n_round} 輪模擬結束後，於測試集上進行最終評估 =====")
+        print(f"將使用初始測試集中的 {len(self.test_data)} 筆互動進行最終評估...")
+        model_to_evaluate = self.rec_model.model # LightGCN 實例
+        model_to_evaluate.eval()
+        with torch.no_grad():
+            # 使用最終的 self.edge_index，它包含所有輪次的所有互動
+            final_graph_edge_index = self.edge_index.to(self.device)
             
-        return self.edge_index # 或其他相關結果
-
-
+            # 對於最終評估，'train_pairs' 應排除所有訓練階段看到的項目（所有 new_interactions)
+            # 以及驗證集中的項目（如果 val_data 在增量訓練中使用過）。
+            all_seen_interactions_for_exclusion = list(new_interactions) + (self.val_data if self.val_data else [])
+            
+            test_prec, test_rec, test_ndcg = precision_recall_ndcg_at_k(
+                model_to_evaluate,
+                final_graph_edge_index,
+                self.test_data,  # 在保留的 test_data 上評估
+                train_pairs=all_seen_interactions_for_exclusion, # 從推薦中排除所有訓練和驗證互動
+                K=self.k_eval
+            )
+            print(f"最終測試結果: P@{self.k_eval} {test_prec:.4f} R@{self.k_eval} {test_rec:.4f} NDCG@{self.k_eval} {test_ndcg:.4f}")
+            
     def train_model_on_collected_data(self,
                                    training_interactions, # (u,i) 元組列表
                                    val_interactions,       
@@ -156,17 +137,15 @@ class RecSimEnv:
             model_to_train.train()
             t0 = time.time()
 
-            
             all_training_samples = []
-            for _ in range(num_neg_per_interaction): # 這將通過調用 sample_pos_neg N 次為每個正樣本生成 N 個負樣本
-                current_samples = sample_pos_neg(
-                    training_interactions, # (u,i) 列表
-                    self.n_user,
-                    self.n_item,
-                    num_negatives=1, # 目前 sample_pos_neg 中的這個參數是遺跡性的
-                    seed=epoch + _ # 稍微改變種子以獲得不同的負樣本集
-                )
-                all_training_samples.append(current_samples)
+            current_samples = sample_pos_neg(
+                training_interactions, # (u,i) 列表
+                self.n_user,
+                self.n_item,
+                num_negatives=1, # 目前 sample_pos_neg 中的這個參數是遺跡性的
+                seed=epoch + _ # 稍微改變種子以獲得不同的負樣本集
+            )
+            all_training_samples.append(current_samples)
             
             if not all_training_samples:
                 print(f"Epoch {epoch:02d} | 未生成訓練樣本。跳過此 epoch 的訓練。")

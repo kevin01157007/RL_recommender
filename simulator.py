@@ -22,13 +22,9 @@ class SimpleSimulator:
         if user_id >= user_embeddings_to_use.shape[0] or item_id >= item_embeddings_to_use.shape[0]:
             print(f"Warning: Simulator - User {user_id} or Item {item_id} out of bounds for embeddings.")
             return torch.tensor(0.0, device=self.device)
-
-        cosine_sim = torch.cosine_similarity(user_embeddings_to_use[user_id], item_embeddings_to_use[item_id], dim=0)
+        with torch.no_grad:
+            cosine_sim = torch.cosine_similarity(user_embeddings_to_use[user_id], item_embeddings_to_use[item_id], dim=0)
         # Map from [-1, 1] to [0, 1]
         score_val = (cosine_sim + 1) / 2
 
         return score_val
-
-    def update_embeddings(self, user_emb, item_emb):
-        self.user_emb = user_emb.to(self.device)
-        self.item_emb = item_emb.to(self.device)
