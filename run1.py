@@ -1,15 +1,12 @@
 # run.py
 import torch
-from env import RecSimEnv          # 從你的 env.py 導入
-from LightGCNRS import LightGCNRS  # 假設你有這個文件
-from LightGCN import LightGCN      # 假設你有這個文件
+from env import RecSimEnv      
+from LightGCNRS import LightGCNRS
+from LightGCN import LightGCN      
 import os
 import pandas as pd
 from simulator import SimpleSimulator 
-# --- 配置 ---
 rec_model_config = {
-    # "n_users": 500, # 已移除，n_user 由 user_emb.pt 決定
-    # "m_items": 2000, # 已移除，n_item 由 item_emb.pt 決定
     "embedding_size": 64,
     "num_layers": 3,
 }
@@ -23,11 +20,6 @@ def load_dat_file_to_interactions(file_path, n_user_config, n_item_config):
     """
     interactions = []
     print(f"Attempting to load interactions from: {file_path}")
-    
-        # 假設 .dat 文件格式與 LightGCN_pretrain.py 中讀取的 ratings 文件類似
-        # 通常第一列是 user_id，第二列是 movie_id
-        # 如果您的 .dat 文件沒有表頭且直接是 user_id, movie_id, ...
-        # 並且是以逗號分隔的
     df = pd.read_csv(file_path, sep=',', header=None, names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
     
     # 確保列存在
@@ -58,19 +50,10 @@ def load_dat_file_to_interactions(file_path, n_user_config, n_item_config):
     return interactions
 
 if __name__ == "__main__":
-    # --- 設置 ---
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
-
-    # n_user 和 n_item 將在加載嵌入後根據嵌入文件確定
-
-    # --- 初始化組件 ---
-
     # 1. 初始圖結構
     init_edge_index = torch.empty((2, 0), dtype=torch.long, device=device)
-    # print(f"Initial edge_index shape: {init_edge_index.shape}") # 可以取消註釋以調試
-
-    # 檢查預訓練嵌入文件是否存在
     if not os.path.exists("user_emb.pt") or not os.path.exists("item_emb.pt"):
         print("Error: Pre-trained embeddings ('user_emb.pt', 'item_emb.pt') not found.")
         print("Please run LightGCN_pretrain.py first to generate embeddings.")
@@ -104,11 +87,7 @@ if __name__ == "__main__":
         n_layers=rec_model_config["num_layers"]
     ).to(device)
     rec_model = LightGCNRS(n_user, lightgcn_model, device)
-    # print("LightGCN and LightGCNRS initialized.") # 可以取消註釋以調試
-
-    # 3. Agent (目前未使用，設為0)
     agent = 0
-
     # 4. 創建 Simulator 實例
     # print("Creating Simulator...") # 可以取消註釋以調試
     simulator = SimpleSimulator(user_embeddings, item_embeddings, device)
@@ -121,13 +100,11 @@ if __name__ == "__main__":
     # print(f"Loading validation interactions from {val_dat_path} for RecSimEnv val_data...") # 可以取消註釋以調試
     val_interactions_for_env = load_dat_file_to_interactions(val_dat_path, n_user, n_item) 
     
-    # print(f"Loading test interactions from {test_dat_path} for RecSimEnv test_data...") # 可以取消註釋以調試
+   
     test_interactions_for_env = load_dat_file_to_interactions(test_dat_path, n_user, n_item)
 
     k_eval_for_env = 20 
 
-    # --- 創建環境 ---
-    # print("Creating RecSimEnv...") # 可以取消註釋以調試
     try:
         env = RecSimEnv(
             init_edge_index=init_edge_index,
@@ -141,7 +118,7 @@ if __name__ == "__main__":
             test_data=test_interactions_for_env,  
             k_eval=k_eval_for_env      
         )
-        # print("RecSimEnv created successfully.") # 可以取消註釋以調試
+       
     except Exception as e:
         print(f"Error creating RecSimEnv: {e}")
         exit()

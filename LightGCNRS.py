@@ -7,15 +7,12 @@ class LightGCNRS:
     def __init__(self, n_users, model, device="cuda"):
         self.device  = device
         self.n_users = n_users
-        self.model   = model.to(device).eval()
+        self.model   = model.to(device)
 
     def recommend(self, uid, k=20, exclude=None):
-        """
-        回傳 uid 的 top-k item id list
-        exclude: set() -> 不推薦已互動商品
-        """
-        user_emb = self.model.embedding.weight[:self.n_users]
-        item_emb = self.model.embedding.weight[self.n_users:]
+        model = self.model.eval()
+        user_emb = model.embedding.weight[:self.n_users]
+        item_emb = model.embedding.weight[self.n_users:]
         u = user_emb[uid]
         scores = torch.matmul(item_emb, u)   # |I|
         if exclude is not None:

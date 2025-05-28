@@ -14,23 +14,21 @@ class SimpleSimulator:
         self.item_emb = item_emb.to(device)
         self.device = device
 
-    def score(self, user_id, item_id):
-        """
-        Calculates an interaction score (e.g., probability) between a user and an item.
-        This is then used to sample a binary interaction event (0 or 1) from a Bernoulli distribution.
-        Args:
-            user_id (int): The user ID.
-            item_id (int): The item ID.
-        Returns:
-            Tensor: A scalar tensor representing the binary interaction event (0 or 1).
-        """
-        if user_id >= self.user_emb.shape[0] or item_id >= self.item_emb.shape[0]:
-         
-             print(f"Warning: Simulator - User {user_id} or Item {item_id} out of bounds for embeddings.")
-             return torch.tensor(0.0, device=self.device)
+    def score(self, user_id, item_id, current_user_emb=None, current_item_emb=None):
+    
+        user_embeddings_to_use = current_user_emb if current_user_emb is not None else self.user_emb
+        item_embeddings_to_use = current_item_emb if current_item_emb is not None else self.item_emb
 
-        cosine_sim = torch.cosine_similarity(self.user_emb[user_id], self.item_emb[item_id], dim=0)
+        if user_id >= user_embeddings_to_use.shape[0] or item_id >= item_embeddings_to_use.shape[0]:
+            print(f"Warning: Simulator - User {user_id} or Item {item_id} out of bounds for embeddings.")
+            return torch.tensor(0.0, device=self.device)
+
+        cosine_sim = torch.cosine_similarity(user_embeddings_to_use[user_id], item_embeddings_to_use[item_id], dim=0)
         # Map from [-1, 1] to [0, 1]
         score_val = (cosine_sim + 1) / 2
 
         return score_val
+
+    def update_embeddings(self, user_emb, item_emb):
+        self.user_emb = user_emb.to(self.device)
+        self.item_emb = item_emb.to(self.device)
