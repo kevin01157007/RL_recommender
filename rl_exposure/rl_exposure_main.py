@@ -98,6 +98,8 @@ for episode in range(10):
 
         # 下一狀態
         edge_index_next = torch.tensor(list(G.edges()), dtype=torch.long).t().contiguous().to(DEVICE)
+        edge_index_next = torch.cat([edge_index_next, edge_index_next[[1, 0], :]], dim=1)
+        
         G_next_edges = list(G.edges())
 
         # Reward
