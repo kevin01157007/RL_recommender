@@ -24,14 +24,14 @@ class RLAgent:
     def store(self, state, action, reward, next_state, graph_prev, graph_next, done):
         self.n_step_buffer.append((state, action, reward, next_state, graph_prev, graph_next, done))
         # 湊滿 n 步才寫進 buffer
-        if len(self.n_step_buffer) >= self.n_step:
+        if len(self.n_step_buffer) > self.n_step:
             s_k_n, a_k_n, _, _, G_k_n, _, _ = self.n_step_buffer[0]
             R = 0
             gamma = 1
             for i in range(self.n_step):
                 R += self.n_step_buffer[i][2] * gamma
                 gamma *= self.gamma
-            s_k, _, _, _, _, G_k, done_flag = self.n_step_buffer[self.n_step - 1]
+            s_k, _, _, _, _, G_k, done_flag = self.n_step_buffer[self.n_step]
             self.buffer.append((s_k_n, a_k_n, R, s_k, G_k_n, G_k, done_flag))
             self.n_step_buffer.pop(0)
         # 若 episode 結束，把剩下的 transition 都寫進 buffer
