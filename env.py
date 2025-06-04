@@ -1,20 +1,16 @@
 import torch
 import pandas as pd
-from torch_geometric.data import Data
-from torch_geometric.utils import add_self_loops
-from torch_geometric.loader import NeighborLoader
-from LightGCNRS import LightGCNRS
-from LightGCN import LightGCN
-from utilis import compute_bpr_loss_dataset, precision_recall_ndcg_at_k, sample_pos_neg, bpr_loss, build_edge_index
+from utility.utilis import compute_bpr_loss_dataset, precision_recall_ndcg_at_k, sample_pos_neg, bpr_loss, build_edge_index
+from utility.build_nx_graph import build_nx_graph
+import community.community_louvain as community_louvain
+from utility.bulid_dtrain_graph import build_dtrain_graph
 import time
-import random
 
 class RecSimEnv:
     def __init__(self,
                  init_edge_index,  # tensor([2,E])  初始邊索引
                  n_user,
                  n_item,
-                 agent,
                  rec_model,
                  sim,
                  device="cuda",
@@ -24,26 +20,24 @@ class RecSimEnv:
         self.device   = torch.device(device)
         self.n_user   = n_user
         self.n_item   = n_item
-        self.agent    = agent
 
         # 1) 建立動態圖
         self.edge_index = init_edge_index.clone().to(self.device)
 
-        # 2) 建立推薦與 Simulator（可先保留）
         self.rec_model = rec_model # 這是 LightGCNRS
         self.sim       = sim
 
         # 3) **載入預先儲存的 embeddings**
-        self.user_emb = torch.load("user_emb.pt", map_location=self.device, weights_only=True)  # [n_user, d]
-        self.item_emb = torch.load("item_emb.pt", map_location=self.device, weights_only=True)  # [n_item, d]
+        self.user_emb = torch.load("model/simulator/user_emb.pt", map_location=self.device, weights_only=True)  # [n_user, d]
+        self.item_emb = torch.load("model/simulator/item_emb.pt", map_location=self.device, weights_only=True)  # [n_item, d]
         
-        self.val_data = val_data if val_data is not None else []   # 儲存 val_data
-        self.test_data = test_data if test_data is not None else [] # 儲存 test_data
+        self.val_data = val_data
+        self.test_data = test_data
         self.k_eval = k_eval # 儲存 k_eval(TOPK)
 
 
     def run(self, n_round, k_rec):
-        new_interactions = [] # 這將是一個 (u,i) 元組的列表，累積所有輪次的互動
+        dtrain_new_interactions = [] # 這將是一個 (u,i) 元組的列表，累積所有輪次的互動
         seen = {u: set() for u in range(self.n_user)}
 
         for t in range(n_round):
@@ -53,28 +47,31 @@ class RecSimEnv:
                 # 1) 取得 Top-k 推薦
                 rec_items = self.rec_model.recommend(u, k=k_rec, exclude=seen[u]) # rec_items 是 I_i^t
                
-                user_new_interactions = []
                 # rec_items  推薦的 item_ids
                 for item_id_recommended in rec_items: # 直接遍歷 RS 推薦的物品
                     simulator_score = self.sim.score(u, item_id_recommended).item()
                     if simulator_score > 0.7:   
-                        user_new_interactions.append((u, item_id_recommended))
-                
-                current_round_interactions.extend(user_new_interactions) # 累積當前timestep的真實互動
-                new_interactions.extend(user_new_interactions)
-                seen[u].update(rec_items) # 用戶看過了所有推薦物品
+                        current_round_interactions.append((u, item_id_recommended))
+                        seen[u].add(item_id_recommended) # 用戶喜歡過的物品
+            dtrain_new_interactions.extend(current_round_interactions)
+                        
             if current_round_interactions: 
                 delta_edge_index = build_edge_index(current_round_interactions, self.n_user).to(self.device)
                 if delta_edge_index.numel() > 0:
                     self.edge_index = torch.cat([self.edge_index, delta_edge_index], dim=1)
                     self.edge_index = torch.unique(self.edge_index, dim=1)
 
+            dtrain_graph = build_dtrain_graph(dtrain_new_interactions)
+            all_partition = community_louvain.best_partition(dtrain_graph, resolution=2, random_state=42)
+            communities = all_partition
+            print(f"總社群數量: {len(set(communities.values()))}")
+
             # --- 每輪結束後進行訓練 ---
-            if new_interactions: 
+            if dtrain_new_interactions: 
                 current_num_epochs = 10 + t * 10
-                print(f"\n--- 第 {t} 輪後進行訓練，使用目前累積的 {len(new_interactions)} 筆真實互動，訓練 {current_num_epochs} 個 epochs ---")
+                print(f"\n--- 第 {t} 輪後進行訓練，使用目前累積的 {len(dtrain_new_interactions)} 筆真實互動，訓練 {current_num_epochs} 個 epochs ---")
                 self.train_model_on_collected_data(
-                    training_interactions=list(new_interactions), 
+                    training_interactions=list(dtrain_new_interactions), 
                     val_interactions=self.val_data,      
                     k_eval=self.k_eval,                  
                     num_epochs=current_num_epochs 
@@ -83,7 +80,7 @@ class RecSimEnv:
             print() # 所有輪次處理完畢後換行
 
 
-            pd.DataFrame(new_interactions, columns=['u','i']).to_csv('new_interactions.csv', index=False)
+            pd.DataFrame(dtrain_new_interactions, columns=['u','i']).to_csv('new_interactions.csv', index=False)
         
 
         # --- 最終測試評估 ---
@@ -96,8 +93,7 @@ class RecSimEnv:
             final_graph_edge_index = self.edge_index.to(self.device)
             
             # 對於最終評估，'train_pairs' 應排除所有訓練階段看到的項目（所有 new_interactions)
-            # 以及驗證集中的項目（如果 val_data 在增量訓練中使用過）。
-            all_seen_interactions_for_exclusion = list(new_interactions) + (self.val_data if self.val_data else [])
+            all_seen_interactions_for_exclusion = list(dtrain_new_interactions) + self.val_data
             
             test_prec, test_rec, test_ndcg = precision_recall_ndcg_at_k(
                 model_to_evaluate,
@@ -116,14 +112,13 @@ class RecSimEnv:
                                    lr=1e-4,               
                                    lambda_reg=5e-4,        
                                    k_eval=20,               
-                                   num_neg_per_interaction=10, # 在 pretrain 中是 num_neg_per_u，現在是每個互動
                                    patience=20): 
 
         model_to_train = self.rec_model.model # 這是 LightGCN 實例
         optimizer = torch.optim.Adam(model_to_train.parameters(), lr=lr)
         
         print(f"在 {len(training_interactions)} 個互動上訓練 LightGCN，在 {len(val_interactions)} 個互動上進行驗證。")
-        print(f"Epochs: {num_epochs}, Batch Size: {batch_size}, LR: {lr}, Lambda_reg: {lambda_reg}, K_eval: {k_eval}, Negatives: {num_neg_per_interaction}, Patience: {patience}")
+        print(f"Epochs: {num_epochs}, Batch Size: {batch_size}, LR: {lr}, Lambda_reg: {lambda_reg}, K_eval: {k_eval}, Patience: {patience}")
 
         loss_hist, val_loss_hist, val_prec_hist, val_rec_hist, val_ndcg_hist = [], [], [], [], []
         best_val_ndcg = -1.0 
@@ -137,27 +132,19 @@ class RecSimEnv:
             model_to_train.train()
             t0 = time.time()
 
-            all_training_samples = []
-            current_samples = sample_pos_neg(
+            samples = sample_pos_neg(
                 training_interactions, # (u,i) 列表
                 self.n_user,
                 self.n_item,
-                num_negatives=1, # 目前 sample_pos_neg 中的這個參數是遺跡性的
-                seed=epoch + _ # 稍微改變種子以獲得不同的負樣本集
+                seed=epoch # 稍微改變種子以獲得不同的負樣本集
             )
-            all_training_samples.append(current_samples)
-            
-            if not all_training_samples:
-                print(f"Epoch {epoch:02d} | 未生成訓練樣本。跳過此 epoch 的訓練。")
-                continue
                 
-            training_samples_tensor = torch.cat(all_training_samples, dim=0)
-            training_samples_tensor = training_samples_tensor[torch.randperm(len(training_samples_tensor))].to(self.device)
+            samples = samples[torch.randperm(len(samples))].to(self.device)
             
             total_train_loss = 0
             processed_samples_count = 0
-            for st in range(0, len(training_samples_tensor), batch_size):
-                batch = training_samples_tensor[st:st + batch_size]
+            for st in range(0, len(samples), batch_size):
+                batch = samples[st:st + batch_size]
                 u, p, n = batch[:, 0], batch[:, 1], batch[:, 2]
                 
                 optimizer.zero_grad()

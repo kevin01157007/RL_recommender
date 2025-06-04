@@ -15,15 +15,9 @@ class SimpleSimulator:
         self.device = device
 
     def score(self, user_id, item_id, current_user_emb=None, current_item_emb=None):
-    
-        user_embeddings_to_use = current_user_emb if current_user_emb is not None else self.user_emb
-        item_embeddings_to_use = current_item_emb if current_item_emb is not None else self.item_emb
 
-        if user_id >= user_embeddings_to_use.shape[0] or item_id >= item_embeddings_to_use.shape[0]:
-            print(f"Warning: Simulator - User {user_id} or Item {item_id} out of bounds for embeddings.")
-            return torch.tensor(0.0, device=self.device)
-        with torch.no_grad:
-            cosine_sim = torch.cosine_similarity(user_embeddings_to_use[user_id], item_embeddings_to_use[item_id], dim=0)
+        with torch.no_grad():
+            cosine_sim = torch.cosine_similarity(self.user_emb[user_id], self.item_emb[item_id], dim=0)
         # Map from [-1, 1] to [0, 1]
         score_val = (cosine_sim + 1) / 2
 

@@ -3,10 +3,6 @@ import networkx as nx
 from sklearn.metrics.pairwise import cosine_similarity
 import community.community_louvain as community_louvain
 from collections import defaultdict
-import pandas as pd
-import time
-from build_nx_graph import build_nx_graph
-import torch
 
 def calculate_ILS(item_emb, rec_item_set):
     """
@@ -148,10 +144,10 @@ def heuristic_exposure_strategy(user_item_graph, rec_item_set, item_emb,
 
     print(f"已生成 {len(all_selected_items)} 條曝光邊")
     return all_selected_items
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-user_embeddings = torch.load("user_emb.pt", map_location=device, weights_only=True)
-item_embeddings = torch.load("item_emb.pt", map_location=device, weights_only=True)
-rec_item_set = [np.random.choice(range(item_embeddings.shape[0]), size=20, replace=False).tolist() for user in range(user_embeddings.shape[0])]
-user_item_graph = build_nx_graph()
-s = heuristic_exposure_strategy(user_item_graph, rec_item_set, item_embeddings)
-print(s)
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# user_embeddings = torch.load("user_emb.pt", map_location=device, weights_only=True)
+# item_embeddings = torch.load("item_emb.pt", map_location=device, weights_only=True)
+# rec_item_set = [np.random.choice(range(item_embeddings.shape[0]), size=20, replace=False).tolist() for user in range(user_embeddings.shape[0])]
+# user_item_graph = build_nx_graph()
+# s = heuristic_exposure_strategy(user_item_graph, rec_item_set, item_embeddings)
+# print(s)

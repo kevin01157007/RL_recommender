@@ -1,7 +1,7 @@
 import torch
 from torch import Tensor
 from typing import List, Dict
-from LightGCN import LightGCN
+from ..LightGCN.LightGCN import LightGCN
 
 class LightGCNRS:
     def __init__(self, n_users, model, device="cuda"):

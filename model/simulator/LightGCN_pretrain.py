@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn.functional as F
-from torch import nn, optim, Tensor
+from torch import nn, optim
 from torch_geometric.nn import MessagePassing
 import matplotlib.pyplot as plt
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
@@ -12,21 +12,12 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 # ────────────────────────────────────────────────────────────────────────────────
 # 1. Load ratings / movies / users (MovieLens‑1M)
 # ────────────────────────────────────────────────────────────────────────────────
-ratings_train = pd.read_csv('data_split/train.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
-ratings_val = pd.read_csv('data_split/val.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
-ratings_test = pd.read_csv('data_split/test.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
-
-movies  = pd.read_csv('raw/ml-1m/movies.dat', sep='::', names=['movie_id', 'title', 'genres'],   engine='python', encoding='latin-1')
-users   = pd.read_csv('raw/ml-1m/users.dat',  sep='::', names=['user_id', 'gender', 'age', 'occupation', 'zip'], engine='python', encoding='latin-1')
+ratings_train = pd.read_csv('../../data/train.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
+ratings_val = pd.read_csv('../../data/val.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
+ratings_test = pd.read_csv('../../data/test.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
 
 num_users, num_items = 5950, 3191
 print(f"Users: {num_users}, Items: {num_items}")
-
-# high‑rating implicit positives
-# ratings = ratings[ratings.user_id.isin(selected_user_ids)]
-# ratings_high = ratings[ratings.rating >= 4].copy()
-# ratings_high['u'] = ratings_high.user_id.map(uid_map)
-# ratings_high['i'] = ratings_high.movie_id.map(mid_map)
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 2. Split last‑k per user → val / test (k=5 here) ; rest = train
@@ -59,7 +50,7 @@ full_edge_index  = build_edge_index(train_inter+val_inter+test_inter, num_users,
 # 4. Negative sampling for BPR
 # ────────────────────────────────────────────────────────────────────────────────
 
-def sample_pos_neg(train_pairs, num_users, num_items, num_negatives=1, seed=None, exclude_pairs=None):
+def sample_pos_neg(train_pairs, num_users, num_items, seed=None, exclude_pairs=None):
     if seed is not None:
         random.seed(seed)
     user2pos = defaultdict(set)
@@ -125,11 +116,10 @@ def bpr_loss(model, users, pos, neg, edge_index, lambda_reg=1e-4):
     reg=(e0[users].norm(2).pow(2)+e0[pos+model.num_users].norm(2).pow(2)+e0[neg+model.num_users].norm(2).pow(2))/users.size(0)
     return loss_bpr+lambda_reg*reg, loss_bpr.detach(), reg.detach()
 
-# quick evaluator for BPR loss on a (u,i) positive set
 
-def compute_bpr_loss_dataset(model, pairs, edge_index_train, num_negatives=1, exclude_pairs=None):
+def compute_bpr_loss_dataset(model, pairs, edge_index_train, exclude_pairs=None):
     model.eval()
-    samples=sample_pos_neg(pairs, num_users, num_items, num_negatives, exclude_pairs=exclude_pairs)
+    samples=sample_pos_neg(pairs, num_users, num_items, exclude_pairs=exclude_pairs)
     u,p,n=samples[:,0],samples[:,1],samples[:,2]
     with torch.no_grad():
         loss,_ ,_=bpr_loss(model,u.to(device),p.to(device),n.to(device),edge_index_train)
@@ -169,11 +159,10 @@ def precision_recall_ndcg_at_k(model, edge_index_train, test_pairs, train_pairs=
 K = 20
 num_epochs=100
 batch_size=1024
-num_neg_per_u=10
 
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model=LightGCN(num_users,num_items,emb_size=64,n_layers=4).to(device)
-opt=optim.Adam(model.parameters(), lr=1e-3)
+model=LightGCN(num_users,num_items,emb_size=64,n_layers=3).to(device)
+opt=optim.Adam(model.parameters(), lr=1e-5)
 train_edge_index=train_edge_index.to(device)
 val_edge_index=val_edge_index.to(device)
 
@@ -181,7 +170,7 @@ loss_hist=[]; val_loss_hist=[]; val_prec_hist=[]; val_rec_hist=[]; val_ndcg_hist
 
 for epoch in range(1,num_epochs+1):
     model.train(); t0=time.time()
-    samples=sample_pos_neg(train_inter,num_users,num_items,num_neg_per_u,seed=epoch)
+    samples=sample_pos_neg(train_inter,num_users,num_items,seed=epoch)
     samples=samples[torch.randperm(len(samples))].to(device)
     total_loss=0
     for st in range(0,len(samples),batch_size):
