@@ -168,6 +168,10 @@ val_edge_index=val_edge_index.to(device)
 
 loss_hist=[]; val_loss_hist=[]; val_prec_hist=[]; val_rec_hist=[]; val_ndcg_hist=[]
 
+patience = 10
+best_val_loss = float('inf')
+patience_counter = 20
+
 for epoch in range(1,num_epochs+1):
     model.train(); t0=time.time()
     samples=sample_pos_neg(train_inter,num_users,num_items,seed=epoch)
@@ -192,6 +196,18 @@ for epoch in range(1,num_epochs+1):
     val_prec_hist.append(prec); val_rec_hist.append(rec); val_ndcg_hist.append(ndcg)
     print(f"Epoch {epoch:02d} | {time.time()-t0:.1f}s | TrainLoss {avg_train_loss:.4f} | ValLoss {val_loss:.4f} | P@{K} {prec:.4f} R@{K} {rec:.4f} NDCG@{K} {ndcg:.4f}")
 
+    # Early stopping logic
+    if val_loss < best_val_loss:
+        best_val_loss = val_loss
+        patience_counter = 0
+        best_model_state = model.state_dict()  # Save best model
+    else:
+        patience_counter += 1
+        if patience_counter >= patience:
+            print(f"Early stopping triggered at epoch {epoch}.")
+            break
+# Load best model before test
+model.load_state_dict(best_model_state)
 # ────────────────────────────────────────────────────────────────────────────────
 # 9. Final Test evaluation
 # ────────────────────────────────────────────────────────────────────────────────
