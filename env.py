@@ -5,16 +5,22 @@ from torch_geometric.utils import add_self_loops
 from torch_geometric.loader import NeighborLoader
 from LightGCNRS import LightGCNRS
 from LightGCN import LightGCN
+from utilis import compute_bpr_loss_dataset, precision_recall_ndcg_at_k, sample_pos_neg, bpr_loss, build_edge_index
+import time
+import random
 
 class RecSimEnv:
     def __init__(self,
-                 init_edge_index,  # tensor([2,E])
+                 init_edge_index,  # tensor([2,E])  初始邊索引
                  n_user,
                  n_item,
                  agent,
                  rec_model,
                  sim,
-                 device="cuda"):
+                 device="cuda",
+                 val_data=None,  # 新增：用於微調期間的驗證數據
+                 test_data=None, # 用於微調後的最終測試
+                 k_eval=20):      # 為評估一致性新增 k_eval
         self.device   = torch.device(device)
         self.n_user   = n_user
         self.n_item   = n_item
@@ -24,193 +30,184 @@ class RecSimEnv:
         self.edge_index = init_edge_index.clone().to(self.device)
 
         # 2) 建立推薦與 Simulator（可先保留）
-        self.rec_model = rec_model
+        self.rec_model = rec_model # 這是 LightGCNRS
         self.sim       = sim
 
-        # 3) **載入 pre-saver 的 embeddings**
-        self.user_emb = torch.load("user_emb.pt", map_location=self.device)  # [n_user, d]
-        self.item_emb = torch.load("item_emb.pt", map_location=self.device)  # [n_item, d]
+        # 3) **載入預先儲存的 embeddings**
+        self.user_emb = torch.load("user_emb.pt", map_location=self.device, weights_only=True)  # [n_user, d]
+        self.item_emb = torch.load("item_emb.pt", map_location=self.device, weights_only=True)  # [n_item, d]
+        
+        self.val_data = val_data if val_data is not None else []   # 儲存 val_data
+        self.test_data = test_data if test_data is not None else [] # 儲存 test_data
+        self.k_eval = k_eval # 儲存 k_eval(TOPK)
+
 
     def run(self, n_round, k_rec):
-        rec_items_list  = []
-        new_interactions = []
+        new_interactions = [] # 這將是一個 (u,i) 元組的列表，累積所有輪次的互動
         seen = {u: set() for u in range(self.n_user)}
-        sim_scores_list = []
 
         for t in range(n_round):
-            print(f"===== Time step {t} =====")
+            print(f"===== Time step{t} =====")
+            current_round_interactions = [] # 當前timestep收集的互動
             for u in range(self.n_user):
                 # 1) 取得 Top-k 推薦
-                rec_items = self.rec_model.recommend(u, k=k_rec, exclude=seen[u])
-                print(f"[User {u}] Recommended {len(rec_items)} items (k_rec={k_rec})")
-
-                # 2) **用 raw dot-product 打分，不用 sim.score**
-                rec_with_scores = [
-                    (item_id, (self.user_emb[u] @ self.item_emb[item_id]).item())
-                    for item_id in rec_items
-                ]
-
-                for item_id, score_val in rec_with_scores:
-                    print(f"[User {u}] Item {item_id} RawScore = {score_val:.4f}")
-
-                new_interactions.extend([
-                    (u, i_id)
-                    for i_id, _ in rec_with_scores
-                    if torch.rand(1).item() < self.sim.score(u, i_id).item()
-                ])
-
-                # 新增：記錄模擬器分數
-                for item_id in rec_items:
-                    sim_score = self.sim.score(u, item_id).item()
-                    sim_scores_list.append((u, t, item_id, sim_score))
-                    print(f"[User {u}] Item {item_id} SimScore = {sim_score:.4f}")
-
-                # 標記為已推薦
-                seen[u].update(rec_items)
-
-                # 收集推薦記錄
-                rec_items_list.extend([(u, t, item_id, item_raw_score) for item_id, item_raw_score in rec_with_scores])
-
-            # (Step2-c) 更新 edge_index
-            if new_interactions:
-                ei_extra = torch.tensor(new_interactions, dtype=torch.long).T.to(self.device)
+                rec_items = self.rec_model.recommend(u, k=k_rec, exclude=seen[u]) # rec_items 是 I_i^t
+               
+                user_new_interactions = []
+                # rec_items  推薦的 item_ids
+                for item_id_recommended in rec_items: # 直接遍歷 RS 推薦的物品
+                    simulator_score = self.sim.score(u, item_id_recommended).item()
+                    if simulator_score > 0.7:   
+                        user_new_interactions.append((u, item_id_recommended))
                 
-                if ei_extra.numel() > 0:
-                    self.edge_index = torch.cat([self.edge_index, ei_extra], dim=1)
+                current_round_interactions.extend(user_new_interactions) # 累積當前timestep的真實互動
+                new_interactions.extend(user_new_interactions)
+                seen[u].update(rec_items) # 用戶看過了所有推薦物品
+            if current_round_interactions: 
+                delta_edge_index = build_edge_index(current_round_interactions, self.n_user).to(self.device)
+                if delta_edge_index.numel() > 0:
+                    self.edge_index = torch.cat([self.edge_index, delta_edge_index], dim=1)
+                    self.edge_index = torch.unique(self.edge_index, dim=1)
 
-        # 最後存檔
-        print(f"Attempting to save rec_items.csv with {len(rec_items_list)} entries.")
-        if rec_items_list:
-            print(f"First entry in rec_items_list: {rec_items_list[0]} (should have 4 elements)")
-        pd.DataFrame(rec_items_list,
-                 columns=['user_id', 'time_step', 'item', 'score']
-                ).to_csv('rec_items.csv', index=False)
+            # --- 每輪結束後進行訓練 ---
+            if new_interactions: 
+                current_num_epochs = 10 + t * 10
+                print(f"\n--- 第 {t} 輪後進行訓練，使用目前累積的 {len(new_interactions)} 筆真實互動，訓練 {current_num_epochs} 個 epochs ---")
+                self.train_model_on_collected_data(
+                    training_interactions=list(new_interactions), 
+                    val_interactions=self.val_data,      
+                    k_eval=self.k_eval,                  
+                    num_epochs=current_num_epochs 
+                )
+    
+            print() # 所有輪次處理完畢後換行
+
+
+            pd.DataFrame(new_interactions, columns=['u','i']).to_csv('new_interactions.csv', index=False)
         
-        print(f"Attempting to save new_interactions.csv with {len(new_interactions)} entries.")
-        pd.DataFrame(new_interactions, columns=['u','i']).to_csv('new_interactions.csv', index=False)
+
+        # --- 最終測試評估 ---
+        print(f"\n===== {n_round} 輪模擬結束後，於測試集上進行最終評估 =====")
+        print(f"將使用初始測試集中的 {len(self.test_data)} 筆互動進行最終評估...")
+        model_to_evaluate = self.rec_model.model # LightGCN 實例
+        model_to_evaluate.eval()
+        with torch.no_grad():
+            # 使用最終的 self.edge_index，它包含所有輪次的所有互動
+            final_graph_edge_index = self.edge_index.to(self.device)
+            
+            # 對於最終評估，'train_pairs' 應排除所有訓練階段看到的項目（所有 new_interactions)
+            # 以及驗證集中的項目（如果 val_data 在增量訓練中使用過）。
+            all_seen_interactions_for_exclusion = list(new_interactions) + (self.val_data if self.val_data else [])
+            
+            test_prec, test_rec, test_ndcg = precision_recall_ndcg_at_k(
+                model_to_evaluate,
+                final_graph_edge_index,
+                self.test_data,  # 在保留的 test_data 上評估
+                train_pairs=all_seen_interactions_for_exclusion, # 從推薦中排除所有訓練和驗證互動
+                K=self.k_eval
+            )
+            print(f"最終測試結果: P@{self.k_eval} {test_prec:.4f} R@{self.k_eval} {test_rec:.4f} NDCG@{self.k_eval} {test_ndcg:.4f}")
+            
+    def train_model_on_collected_data(self,
+                                   training_interactions, # (u,i) 元組列表
+                                   val_interactions,       
+                                   num_epochs=200,          
+                                   batch_size=2048,        
+                                   lr=1e-4,               
+                                   lambda_reg=5e-4,        
+                                   k_eval=20,               
+                                   num_neg_per_interaction=10, # 在 pretrain 中是 num_neg_per_u，現在是每個互動
+                                   patience=20): 
+
+        model_to_train = self.rec_model.model # 這是 LightGCN 實例
+        optimizer = torch.optim.Adam(model_to_train.parameters(), lr=lr)
         
-       
-        print(f"Attempting to save rec_items_sim_scores.csv with {len(sim_scores_list)} entries.")
-        if sim_scores_list:
-            print(f"First entry in sim_scores_list: {sim_scores_list[0]} (should have 4 elements)")
-        pd.DataFrame(sim_scores_list,
-                     columns=['user_id', 'time_step', 'item', 'sim_score']
-                    ).to_csv('rec_items_sim_scores.csv', index=False)
-        
-        print("CSV files saving process finished.")
+        print(f"在 {len(training_interactions)} 個互動上訓練 LightGCN，在 {len(val_interactions)} 個互動上進行驗證。")
+        print(f"Epochs: {num_epochs}, Batch Size: {batch_size}, LR: {lr}, Lambda_reg: {lambda_reg}, K_eval: {k_eval}, Negatives: {num_neg_per_interaction}, Patience: {patience}")
 
+        loss_hist, val_loss_hist, val_prec_hist, val_rec_hist, val_ndcg_hist = [], [], [], [], []
+        best_val_ndcg = -1.0 
+        patience_counter = 0
 
-    # ---------------- 內部工具 ----------------
-    def finetune_lightgcn(self, epochs=3, batch_size=2048):
-        loader = NeighborLoader(Data(edge_index=add_self_loops(self.edge_index)[0]),
-                                num_neighbors=[10],
-                                batch_size=batch_size,
-                                input_nodes=None,
-                                shuffle=True)
-        opt = torch.optim.Adam(self.rec_model.parameters(), lr=1e-3)
-        bpr = torch.nn.BCEWithLogitsLoss()
+        # LightGCN 在訓練和驗證期間前向傳播所用的 edge_index
+        # 是 self.edge_index，它已經用所有 training_interactions 更新過了。
+        current_graph_edge_index = self.edge_index.to(self.device)
 
-        for _ in range(epochs):
-            for batch in loader:
-                users = batch.n_id[batch.n_id < self.n_user]
-                pos_i = torch.randint(0, self.n_item, (len(users),), device=self.device)
-                neg_i = torch.randint(0, self.n_item, (len(users),), device=self.device)
+        for epoch in range(1, num_epochs + 1):
+            model_to_train.train()
+            t0 = time.time()
 
-                uemb  = self.sim.get_user_emb(users)
-                p_emb = self.sim.get_item_emb(pos_i)
-                n_emb = self.sim.get_item_emb(neg_i)
-                pos_logits = (uemb * p_emb).sum(-1)
-                neg_logits = (uemb * n_emb).sum(-1)
-                loss = bpr(pos_logits, torch.ones_like(pos_logits)) + \
-                       bpr(neg_logits, torch.zeros_like(neg_logits))
-
-                opt.zero_grad()
+            all_training_samples = []
+            current_samples = sample_pos_neg(
+                training_interactions, # (u,i) 列表
+                self.n_user,
+                self.n_item,
+                num_negatives=1, # 目前 sample_pos_neg 中的這個參數是遺跡性的
+                seed=epoch + _ # 稍微改變種子以獲得不同的負樣本集
+            )
+            all_training_samples.append(current_samples)
+            
+            if not all_training_samples:
+                print(f"Epoch {epoch:02d} | 未生成訓練樣本。跳過此 epoch 的訓練。")
+                continue
+                
+            training_samples_tensor = torch.cat(all_training_samples, dim=0)
+            training_samples_tensor = training_samples_tensor[torch.randperm(len(training_samples_tensor))].to(self.device)
+            
+            total_train_loss = 0
+            processed_samples_count = 0
+            for st in range(0, len(training_samples_tensor), batch_size):
+                batch = training_samples_tensor[st:st + batch_size]
+                u, p, n = batch[:, 0], batch[:, 1], batch[:, 2]
+                
+                optimizer.zero_grad()
+                loss, _, _ = bpr_loss(model_to_train, u, p, n, current_graph_edge_index, lambda_reg=lambda_reg)
                 loss.backward()
-                opt.step()
+                optimizer.step()
+                total_train_loss += loss.item() * u.size(0)
+                processed_samples_count += u.size(0)
+            
+            avg_train_loss = total_train_loss / processed_samples_count if processed_samples_count > 0 else 0
+            loss_hist.append(avg_train_loss)
 
+            # 驗證
+            model_to_train.eval()
+            with torch.no_grad():
+                val_loss = compute_bpr_loss_dataset(
+                    model_to_train,
+                    val_interactions, # 對 (pairs)
+                    self.device,
+                    current_graph_edge_index, # edge_index_train
+                    self.n_user,
+                    self.n_item,
+                    num_negatives=1, 
+                    exclude_pairs=training_interactions + val_interactions # 從負樣本選擇中排除訓練和驗證的正樣本
+                )
+                val_loss_hist.append(val_loss)
 
-    def evaluate(self):
-        import networkx as nx
-        import community as community_louvain
-        import torch
-        import numpy as np
-        from collections import defaultdict
-        from torch.nn.functional import softplus
+                prec, rec, ndcg = precision_recall_ndcg_at_k(
+                    model_to_train,
+                    current_graph_edge_index, 
+                    val_interactions,         
+                    train_pairs=training_interactions, # 從推薦中排除已見物品
+                    K=k_eval
+                )
+                val_prec_hist.append(prec)
+                val_rec_hist.append(rec)
+                val_ndcg_hist.append(ndcg)
 
-        # 1. 圖結構指標：社群數 & 平均度數
-        g = nx.Graph()
-        n_nodes = self.n_user + self.n_item
-        g.add_nodes_from(range(n_nodes))
-        # edge_index shape = [2, E]
-        edges = self.edge_index.t().tolist()
-        g.add_edges_from(edges)
-        part = community_louvain.best_partition(g, resolution=1.0)
-        n_comm = len(set(part.values()))
-        degs = dict(g.degree())
-        avg_deg = sum(degs.values()) / n_nodes
+            elapsed_time = time.time() - t0
+            print(f"Epoch {epoch:02d} | {elapsed_time:.1f}s | TrainLoss {avg_train_loss:.4f} | ValLoss {val_loss:.4f} | P@{k_eval} {prec:.4f} R@{k_eval} {rec:.4f} NDCG@{k_eval} {ndcg:.4f}")
 
-        # 2. 推薦模型嵌入 & BPR loss
-        #    2.1 取出所有 user/item 嵌入
-        user_emb, item_emb = self.rec_model.model.get_user_item(self.edge_index)
-        #    2.2 隨機負採樣測試 BPR
-        samples = []
-        for u, i in self.test_data:
-            # 以每個測試正例配一個隨機負例
-            neg = np.random.choice(self.n_item)
-            samples.append((u, i, neg))
-        users, pos, neg = zip(*samples)
-        users = torch.tensor(users, dtype=torch.long, device=self.rec_model.device)
-        pos   = torch.tensor(pos,   dtype=torch.long, device=self.rec_model.device)
-        neg   = torch.tensor(neg,   dtype=torch.long, device=self.rec_model.device)
+            if ndcg > best_val_ndcg:
+                best_val_ndcg = ndcg
+                patience_counter = 0
+            else:
+                patience_counter += 1
 
-        #    2.3 計算 BPR 損失
-        u_e = user_emb[users]
-        p_e = item_emb[pos]
-        n_e = item_emb[neg]
-        pos_scores = torch.sum(u_e * p_e, dim=1)
-        neg_scores = torch.sum(u_e * n_e, dim=1)
-        loss_bpr = torch.mean(softplus(neg_scores - pos_scores))
-        #    正則項：對第0層嵌入做 L2
-        e0 = self.rec_model.model.embedding.weight
-        reg = (e0[users].norm(2).pow(2)
-            + e0[pos + self.n_user].norm(2).pow(2)
-            + e0[neg + self.n_user].norm(2).pow(2)) / users.size(0)
-        loss = loss_bpr + self.lambda_reg * reg
-
-        # 3. Top-K 指標：Precision, Recall, NDCG
-        K = self.k_eval
-        #    3.1 計算所有 user-item 原始分數矩陣
-        all_u, all_i = user_emb, item_emb
-        scores = torch.matmul(all_u, all_i.t())  # shape = (U, I)
-        #    3.2 對每個 user 排序、計算 metrics
-        precisions, recalls, ndcgs = [], [], []
-        test_pos = defaultdict(set)
-        for u, i in self.test_data:
-            test_pos[u].add(i)
-
-        for u in range(self.n_user):
-
-            topk = torch.topk(scores[u], K).indices.tolist()
-            hits = [1 if i in test_pos[u] else 0 for i in topk]
-            tp = sum(hits)
-            precisions.append(tp / K)
-            recalls.append(tp / max(1, len(test_pos[u])))
-            # NDCG
-            dcg = sum(h / np.log2(idx+2) for idx, h in enumerate(hits))
-            ideal = min(len(test_pos[u]), K)
-            idcg = sum(1 / np.log2(i+2) for i in range(ideal)) or 1.0
-            ndcgs.append(dcg / idcg)
-
-        prec = float(np.mean(precisions))
-        rec  = float(np.mean(recalls))
-        ndcg = float(np.mean(ndcgs))
-
-        # 4. 返回所有統計指標
-        return {
-            "n_comm":   n_comm,
-            "avg_deg":  avg_deg,
-            "bpr_loss": float(loss.item()),
-            "precision": prec,
-            "recall":    rec,
-            "ndcg":      ndcg
-        }
+            if patience_counter >= patience:
+                print(f"由於 Val NDCG 連續 {patience} 個 epochs 沒有改善，在 epoch {epoch} 提前停止。")
+                break
+        
+        print("完成模擬後訓練。")
+    
