@@ -24,7 +24,7 @@ class RLAgent:
     def store(self, state, action, reward, next_state, graph_prev, graph_next, done):
         self.n_step_buffer.append((state, action, reward, next_state, graph_prev, graph_next, done))
         # 湊滿 n 步才寫進 buffer
-        if len(self.n_step_buffer) > self.n_step:
+        if len(self.n_step_buffer) >= self.n_step:
             s_k_n, a_k_n, _, _, G_k_n, _, _ = self.n_step_buffer[0]
             R = 0
             gamma = 1
