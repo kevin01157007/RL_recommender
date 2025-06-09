@@ -50,13 +50,21 @@ full_edge_index  = build_edge_index(train_inter + val_inter + test_inter, num_us
 # ────────────────────────────────────────────────────────────────────────────────
 
 # Pre‑compute user → positive‑item list for O(1) sampling later
-user_pos_dict = defaultdict(list)
+train_user_pos_dict = defaultdict(list)
 for u, i in train_inter:
-    user_pos_dict[u].append(i)
+    train_user_pos_dict[u].append(i)
+
+val_user_pos_dict = defaultdict(list)
+for u, i in val_inter:
+    val_user_pos_dict[u].append(i)
+
+test_user_pos_dict = defaultdict(list)
+for u, i in test_inter:
+    test_user_pos_dict[u].append(i)
 
 all_items_set = set(range(num_items))
 
-def sample_mini_batch(batch_size):
+def sample_mini_batch(batch_size, user_pos_dict):
     """Uniformly sample *users*, then one positive & one negative item each."""
     users, pos_items, neg_items = [], [], []
     for _ in range(batch_size):
@@ -216,11 +224,13 @@ full_edge_index  = full_edge_index.to(device)
 loss_hist, val_loss_hist = [], []
 val_prec_hist, val_rec_hist, val_ndcg_hist = [], [], []
 
-patience = 10
-best_metric = -1
+patience = 20
+best_val_loss = float('inf')
 patience_counter = 0
 
 steps_per_epoch = int(np.ceil(len(train_inter) / batch_size))  # heuristic
+val_steps_per_epoch = int(np.ceil(len(val_inter) / batch_size))  # heuristic
+test_steps_per_epoch = int(np.ceil(len(test_inter) / batch_size))  # heuristic
 
 for epoch in range(1, num_epochs + 1):
     model.train()
@@ -228,7 +238,7 @@ for epoch in range(1, num_epochs + 1):
     total_loss = 0.0
 
     for _ in range(steps_per_epoch):
-        u, p, n = sample_mini_batch(batch_size)
+        u, p, n = sample_mini_batch(batch_size, train_user_pos_dict)
         u, p, n = u.to(device), p.to(device), n.to(device)
         opt.zero_grad()
         loss, _, _ = bpr_loss(model, u, p, n, train_edge_index)
@@ -240,15 +250,18 @@ for epoch in range(1, num_epochs + 1):
     loss_hist.append(avg_train_loss)
 
     # ─── Validation ────────────────────────────────────────────────────────────
-    val_loss = compute_bpr_loss_dataset(
-        model,
-        val_inter,
-        val_edge_index,  # propagation graph = train ∪ val
-        exclude_pairs=None,
-    )
-    val_loss_hist.append(val_loss)
-
     model.eval()
+    for _ in range(val_steps_per_epoch):
+        u, p, n = sample_mini_batch(batch_size, val_user_pos_dict)
+        u, p, n = u.to(device), p.to(device), n.to(device)
+        with torch.no_grad():
+            loss, _, _ = bpr_loss(model, u, p, n, train_edge_index)
+        total_loss += loss.item() * u.size(0)
+
+    avg_val_loss = total_loss / (val_steps_per_epoch * batch_size)
+    val_loss_hist.append(avg_val_loss)
+
+    
     with torch.no_grad():
         prec, rec, ndcg = precision_recall_ndcg_at_k(
             model, val_edge_index, val_inter, train_inter, K
@@ -259,15 +272,15 @@ for epoch in range(1, num_epochs + 1):
 
     print(
         f"Epoch {epoch:02d} | {time.time() - t0:.1f}s | TrainLoss {avg_train_loss:.4f} | "
-        f"ValLoss {val_loss:.4f} | P@{K} {prec:.4f} R@{K} {rec:.4f} NDCG@{K} {ndcg:.4f}"
+        f"ValLoss {avg_val_loss:.4f} | P@{K} {prec:.4f} R@{K} {rec:.4f} NDCG@{K} {ndcg:.4f}"
     )
 
     # Early stopping -----------------------------------------------------------
-    current_metric = ndcg
-    if current_metric > best_metric:
-        best_metric = current_metric
-        best_model_state = model.state_dict()
+    # Early stopping logic
+    if avg_val_loss < best_val_loss:
+        best_val_loss = avg_val_loss
         patience_counter = 0
+        best_model_state = model.state_dict()  # Save best model
     else:
         patience_counter += 1
         if patience_counter >= patience:
@@ -279,19 +292,21 @@ for epoch in range(1, num_epochs + 1):
 # ────────────────────────────────────────────────────────────────────────────────
 model.load_state_dict(best_model_state)
 model.eval()
+for _ in range(test_steps_per_epoch):
+    u, p, n = sample_mini_batch(batch_size, test_user_pos_dict)
+    u, p, n = u.to(device), p.to(device), n.to(device)
+    with torch.no_grad():
+        loss, _, _ = bpr_loss(model, u, p, n, train_edge_index)
+    total_loss += loss.item() * u.size(0)
+
+avg_test_loss = total_loss / (test_steps_per_epoch * batch_size)
 with torch.no_grad():
     prec_test, rec_test, ndcg_test = precision_recall_ndcg_at_k(
-        model, full_edge_index, test_inter, train_inter + val_inter, K
-    )
-    test_loss = compute_bpr_loss_dataset(
-        model,
-        test_inter,
-        full_edge_index,
-        exclude_pairs=None,
+        model, full_edge_index, test_inter, train_inter+val_inter, K
     )
 print(
     f"\nFinal Test | P@{K} {prec_test:.4f} | R@{K} {rec_test:.4f} | "
-    f"NDCG@{K} {ndcg_test:.4f} | BPR Loss {test_loss:.4f}"
+    f"NDCG@{K} {ndcg_test:.4f} | BPR Loss {avg_test_loss:.4f}"
 )
 
 # ────────────────────────────────────────────────────────────────────────────────
