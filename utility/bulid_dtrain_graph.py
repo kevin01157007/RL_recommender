@@ -13,16 +13,16 @@ def build_dtrain_graph(inter):
     items = sorted(set(pair[1] for pair in inter))  # 獲取所有唯一的項目ID
 
     # 添加用戶節點
-    for user in users:
-        B.add_node(user, bipartite=0)
+    for uid in users:
+        B.add_node(f"u{uid}", bipartite=0)
 
     # 添加項目節點
-    for item in items:
-        B.add_node(item + len(users), bipartite=1)
+    for mid in items:
+        B.add_node(f"m{mid}", bipartite=1)
 
     # 添加邊 (使用者和項目之間的關係)
     for user, item in inter:
-        B.add_edge(user, item + len(users))  # 修正：使用偏移後的項目ID
+        B.add_edge(f"u{user}",  f"u{item}")  # 修正：使用偏移後的項目ID
 
     end_time = time.time()
     print(f"圖建立完成。耗時: {end_time - start_time:.2f} 秒")

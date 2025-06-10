@@ -1,8 +1,10 @@
 import numpy as np
 import networkx as nx
+import torch
 from sklearn.metrics.pairwise import cosine_similarity
 import community.community_louvain as community_louvain
 from collections import defaultdict
+from utility.build_nx_graph import build_nx_graph
 
 def calculate_ILS(item_emb, rec_item_set):
     """
@@ -78,9 +80,9 @@ def heuristic_exposure_strategy(user_item_graph, rec_item_set, item_emb,
         elif node in items:
             community_items[community_id].append(node)
     
-    # 過濾掉沒有用戶或項目的社群
+    # 過濾掉少於3個user或3個item的社群
     valid_communities = [comm_id for comm_id in set(communities.values())
-                        if len(community_users[comm_id]) > 0 and len(community_items[comm_id]) > 0]
+                        if len(community_users[comm_id]) > 2 and len(community_items[comm_id]) > 2]
     print("\nTop 社群資訊（前10）:")
     from collections import Counter
     comm_sizes = Counter(communities.values())
@@ -115,7 +117,8 @@ def heuristic_exposure_strategy(user_item_graph, rec_item_set, item_emb,
         # 計算社群中每個用戶的交互項目集合的多樣性得分(ILS)
         user_diversity_scores = {}
         for user in community_users[source_idx]:
-            user_items = rec_item_set[user]
+            user = ''.join(filter(str.isdigit, user))
+            user_items = rec_item_set[int(user)]
             if len(user_items) > 1:
                 user_diversity_scores[user] = calculate_ILS(item_emb, user_items)
         
@@ -129,7 +132,7 @@ def heuristic_exposure_strategy(user_item_graph, rec_item_set, item_emb,
 
         # 為每個多樣化用戶選擇歷史交互項目
         for user in diverse_users:
-            user_items = list(user_item_graph.neighbors(user))
+            user_items = list(user_item_graph.neighbors(f"u{user}"))
             
             if len(user_items) == 0:
                 continue
@@ -139,15 +142,15 @@ def heuristic_exposure_strategy(user_item_graph, rec_item_set, item_emb,
                                             size=min(n_items_per_user, len(user_items)), 
                                             replace=False)
             for item_node_id in selected_items:
-                item_node_id = item_node_id - len(users)  # 減去user長度
-                all_selected_items.append((user, item_node_id))  
+                item_node_id = ''.join(filter(str.isdigit, item_node_id))
+                all_selected_items.append((int(user), int(item_node_id)))  
 
     print(f"已生成 {len(all_selected_items)} 條曝光邊")
     return all_selected_items
-# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-# user_embeddings = torch.load("user_emb.pt", map_location=device, weights_only=True)
-# item_embeddings = torch.load("item_emb.pt", map_location=device, weights_only=True)
-# rec_item_set = [np.random.choice(range(item_embeddings.shape[0]), size=20, replace=False).tolist() for user in range(user_embeddings.shape[0])]
-# user_item_graph = build_nx_graph()
-# s = heuristic_exposure_strategy(user_item_graph, rec_item_set, item_embeddings)
-# print(s)
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+user_embeddings = torch.load("model/simulator/user_emb.pt", map_location=device, weights_only=True)
+item_embeddings = torch.load("model/simulator/item_emb.pt", map_location=device, weights_only=True)
+rec_item_set = [np.random.choice(range(item_embeddings.shape[0]), size=20, replace=False).tolist() for user in range(user_embeddings.shape[0])]
+user_item_graph = build_nx_graph()
+s = heuristic_exposure_strategy(user_item_graph, rec_item_set, item_embeddings)
+print(s)

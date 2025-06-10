@@ -7,15 +7,12 @@ import numpy as np
 # --- 1. 載入資料 ---
 # 設定 MovieLens 1M 資料集的路徑 (請修改成你的實際路徑)
 
-ratings_file = "data_split/train.dat"
+ratings_file = "data/train.dat"
 
-# 讀取 ratings.dat，注意分隔符是 '::'
-# 使用者ID::電影ID::評分::時間戳
 try:
     ratings = pd.read_csv(ratings_file,
                         sep=',',
-                        engine='python', # 需要 python engine 來處理 '::'
-                        #   header=None,
+                        engine='python',
                         names=['UserID', 'MovieID', 'Rating', 'Timestamp'],
                         encoding='ISO-8859-1') # 有些檔案可能需要指定編碼
 except FileNotFoundError:
@@ -33,35 +30,20 @@ start_time = time.time()
 
 B = nx.Graph()
 
-uid_map = {old: new for new, old in enumerate(sorted(ratings.UserID.unique()))}
-mid_map = {old: new for new, old in enumerate(sorted(ratings.MovieID.unique()))}
-
-
-ratings['UserID'] = ratings.UserID.map(uid_map)
-ratings['MovieID'] = ratings.MovieID.map(mid_map)
-
 # 添加節點，並標記節點類型 (bipartite=0 for users, bipartite=1 for movies)
 users = sorted(ratings['UserID'].unique())
 movies = sorted(ratings['MovieID'].unique())
 # print(movies)
 # # print(users)
 # print(movies)
-# 添加用戶節點
-for i in range(len(users)):
-    B.add_node(i, bipartite=0)
+for uid in users:
+    B.add_node(f"u{uid}", bipartite=0)
 
-# 添加項目節點
-for i in range(len(users),len(users)+len(movies)):
-    B.add_node(i, bipartite=1)
+for mid in movies:
+    B.add_node(f"m{mid}", bipartite=1)
 
-# 添加邊 (使用者和電影之間的評分代表一條邊)
-# 我們這裡不考慮評分值作為權重，僅代表有互動
-movie_offset = len(users)
-movie_id_map = {m: movie_offset + idx for idx, m in enumerate(movies)}
-# print(movie_id_map)
 
-edges = [(row['UserID'],
-        movie_id_map[row['MovieID']])
+edges = [(f"u{row['UserID']}", f"m{row['MovieID']}")
         for _, row in ratings.iterrows()]
 # print(edges[:10])
 B.add_edges_from(edges)
@@ -76,34 +58,10 @@ start_time = time.time()
 if nx.is_connected(B):
     print("圖是連通的。")
     graph_to_process = B
-else:
-    print("圖不是連通的。將在最大的連通元件上執行 Louvain。")
-    # 找到最大的連通元件
-    largest_cc = max(nx.connected_components(B), key=len)
-    graph_to_process = B.subgraph(largest_cc).copy() # 使用子圖
-    # 找出所有節點
-    all_nodes = set(B.nodes())
-
-    # 找出最大連通元件的節點
-    largest_cc_nodes = set(largest_cc)
-
-    # 取差集：這些是沒有被包含進最大連通元件的節點
-    excluded_nodes = all_nodes - largest_cc_nodes
-
-    print(f"\n不在最大連通元件中的節點數量：{len(excluded_nodes)}")
-    print("其中前 10 個節點為：")
-    print(list(excluded_nodes)[:10])
-    print("\n前 10 個被排除節點的類型：")
-    for node in list(excluded_nodes)[:10]:
-        node_type = B.nodes[node].get('bipartite')
-        type_str = "User" if node_type == 0 else "Movie"
-        print(f"節點 {node} 類型: {type_str}")
-    print(f"最大連通元件包含 {graph_to_process.number_of_nodes()} 個節點 和 {graph_to_process.number_of_edges()} 條邊。")
-
 # 使用 best_partition 找到最佳的社群劃分
 # 注意：python-louvain 的 best_partition 會將圖視為 unipartite 進行處理
 # 它會回傳一個字典 {node: community_id}
-partition = community_louvain.best_partition(graph_to_process, resolution=2, random_state=42)
+partition = community_louvain.best_partition(graph_to_process, resolution=1.25, random_state=42)
 
 end_time = time.time()
 print(f"Louvain 執行完成。耗時: {end_time - start_time:.2f} 秒")
@@ -139,7 +97,7 @@ for node, comm_id in partition.items():
 
 print("\n社群大小分佈 (Top 10):")
 sorted_sizes = sorted(community_sizes.items(), key=lambda item: item[1], reverse=True)
-for i, (comm_id, size) in enumerate(sorted_sizes[:10]):
+for i, (comm_id, size) in enumerate(sorted_sizes):
      users_in_comm = community_users.get(comm_id, 0)
      movies_in_comm = community_movies.get(comm_id, 0)
      print(f"  社群 {comm_id}: 大小={size}, 使用者={users_in_comm}, 電影={movies_in_comm}")
