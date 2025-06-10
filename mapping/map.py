@@ -13,13 +13,13 @@ EMB_DIM = USER_EMB.size(1)
 NUM_USERS = USER_EMB.shape[0]
 NUM_ITEMS = ITEM_EMB.shape[0]
 # 讀取資料
-train_df = pd.read_csv('data_split/train.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'])
+train_df = pd.read_csv('data/train.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'])
 movies = pd.read_csv('raw/ml-1m/movies.dat', sep='::', names=['movie_id', 'title', 'genres'], engine='python', encoding='latin-1')
 users   = pd.read_csv('raw/ml-1m/users.dat',  sep='::', names=['user_id', 'gender', 'age', 'occupation', 'zip'], engine='python', encoding='latin-1')
 # 讀取映射關係
-with open('data_split/uid_map.pkl', 'rb') as f:
+with open('mapping/uid_map.pkl', 'rb') as f:
     uid_map = pickle.load(f)
-with open('data_split/mid_map.pkl', 'rb') as f:
+with open('mapping/mid_map.pkl', 'rb') as f:
     mid_map = pickle.load(f)
 
 # 創建反向映射（從新ID到舊ID）
@@ -56,7 +56,7 @@ def convert_recommendations_to_original_ids(userid):
     # 使用之前載入的 reverse_mid_map 進行轉換
     with torch.no_grad():
         score = USER_EMB[userid] @ ITEM_EMB.t()
-        TOP_K = 10
+        TOP_K = 20
         _, topk_idx = torch.topk(score, TOP_K)
         recommendations = topk_idx.cpu().tolist()
     original_ids = [reverse_mid_map[item_id] for item_id in recommendations]

@@ -13,9 +13,9 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 # 1. Load ratings / movies / users (MovieLens‑1M)
 #   (unchanged – assumes the same three *.dat files already pre‑splitted)
 # ────────────────────────────────────────────────────────────────────────────────
-ratings_train = pd.read_csv('../../data/train.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
-ratings_val   = pd.read_csv('../../data/val.dat',   sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'],  engine='python', encoding='latin-1')
-ratings_test  = pd.read_csv('../../data/test.dat',  sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'],  engine='python', encoding='latin-1')
+ratings_train = pd.read_csv('data/train.dat', sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'], engine='python', encoding='latin-1')
+ratings_val   = pd.read_csv('data/val.dat',   sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'],  engine='python', encoding='latin-1')
+ratings_test  = pd.read_csv('data/test.dat',  sep=',', names=['user_id', 'movie_id', 'rating', 'timestamp'],  engine='python', encoding='latin-1')
 
 num_users, num_items = 5950, 3191  # make sure these match the real max‑id + 1
 print(f"Users: {num_users}, Items: {num_items}")
@@ -62,9 +62,13 @@ test_user_pos_dict = defaultdict(list)
 for u, i in test_inter:
     test_user_pos_dict[u].append(i)
 
+val_train_user_pos_dict = defaultdict(list)
+for u, i in val_inter + train_inter:
+    val_train_user_pos_dict[u].append(i)
+
 all_items_set = set(range(num_items))
 
-def sample_mini_batch(batch_size, user_pos_dict):
+def sample_mini_batch(batch_size, user_pos_dict, exclude_user_pos_dict=None):
     """Uniformly sample *users*, then one positive & one negative item each."""
     users, pos_items, neg_items = [], [], []
     for _ in range(batch_size):
@@ -74,7 +78,7 @@ def sample_mini_batch(batch_size, user_pos_dict):
         # sample negative not in pos set
         while True:
             n = random.randrange(num_items)
-            if n not in user_pos_dict[u]:
+            if n not in user_pos_dict[u] and (exclude_user_pos_dict is None or n not in exclude_user_pos_dict[u]):
                 break
         users.append(u)
         pos_items.append(p)
@@ -224,8 +228,8 @@ full_edge_index  = full_edge_index.to(device)
 loss_hist, val_loss_hist = [], []
 val_prec_hist, val_rec_hist, val_ndcg_hist = [], [], []
 
-patience = 20
-best_val_loss = float('inf')
+patience = 40
+best_precision = 0
 patience_counter = 0
 
 steps_per_epoch = int(np.ceil(len(train_inter) / batch_size))  # heuristic
@@ -235,7 +239,10 @@ test_steps_per_epoch = int(np.ceil(len(test_inter) / batch_size))  # heuristic
 for epoch in range(1, num_epochs + 1):
     model.train()
     t0 = time.time()
-    total_loss = 0.0
+
+    total_train_loss = 0.0
+    total_val_loss = 0.0
+    total_test_loss = 0.0
 
     for _ in range(steps_per_epoch):
         u, p, n = sample_mini_batch(batch_size, train_user_pos_dict)
@@ -244,21 +251,21 @@ for epoch in range(1, num_epochs + 1):
         loss, _, _ = bpr_loss(model, u, p, n, train_edge_index)
         loss.backward()
         opt.step()
-        total_loss += loss.item() * u.size(0)
+        total_train_loss += loss.item() * u.size(0)
 
-    avg_train_loss = total_loss / (steps_per_epoch * batch_size)
+    avg_train_loss = total_train_loss / (steps_per_epoch * batch_size)
     loss_hist.append(avg_train_loss)
 
     # ─── Validation ────────────────────────────────────────────────────────────
     model.eval()
     for _ in range(val_steps_per_epoch):
-        u, p, n = sample_mini_batch(batch_size, val_user_pos_dict)
+        u, p, n = sample_mini_batch(batch_size, val_user_pos_dict, train_user_pos_dict)
         u, p, n = u.to(device), p.to(device), n.to(device)
         with torch.no_grad():
             loss, _, _ = bpr_loss(model, u, p, n, train_edge_index)
-        total_loss += loss.item() * u.size(0)
+        total_val_loss += loss.item() * u.size(0)
 
-    avg_val_loss = total_loss / (val_steps_per_epoch * batch_size)
+    avg_val_loss = total_val_loss / (val_steps_per_epoch * batch_size)
     val_loss_hist.append(avg_val_loss)
 
     
@@ -277,8 +284,8 @@ for epoch in range(1, num_epochs + 1):
 
     # Early stopping -----------------------------------------------------------
     # Early stopping logic
-    if avg_val_loss < best_val_loss:
-        best_val_loss = avg_val_loss
+    if prec > best_precision:
+        best_precision = prec
         patience_counter = 0
         best_model_state = model.state_dict()  # Save best model
     else:
@@ -293,13 +300,13 @@ for epoch in range(1, num_epochs + 1):
 model.load_state_dict(best_model_state)
 model.eval()
 for _ in range(test_steps_per_epoch):
-    u, p, n = sample_mini_batch(batch_size, test_user_pos_dict)
+    u, p, n = sample_mini_batch(batch_size, test_user_pos_dict, val_train_user_pos_dict)
     u, p, n = u.to(device), p.to(device), n.to(device)
     with torch.no_grad():
         loss, _, _ = bpr_loss(model, u, p, n, train_edge_index)
-    total_loss += loss.item() * u.size(0)
+    total_test_loss += loss.item() * u.size(0)
 
-avg_test_loss = total_loss / (test_steps_per_epoch * batch_size)
+avg_test_loss = total_test_loss / (test_steps_per_epoch * batch_size)
 with torch.no_grad():
     prec_test, rec_test, ndcg_test = precision_recall_ndcg_at_k(
         model, full_edge_index, test_inter, train_inter+val_inter, K
@@ -314,8 +321,8 @@ print(
 # ────────────────────────────────────────────────────────────────────────────────
 user_emb, item_emb = model.get_user_item(full_edge_index)
 # torch.save(model.state_dict(), "lightgcn_ml1m_fixed.pth")
-# torch.save(user_emb.cpu(), "user_emb.pt")
-# torch.save(item_emb.cpu(), "item_emb.pt")
+torch.save(user_emb.cpu(), "model/simulaor/user_emb.pt")
+torch.save(item_emb.cpu(), "model/simulaor/item_emb.pt")
 
 # Curves
 epochs_r = list(range(1, len(loss_hist) + 1))
