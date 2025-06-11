@@ -136,7 +136,7 @@ def train_val(model, num_items, num_epochs, batch_size, device, opt, train_inter
         
         with torch.no_grad():
             prec, rec, ndcg = precision_recall_ndcg_at_k(
-                model, val_edge_index, val_inter, train_inter, K
+                model, train_edge_index, val_inter, train_inter, K
             )
         val_prec_hist.append(prec)
         val_rec_hist.append(rec)
@@ -146,7 +146,7 @@ def train_val(model, num_items, num_epochs, batch_size, device, opt, train_inter
             f"Epoch {epoch:02d} | {time.time() - t0:.1f}s | TrainLoss {avg_train_loss:.4f} | "
             f"ValLoss {avg_val_loss:.4f} | P@{K} {prec:.4f} R@{K} {rec:.4f} NDCG@{K} {ndcg:.4f}"
         )
-
+        best_model_state = model.state_dict()
         # Early stopping -----------------------------------------------------------
         # Early stopping logic
         if prec > best_precision:
@@ -161,7 +161,9 @@ def train_val(model, num_items, num_epochs, batch_size, device, opt, train_inter
     model.load_state_dict(best_model_state)
 
 def test(model, num_items, batch_size, device, train_inter, val_inter, test_inter, train_edge_index, full_edge_index, K):
-    test_steps_per_epoch = int(np.ceil(len(test_inter) / batch_size))  # heuristic
+    test_steps_per_epoch = int(np.ceil(len(test_inter) / batch_size))  # heuristic 
+    total_test_loss = 0
+
     val_user_pos_dict = defaultdict(list)
     for u, i in val_inter:
         val_user_pos_dict[u].append(i)
@@ -183,7 +185,7 @@ def test(model, num_items, batch_size, device, train_inter, val_inter, test_inte
     avg_test_loss = total_test_loss / (test_steps_per_epoch * batch_size)
     with torch.no_grad():
         prec_test, rec_test, ndcg_test = precision_recall_ndcg_at_k(
-            model, full_edge_index, test_inter, train_inter+val_inter, K
+            model, train_edge_index, test_inter, train_inter+val_inter, K
         )
     print(
         f"\nFinal Test | P@{K} {prec_test:.4f} | R@{K} {rec_test:.4f} | "

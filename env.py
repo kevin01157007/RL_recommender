@@ -4,6 +4,7 @@ from utility.utilis import build_edge_index, train_val, test
 import community.community_louvain as community_louvain
 from utility.bulid_dtrain_graph import build_dtrain_graph
 import time
+import random
 
 class RecSimEnv:
     def __init__(self,
@@ -13,8 +14,6 @@ class RecSimEnv:
                  rec_model,
                  sim,
                  device="cuda",
-                 val_data=None,  # 新增：用於微調期間的驗證數據
-                 test_data=None, # 用於微調後的最終測試
                  k_eval=20):      # 為評估一致性新增 k_eval
         self.device   = torch.device(device)
         self.n_user   = n_user
@@ -40,45 +39,51 @@ class RecSimEnv:
         for t in range(n_round):
             print(f"===== Time step{t} =====")
             current_round_interactions = [] # 當前timestep收集的互動
-            for u in range(self.n_user):
-                # 1) 取得 Top-k 推薦
-                rec_items = self.rec_model.recommend(u, k=k_rec, exclude=seen[u]) # rec_items 是 I_i^t
-               
-                # rec_items  推薦的 item_ids
-                for item_id_recommended in rec_items: # 直接遍歷 RS 推薦的物品
-                    simulator_score = self.sim.score(u, item_id_recommended).item()
-                    if simulator_score > 0.7:   
-                        current_round_interactions.append((u, item_id_recommended))
-                        seen[u].add(item_id_recommended) # 用戶喜歡過的物品
-            dtrain_new_interactions.extend(current_round_interactions)
-
+            while len(current_round_interactions) < 10000:
+                for u in range(self.n_user):
+                    # 1) 取得 Top-k 推薦
+                    if t < 2:
+                        rec_items = list(set(range(self.n_item)) - seen[u])
+                        rec_items = random.sample(rec_items, k_rec)
+                    else:
+                        rec_items = self.rec_model.recommend(u, k=k_rec, exclude=seen[u]) # rec_items 是 I_i^t
+                
+                    # rec_items  推薦的 item_ids
+                    for item_id_recommended in rec_items: # 直接遍歷 RS 推薦的物品
+                        simulator_score = self.sim.score(u, item_id_recommended).item()
+                        if simulator_score > 0.85:   
+                            current_round_interactions.append((u, item_id_recommended))
+                            seen[u].add(item_id_recommended) # 用戶喜歡過的物品
+                print(len(current_round_interactions))
+                if (t < 1 and len(current_round_interactions) > 6000)  or t > 1: 
+                    break
+        
             #t = 0先不訓練，收集dtest、dval
-            if t == 0:
-                dtest = current_round_interactions[:len(current_round_interactions)]
-                dval = current_round_interactions[len(current_round_interactions):]
-                current_round_interactions = []
-                dtrain_new_interactions = []
-                        
-            if current_round_interactions: 
+            if t <= 0:
+                n = int(len(current_round_interactions)/2)
+                random.shuffle(current_round_interactions)
+                dtest = current_round_interactions[:n]
+                pd.DataFrame(dtest, columns=['u','i']).to_csv("dtest.csv", index=False)
+                dval = current_round_interactions[n:]
+                pd.DataFrame(dval, columns=['u','i']).to_csv("dval.csv", index=False)
+            else:
+                dtrain_new_interactions.extend(current_round_interactions)
                 delta_edge_index = build_edge_index(current_round_interactions, self.n_user).to(self.device)
                 if delta_edge_index.numel() > 0:
                     self.edge_index = torch.cat([self.edge_index, delta_edge_index], dim=1)
                     self.edge_index = torch.unique(self.edge_index, dim=1)
-
-            if t > 0:
                 dtrain_graph = build_dtrain_graph(dtrain_new_interactions)
                 communities = community_louvain.best_partition(dtrain_graph, resolution=2, random_state=42)
                 print(f"總社群數量: {len(set(communities.values()))}")
-
-
             # --- 每輪結束後進行訓練 ---
-            if dtrain_new_interactions: 
-                current_num_epochs = 10 + t * 10
+            
+                current_num_epochs = 20 + t * 10
                 print(f"\n--- 第 {t} 輪後進行訓練，使用目前累積的 {len(dtrain_new_interactions)} 筆真實互動，訓練 {current_num_epochs} 個 epochs ---")
                 self.train_model_on_collected_data(
                     training_interactions=dtrain_new_interactions,
-                    val_interactions=self.val_data,
-                    k_eval=self.k_eval,
+                    val_interactions=dval,
+                    batch_size = 32,
+                    k_eval=10,
                     num_epochs=current_num_epochs
                 )
     
@@ -88,7 +93,7 @@ class RecSimEnv:
         
         # --- 最終測試評估 ---
         print(f"\n===== {n_round} 輪模擬結束後，於測試集上進行最終評估 =====")
-        print(f"將使用初始測試集中的 {len(self.test_data)} 筆互動進行最終評估...")
+        print(f"將使用初始測試集中的 {len(dtest)} 筆互動進行最終評估...")
 
         full_edge_index  = build_edge_index(dtrain_new_interactions + dval + dtest, self.n_user).to(self.device)
 
@@ -96,11 +101,11 @@ class RecSimEnv:
         model_to_evaluate.eval()
         test(model_to_evaluate, 
              num_items = self.n_item,
-             batch_size = 512, 
+             batch_size = 128, 
              device = self.device, 
              train_inter = dtrain_new_interactions, val_inter = dval, test_inter = dtest, 
              train_edge_index = self.edge_index, full_edge_index = full_edge_index, 
-             K = self.k_eval)
+             K = 10)
             
     def train_model_on_collected_data(self,
                                    training_interactions, # (u,i) 元組列表

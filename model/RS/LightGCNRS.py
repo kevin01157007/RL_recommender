@@ -1,6 +1,4 @@
 import torch
-from torch import Tensor
-from typing import List, Dict
 from ..LightGCN.LightGCN import LightGCN
 
 class LightGCNRS:

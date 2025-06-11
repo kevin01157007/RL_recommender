@@ -18,3 +18,7 @@ import random
 # e = torch.cat([b,c],dim=1)
 # e = torch.unique(e, dim = 1)
 # print(e)
+
+d = [(7,8),(8,9),(9,10),(7,12)]
+random.shuffle(d) 
+print(d[0])

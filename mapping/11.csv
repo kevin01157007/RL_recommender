@@ -1,134 +1,20 @@
 ,Movie ID,Title,Genres,Rating,Timestamp
-0,1210,Star Wars: Episode VI - Return of the Jedi (1983),Action|Adventure|Romance|Sci-Fi|War,5,974672326
-1,1954,Rocky (1976),Action|Drama,5,974672363
-2,2959,Fight Club (1999),Drama,4,974673308
-3,2599,Election (1999),Comedy,4,974673406
-4,2571,"Matrix, The (1999)",Action|Sci-Fi|Thriller,5,974673480
-5,1921,Pi (1998),Sci-Fi|Thriller,4,974673708
-6,1370,Die Hard 2 (1990),Action|Thriller,4,974673839
-7,1036,Die Hard (1988),Action|Thriller,5,974673839
-8,1,Toy Story (1995),Animation|Children's|Comedy,4,974674055
-9,3052,Dogma (1999),Comedy,5,974674233
-10,223,Clerks (1994),Comedy,4,974674233
-11,1249,Nikita (La Femme Nikita) (1990),Thriller,4,974674290
-12,1267,"Manchurian Candidate, The (1962)",Film-Noir|Thriller,5,974674290
-13,593,"Silence of the Lambs, The (1991)",Drama|Thriller,5,974674290
-14,1617,L.A. Confidential (1997),Crime|Film-Noir|Mystery|Thriller,4,974674290
-15,2762,"Sixth Sense, The (1999)",Thriller,5,974674290
-16,50,"Usual Suspects, The (1995)",Crime|Thriller,5,974674290
-17,457,"Fugitive, The (1993)",Action|Thriller,5,974674339
-18,1240,"Terminator, The (1984)",Action|Sci-Fi|Thriller,4,974674339
-19,589,Terminator 2: Judgment Day (1991),Action|Sci-Fi|Thriller,4,974674416
-20,1994,Poltergeist (1982),Horror|Thriller,4,974674416
-21,1219,Psycho (1960),Horror|Thriller,4,974674416
-22,1089,Reservoir Dogs (1992),Crime|Thriller,4,974674416
-23,47,Seven (Se7en) (1995),Crime|Thriller,5,974674458
-24,733,"Rock, The (1996)",Action|Adventure|Thriller,5,974674532
-25,3203,Dead Calm (1989),Thriller,4,974674642
-26,1625,"Game, The (1997)",Mystery|Thriller,4,974674642
-27,3256,Patriot Games (1992),Action|Thriller,5,974674642
-28,1653,Gattaca (1997),Drama|Sci-Fi|Thriller,4,974674700
-29,2288,"Thing, The (1982)",Action|Horror|Sci-Fi|Thriller,5,974674723
-30,377,Speed (1994),Action|Romance|Thriller,5,974674723
-31,1610,"Hunt for Red October, The (1990)",Action|Thriller,5,974674799
-32,349,Clear and Present Danger (1994),Action|Adventure|Thriller,4,974674799
-33,2273,Rush Hour (1998),Action|Thriller,5,974674880
-34,474,In the Line of Fire (1993),Action|Thriller,5,974674880
-35,490,Malice (1993),Thriller,4,974674880
-36,1748,Dark City (1998),Film-Noir|Sci-Fi|Thriller,4,974674880
-37,2542,"Lock, Stock & Two Smoking Barrels (1998)",Comedy|Crime|Thriller,4,974675210
-38,6,Heat (1995),Action|Crime|Thriller,4,974675225
-39,1805,Wild Things (1998),Crime|Drama|Mystery|Thriller,4,974675270
-40,2844,"Minus Man, The (1999)",Drama|Mystery,4,974675301
-41,3555,U-571 (2000),Action|Thriller,4,974735169
-42,2804,"Christmas Story, A (1983)",Comedy|Drama,5,974736324
-43,480,Jurassic Park (1993),Action|Adventure|Sci-Fi,4,974740442
-44,1584,Contact (1997),Drama|Sci-Fi,5,974740442
-45,1676,Starship Troopers (1997),Action|Adventure|Sci-Fi|War,4,974740549
-46,2699,Arachnophobia (1990),Action|Comedy|Sci-Fi|Thriller,4,974740549
-47,1573,Face/Off (1997),Action|Sci-Fi|Thriller,4,974740549
-48,32,Twelve Monkeys (1995),Drama|Sci-Fi,4,974740549
-49,780,Independence Day (ID4) (1996),Action|Sci-Fi|War,4,974740871
-50,1527,"Fifth Element, The (1997)",Action|Sci-Fi,4,974741210
-51,2012,Back to the Future Part III (1990),Comedy|Sci-Fi|Western,4,974741210
-52,2600,eXistenZ (1999),Action|Sci-Fi|Thriller,4,974742148
-53,2858,American Beauty (1999),Comedy|Drama,5,974742457
-54,2706,American Pie (1999),Comedy,4,974742457
-55,2710,"Blair Witch Project, The (1999)",Horror,4,974742753
-56,2355,"Bug's Life, A (1998)",Animation|Children's|Comedy,4,974742776
-57,2950,"Blue Lagoon, The (1980)",Adventure|Drama|Romance,4,975593443
-58,3578,Gladiator (2000),Action|Drama,4,976127695
-59,648,Mission: Impossible (1996),Action|Adventure|Mystery,4,976127949
-60,3755,"Perfect Storm, The (2000)",Action|Adventure|Thriller,4,976127968
-61,3911,Best in Show (2000),Comedy,4,976128110
-62,318,"Shawshank Redemption, The (1994)",Drama,5,976136592
-63,527,Schindler's List (1993),Drama|War,5,976136592
-64,110,Braveheart (1995),Action|Drama|War,4,976136628
-65,1912,Out of Sight (1998),Action|Crime|Romance,5,976136628
-66,2028,Saving Private Ryan (1998),Action|Drama|War,5,976136628
-67,296,Pulp Fiction (1994),Crime|Drama,5,976137759
-68,2329,American History X (1998),Drama,5,976137782
-69,1266,Unforgiven (1992),Western,5,976137831
-70,1704,Good Will Hunting (1997),Drama,5,976137831
-71,1393,Jerry Maguire (1996),Drama|Romance,5,976137887
-72,1784,As Good As It Gets (1997),Comedy|Drama,4,976138325
-73,1673,Boogie Nights (1997),Drama,5,976138358
-74,2396,Shakespeare in Love (1998),Comedy|Romance,5,976816358
-75,356,Forrest Gump (1994),Comedy|Romance|War,5,976816972
-76,2890,Three Kings (1999),Drama|War,5,976817099
-77,1196,Star Wars: Episode V - The Empire Strikes Back (1980),Action|Adventure|Drama|Sci-Fi|War,5,976817277
-78,1198,Raiders of the Lost Ark (1981),Action|Adventure,5,976817277
-79,1291,Indiana Jones and the Last Crusade (1989),Action|Adventure,5,976817345
-80,1231,"Right Stuff, The (1983)",Drama,4,976817345
-81,1197,"Princess Bride, The (1987)",Action|Adventure|Comedy|Romance,5,976817369
-82,2918,Ferris Bueller's Day Off (1986),Comedy,5,976817369
-83,260,Star Wars: Episode IV - A New Hope (1977),Action|Adventure|Fantasy|Sci-Fi,5,976817435
-84,1387,Jaws (1975),Action|Horror,5,976817482
-85,1230,Annie Hall (1977),Comedy|Romance,4,976817482
-86,3504,Network (1976),Comedy|Drama,4,976817503
-87,3471,Close Encounters of the Third Kind (1977),Drama|Sci-Fi,5,976817517
-88,750,Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963),Sci-Fi|War,5,976817586
-89,2300,"Producers, The (1968)",Comedy|Musical,4,976817639
-90,1250,"Bridge on the River Kwai, The (1957)",Drama|War,4,976817704
-91,1945,On the Waterfront (1954),Crime|Drama,4,976817704
-92,923,Citizen Kane (1941),Drama,4,976817742
-93,912,Casablanca (1942),Drama|Romance|War,5,976817758
-94,953,It's a Wonderful Life (1946),Drama,5,976817781
-95,924,2001: A Space Odyssey (1968),Drama|Mystery|Sci-Fi|Thriller,4,976817986
-96,1200,Aliens (1986),Action|Sci-Fi|Thriller|War,4,976817986
-97,1214,Alien (1979),Action|Horror|Sci-Fi|Thriller,5,976818010
-98,3267,"Mariachi, El (1992)",Action|Thriller,4,977510163
-99,3617,Road Trip (2000),Comedy,4,984406027
-100,3952,"Contender, The (2000)",Drama|Thriller,4,988049206
-101,3897,Almost Famous (2000),Comedy|Drama,4,988049206
-102,3624,Shanghai Noon (2000),Action,5,989147760
-103,587,Ghost (1990),Comedy|Romance|Thriller,4,991009619
-104,3317,Wonder Boys (2000),Comedy|Drama,4,992139014
-105,3827,Space Cowboys (2000),Action|Sci-Fi,4,992139179
-106,2671,Notting Hill (1999),Comedy|Romance,4,994192774
-107,1797,Everest (1998),Documentary,4,995771031
-108,1711,Midnight in the Garden of Good and Evil (1997),Comedy|Crime|Drama|Mystery,4,998224309
-109,2268,"Few Good Men, A (1992)",Crime|Drama,4,998747034
-110,2302,My Cousin Vinny (1992),Comedy,5,1000587620
-111,1923,There's Something About Mary (1998),Comedy,5,1000587620
-112,1500,Grosse Pointe Blank (1997),Comedy|Crime,4,1000587648
-113,2912,"Limey, The (1999)",Action|Crime|Drama,4,1000592178
-114,2916,Total Recall (1990),Action|Adventure|Sci-Fi|Thriller,4,1000592178
-115,368,Maverick (1994),Action|Comedy|Western,4,1000592178
-116,380,True Lies (1994),Action|Adventure|Comedy|Romance,4,1000592178
-117,1552,Con Air (1997),Action|Adventure|Thriller,5,1000592208
-118,3301,"Whole Nine Yards, The (2000)",Comedy|Crime,4,1000592257
-119,2628,Star Wars: Episode I - The Phantom Menace (1999),Action|Adventure|Fantasy|Sci-Fi,4,1000592417
-120,367,"Mask, The (1994)",Comedy|Crime|Fantasy,4,1000592417
-121,1639,Chasing Amy (1997),Drama|Romance,4,1000592500
-122,249,Immortal Beloved (1994),Drama|Romance,4,1000592500
-123,1270,Back to the Future (1985),Comedy|Sci-Fi,5,1001286384
-124,180,Mallrats (1995),Comedy,4,1001887186
-125,1721,Titanic (1997),Drama|Romance,5,1001887355
-126,595,Beauty and the Beast (1991),Animation|Children's|Musical,5,1001887475
-127,1569,My Best Friend's Wedding (1997),Comedy|Romance,4,1001888491
-128,2617,"Mummy, The (1999)",Action|Adventure|Horror|Thriller,4,1003352185
-129,2502,Office Space (1999),Comedy|Romance,4,1004890001
-130,1265,Groundhog Day (1993),Comedy|Romance,4,1008613193
-131,1285,Heathers (1989),Comedy,4,1010106246
-132,2067,Doctor Zhivago (1965),Drama|Romance|War,4,1012006271
+0,1834,"Spanish Prisoner, The (1997)",Drama|Thriller,4,977166262
+1,3448,"Good Morning, Vietnam (1987)",Comedy|Drama|War,4,977166262
+2,1230,Annie Hall (1977),Comedy|Romance,4,977166262
+3,527,Schindler's List (1993),Drama|War,5,977166292
+4,858,"Godfather, The (1972)",Action|Crime|Drama,4,977166323
+5,1073,Willy Wonka and the Chocolate Factory (1971),Adventure|Children's|Comedy|Fantasy,5,977166323
+6,2966,"Straight Story, The (1999)",Drama,4,977166419
+7,3578,Gladiator (2000),Action|Drama,4,977166458
+8,2791,Airplane! (1980),Comedy,4,977166458
+9,246,Hoop Dreams (1994),Documentary,4,977166938
+10,1649,"Fast, Cheap & Out of Control (1997)",Documentary,5,977166964
+11,162,Crumb (1994),Documentary,4,977166964
+12,2677,Buena Vista Social Club (1999),Documentary,5,977166964
+13,1111,Microcosmos (Microcosmos: Le peuple de l'herbe) (1996),Documentary,5,977166985
+14,206,Unzipped (1995),Documentary,4,977167038
+15,1797,Everest (1998),Documentary,4,977167038
+16,1179,"Grifters, The (1990)",Crime|Drama|Film-Noir,4,977167096
+17,1617,L.A. Confidential (1997),Crime|Film-Noir|Mystery|Thriller,4,977167096
+18,164,Devil in a Blue Dress (1995),Crime|Film-Noir|Mystery|Thriller,4,977167096
