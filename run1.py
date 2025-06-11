@@ -50,8 +50,6 @@ if __name__ == "__main__":
             rec_model=rec_model,
             sim=simulator,
             device=device,
-            val_data=val_inter,    
-            test_data=test_inter,  
             k_eval=k_eval_for_env      
         )
        

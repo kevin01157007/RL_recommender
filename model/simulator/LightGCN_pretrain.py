@@ -150,33 +150,6 @@ def bpr_loss(model, users, pos, neg, edge_index, lambda_reg=1e-4):
     ) / users.size(0)
 
     return loss_bpr + lambda_reg * reg, loss_bpr.detach(), reg.detach()
-
-
-# ────────────────────────────────────────────────────────────────────────────────
-# 7. Dataset‑level BPR loss (for val / test monitoring)
-# ────────────────────────────────────────────────────────────────────────────────
-
-def compute_bpr_loss_dataset(model, pairs, edge_index_prop, exclude_pairs=None):
-    model.eval()
-    # negative sampling using *only the evaluated pairs* to avoid label leakage
-    samples = []
-    user2pos_tmp = defaultdict(list)
-    for u, i in pairs:
-        user2pos_tmp[u].append(i)
-    for u, pos_list in user2pos_tmp.items():
-        for p in pos_list:
-            while True:
-                n = random.randrange(num_items)
-                if n not in user2pos_tmp[u] and (exclude_pairs is None or (u, n) not in exclude_pairs):
-                    break
-            samples.append((u, p, n))
-    samples = torch.tensor(samples, dtype=torch.long)
-    u, p, n = samples[:, 0], samples[:, 1], samples[:, 2]
-    with torch.no_grad():
-        loss, _, _ = bpr_loss(model, u.to(device), p.to(device), n.to(device), edge_index_prop)
-    return loss.item()
-
-
 # ────────────────────────────────────────────────────────────────────────────────
 # 8. Top‑K ranking metrics
 # ────────────────────────────────────────────────────────────────────────────────

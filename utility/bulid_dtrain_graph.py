@@ -22,7 +22,7 @@ def build_dtrain_graph(inter):
 
     # 添加邊 (使用者和項目之間的關係)
     for user, item in inter:
-        B.add_edge(f"u{user}",  f"u{item}")  # 修正：使用偏移後的項目ID
+        B.add_edge(f"u{user}",  f"m{item}")
 
     end_time = time.time()
     print(f"圖建立完成。耗時: {end_time - start_time:.2f} 秒")
