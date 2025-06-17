@@ -35,7 +35,7 @@ class RecSimEnv:
         self.k_eval = k_eval # 儲存 k_eval(TOPK)
 
 
-    def run(self, n_round, k_rec, gcn_retrain_every_n_rounds=1, gcn_simulation_retrain_epochs=100):
+    def run(self, n_round, k_rec, gcn_retrain_every_n_rounds=2, gcn_simulation_retrain_epochs=100):
         user_item_graph = build_nx_graph()
         agent = RLAgent(num_users=self.n_user, num_nodes=self.user_emb.shape[0] + self.item_emb.shape[0] + 1, emb_dim=self.user_emb.size(1),
                         device=self.device)
@@ -133,26 +133,6 @@ class RecSimEnv:
                         k_eval=10,
                         num_epochs=current_num_epochs
                     )
-
-                    print(f"\n--- Updating RL agent's Q-network embeddings with trained GCN embeddings ---")
-                    with torch.no_grad():
-                        # Get the raw (layer 0) embeddings from the trained LightGCN model
-                        trained_gcn_embeddings = self.rec_model.model.embedding.weight.data
-
-                        # Update user embeddings in Q-network
-                        agent.q_net.node_emb.weight.data[:self.n_user] = trained_gcn_embeddings[:self.n_user]
-
-                        # Update item embeddings in Q-network
-                        # Note: LightGCN stores embeddings as [users, items]
-                        # QNetwork stores them as [users, items, virtual_node]
-                        # Item embeddings in trained_gcn_embeddings start from self.n_user index
-                        agent.q_net.node_emb.weight.data[self.n_user:self.n_user+self.n_item] = \
-                            trained_gcn_embeddings[self.n_user:self.n_user+self.n_item]
-
-                        # Update the target network embeddings to match the Q-network
-                        agent.target_net.node_emb.weight.data.copy_(agent.q_net.node_emb.weight.data)
-                    print("--- RL agent's embeddings updated ---")
-
                     print() # 所有輪次處理完畢後換行
                     # --- 最終測試評估 ---
                     print(f"\n=====第 {t} 輪模擬結束後，於測試集上進行最終評估 =====")
