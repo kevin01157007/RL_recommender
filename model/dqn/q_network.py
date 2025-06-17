@@ -44,7 +44,7 @@ class QNetwork(nn.Module):
         # 前 gcn_layers 層
         for conv in self.convs:
             x = F.relu(conv(x, edge_index))
-            y = F.relu(conv(x, ei))
+        y = F.relu(conv(x, self._augment_edge_index(edge_index)))
         return x, y                             
 
     def forward(self, edge_index, u_idx, v_idx):

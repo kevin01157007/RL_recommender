@@ -1,0 +1,518 @@
+Using device: cuda
+Starting environment run...
+===== Time step0 =====
+收集val有幾個: 5950
+收集test有幾個: 5950
+===== Time step1 =====
+收集到幾個互動: 8107
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 0.02 秒
+節點數量: 7384 (Users: 5950, Items: 1434)
+邊數量: 8107
+圖不是連通的。將個別偵測社群
+總社群數量: 375
+
+--- 第 1 輪後進行訓練，使用目前累積的 8107 筆真實互動，訓練 100 個 epochs ---
+在 8107 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 100, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+Epoch 01 | 7.0s | TrainLoss 0.6922 | ValLoss 0.6931 | P@10 0.0008 R@10 0.0076 NDCG@10 0.0034
+Epoch 02 | 7.0s | TrainLoss 0.6920 | ValLoss 0.6931 | P@10 0.0008 R@10 0.0082 NDCG@10 0.0040
+Epoch 03 | 7.0s | TrainLoss 0.6919 | ValLoss 0.6931 | P@10 0.0009 R@10 0.0092 NDCG@10 0.0046
+Epoch 04 | 7.1s | TrainLoss 0.6917 | ValLoss 0.6931 | P@10 0.0010 R@10 0.0097 NDCG@10 0.0050
+Epoch 05 | 7.1s | TrainLoss 0.6916 | ValLoss 0.6931 | P@10 0.0011 R@10 0.0109 NDCG@10 0.0055
+Epoch 06 | 7.0s | TrainLoss 0.6914 | ValLoss 0.6931 | P@10 0.0012 R@10 0.0116 NDCG@10 0.0057
+Epoch 07 | 6.9s | TrainLoss 0.6912 | ValLoss 0.6931 | P@10 0.0013 R@10 0.0131 NDCG@10 0.0062
+Epoch 08 | 7.1s | TrainLoss 0.6909 | ValLoss 0.6931 | P@10 0.0014 R@10 0.0139 NDCG@10 0.0066
+Epoch 09 | 7.0s | TrainLoss 0.6907 | ValLoss 0.6931 | P@10 0.0014 R@10 0.0145 NDCG@10 0.0068
+Epoch 10 | 7.0s | TrainLoss 0.6904 | ValLoss 0.6931 | P@10 0.0016 R@10 0.0160 NDCG@10 0.0074
+Epoch 11 | 6.9s | TrainLoss 0.6901 | ValLoss 0.6931 | P@10 0.0016 R@10 0.0161 NDCG@10 0.0078
+Epoch 12 | 6.9s | TrainLoss 0.6898 | ValLoss 0.6931 | P@10 0.0016 R@10 0.0156 NDCG@10 0.0077
+Epoch 13 | 7.0s | TrainLoss 0.6894 | ValLoss 0.6931 | P@10 0.0016 R@10 0.0163 NDCG@10 0.0080
+Epoch 14 | 7.0s | TrainLoss 0.6890 | ValLoss 0.6931 | P@10 0.0016 R@10 0.0160 NDCG@10 0.0080
+Epoch 15 | 6.9s | TrainLoss 0.6886 | ValLoss 0.6931 | P@10 0.0016 R@10 0.0161 NDCG@10 0.0080
+Epoch 16 | 6.9s | TrainLoss 0.6882 | ValLoss 0.6931 | P@10 0.0017 R@10 0.0171 NDCG@10 0.0083
+Epoch 17 | 6.9s | TrainLoss 0.6877 | ValLoss 0.6931 | P@10 0.0018 R@10 0.0182 NDCG@10 0.0087
+Epoch 18 | 7.0s | TrainLoss 0.6871 | ValLoss 0.6931 | P@10 0.0018 R@10 0.0185 NDCG@10 0.0087
+Epoch 19 | 7.2s | TrainLoss 0.6866 | ValLoss 0.6931 | P@10 0.0018 R@10 0.0178 NDCG@10 0.0085
+Epoch 20 | 7.0s | TrainLoss 0.6859 | ValLoss 0.6931 | P@10 0.0018 R@10 0.0178 NDCG@10 0.0085
+Epoch 21 | 7.0s | TrainLoss 0.6853 | ValLoss 0.6931 | P@10 0.0018 R@10 0.0182 NDCG@10 0.0084
+Epoch 22 | 7.0s | TrainLoss 0.6846 | ValLoss 0.6931 | P@10 0.0018 R@10 0.0178 NDCG@10 0.0083
+Epoch 23 | 7.0s | TrainLoss 0.6839 | ValLoss 0.6931 | P@10 0.0019 R@10 0.0187 NDCG@10 0.0087
+Epoch 24 | 7.0s | TrainLoss 0.6832 | ValLoss 0.6931 | P@10 0.0018 R@10 0.0185 NDCG@10 0.0086
+Epoch 25 | 7.0s | TrainLoss 0.6824 | ValLoss 0.6931 | P@10 0.0018 R@10 0.0183 NDCG@10 0.0086
+Epoch 26 | 7.2s | TrainLoss 0.6814 | ValLoss 0.6931 | P@10 0.0019 R@10 0.0187 NDCG@10 0.0087
+Epoch 27 | 7.0s | TrainLoss 0.6806 | ValLoss 0.6931 | P@10 0.0019 R@10 0.0188 NDCG@10 0.0087
+Epoch 28 | 7.0s | TrainLoss 0.6798 | ValLoss 0.6931 | P@10 0.0019 R@10 0.0193 NDCG@10 0.0089
+Epoch 29 | 7.0s | TrainLoss 0.6787 | ValLoss 0.6931 | P@10 0.0020 R@10 0.0203 NDCG@10 0.0093
+Epoch 30 | 7.0s | TrainLoss 0.6777 | ValLoss 0.6931 | P@10 0.0020 R@10 0.0203 NDCG@10 0.0093
+Epoch 31 | 7.1s | TrainLoss 0.6768 | ValLoss 0.6931 | P@10 0.0021 R@10 0.0208 NDCG@10 0.0094
+Epoch 32 | 6.9s | TrainLoss 0.6754 | ValLoss 0.6930 | P@10 0.0021 R@10 0.0207 NDCG@10 0.0093
+Epoch 33 | 6.9s | TrainLoss 0.6744 | ValLoss 0.6931 | P@10 0.0021 R@10 0.0205 NDCG@10 0.0093
+Epoch 34 | 7.0s | TrainLoss 0.6733 | ValLoss 0.6931 | P@10 0.0020 R@10 0.0203 NDCG@10 0.0092
+Epoch 35 | 7.0s | TrainLoss 0.6719 | ValLoss 0.6931 | P@10 0.0020 R@10 0.0203 NDCG@10 0.0092
+Epoch 36 | 7.2s | TrainLoss 0.6706 | ValLoss 0.6931 | P@10 0.0020 R@10 0.0203 NDCG@10 0.0092
+Epoch 37 | 7.1s | TrainLoss 0.6694 | ValLoss 0.6930 | P@10 0.0020 R@10 0.0200 NDCG@10 0.0091
+Epoch 38 | 6.7s | TrainLoss 0.6679 | ValLoss 0.6930 | P@10 0.0020 R@10 0.0198 NDCG@10 0.0091
+Epoch 39 | 6.7s | TrainLoss 0.6668 | ValLoss 0.6930 | P@10 0.0020 R@10 0.0203 NDCG@10 0.0093
+Epoch 40 | 6.7s | TrainLoss 0.6652 | ValLoss 0.6930 | P@10 0.0020 R@10 0.0200 NDCG@10 0.0092
+Epoch 41 | 7.0s | TrainLoss 0.6639 | ValLoss 0.6931 | P@10 0.0020 R@10 0.0202 NDCG@10 0.0092
+Epoch 42 | 6.9s | TrainLoss 0.6626 | ValLoss 0.6929 | P@10 0.0021 R@10 0.0205 NDCG@10 0.0093
+Epoch 43 | 6.9s | TrainLoss 0.6607 | ValLoss 0.6930 | P@10 0.0021 R@10 0.0205 NDCG@10 0.0093
+Epoch 44 | 7.0s | TrainLoss 0.6596 | ValLoss 0.6929 | P@10 0.0020 R@10 0.0200 NDCG@10 0.0091
+Epoch 45 | 7.0s | TrainLoss 0.6579 | ValLoss 0.6929 | P@10 0.0020 R@10 0.0203 NDCG@10 0.0092
+Epoch 46 | 7.2s | TrainLoss 0.6559 | ValLoss 0.6929 | P@10 0.0020 R@10 0.0203 NDCG@10 0.0092
+Epoch 47 | 7.0s | TrainLoss 0.6544 | ValLoss 0.6931 | P@10 0.0021 R@10 0.0205 NDCG@10 0.0092
+Epoch 48 | 7.0s | TrainLoss 0.6527 | ValLoss 0.6930 | P@10 0.0021 R@10 0.0205 NDCG@10 0.0093
+Epoch 49 | 7.0s | TrainLoss 0.6511 | ValLoss 0.6928 | P@10 0.0021 R@10 0.0205 NDCG@10 0.0092
+Epoch 50 | 6.8s | TrainLoss 0.6490 | ValLoss 0.6928 | P@10 0.0021 R@10 0.0205 NDCG@10 0.0092
+Epoch 51 | 7.0s | TrainLoss 0.6471 | ValLoss 0.6932 | P@10 0.0021 R@10 0.0205 NDCG@10 0.0092
+Early stopping triggered at epoch 51.
+完成模擬後訓練。
+
+
+=====第 1 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0023 | R@10 0.0234 | NDCG@10 0.0116 | BPR Loss 0.6931
+
+===== Time step2 =====
+收集到幾個互動: 21197
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 0.04 秒
+節點數量: 7384 (Users: 5950, Items: 1434)
+邊數量: 29304
+圖不是連通的。將個別偵測社群
+總社群數量: 55
+
+--- 第 2 輪後進行訓練，使用目前累積的 29304 筆真實互動，訓練 100 個 epochs ---
+在 29304 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 100, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+Epoch 01 | 16.2s | TrainLoss 0.6807 | ValLoss 0.6928 | P@10 0.0027 R@10 0.0272 NDCG@10 0.0141
+Epoch 02 | 15.8s | TrainLoss 0.6794 | ValLoss 0.6927 | P@10 0.0028 R@10 0.0276 NDCG@10 0.0144
+Epoch 03 | 16.3s | TrainLoss 0.6780 | ValLoss 0.6925 | P@10 0.0027 R@10 0.0274 NDCG@10 0.0144
+Epoch 04 | 15.7s | TrainLoss 0.6764 | ValLoss 0.6924 | P@10 0.0027 R@10 0.0271 NDCG@10 0.0144
+Epoch 05 | 16.1s | TrainLoss 0.6748 | ValLoss 0.6920 | P@10 0.0029 R@10 0.0286 NDCG@10 0.0149
+Epoch 06 | 16.0s | TrainLoss 0.6730 | ValLoss 0.6916 | P@10 0.0029 R@10 0.0292 NDCG@10 0.0150
+Epoch 07 | 15.3s | TrainLoss 0.6709 | ValLoss 0.6912 | P@10 0.0030 R@10 0.0299 NDCG@10 0.0154
+Epoch 08 | 15.6s | TrainLoss 0.6687 | ValLoss 0.6907 | P@10 0.0031 R@10 0.0314 NDCG@10 0.0157
+Epoch 09 | 14.5s | TrainLoss 0.6662 | ValLoss 0.6899 | P@10 0.0034 R@10 0.0336 NDCG@10 0.0163
+Epoch 10 | 15.1s | TrainLoss 0.6634 | ValLoss 0.6890 | P@10 0.0034 R@10 0.0341 NDCG@10 0.0167
+Epoch 11 | 15.0s | TrainLoss 0.6604 | ValLoss 0.6881 | P@10 0.0035 R@10 0.0346 NDCG@10 0.0173
+Epoch 12 | 15.9s | TrainLoss 0.6571 | ValLoss 0.6867 | P@10 0.0036 R@10 0.0360 NDCG@10 0.0178
+Epoch 13 | 16.2s | TrainLoss 0.6533 | ValLoss 0.6853 | P@10 0.0037 R@10 0.0371 NDCG@10 0.0180
+Epoch 14 | 15.4s | TrainLoss 0.6491 | ValLoss 0.6834 | P@10 0.0037 R@10 0.0373 NDCG@10 0.0179
+Epoch 15 | 15.2s | TrainLoss 0.6447 | ValLoss 0.6813 | P@10 0.0036 R@10 0.0365 NDCG@10 0.0177
+Epoch 16 | 15.8s | TrainLoss 0.6398 | ValLoss 0.6796 | P@10 0.0037 R@10 0.0368 NDCG@10 0.0177
+Epoch 17 | 16.0s | TrainLoss 0.6346 | ValLoss 0.6766 | P@10 0.0036 R@10 0.0365 NDCG@10 0.0175
+Epoch 18 | 16.0s | TrainLoss 0.6284 | ValLoss 0.6739 | P@10 0.0037 R@10 0.0368 NDCG@10 0.0177
+Epoch 19 | 15.9s | TrainLoss 0.6221 | ValLoss 0.6700 | P@10 0.0038 R@10 0.0376 NDCG@10 0.0180
+Epoch 20 | 15.9s | TrainLoss 0.6152 | ValLoss 0.6671 | P@10 0.0038 R@10 0.0378 NDCG@10 0.0176
+Epoch 21 | 15.8s | TrainLoss 0.6083 | ValLoss 0.6629 | P@10 0.0039 R@10 0.0388 NDCG@10 0.0178
+Epoch 22 | 15.8s | TrainLoss 0.6008 | ValLoss 0.6584 | P@10 0.0039 R@10 0.0392 NDCG@10 0.0179
+Epoch 23 | 15.3s | TrainLoss 0.5924 | ValLoss 0.6544 | P@10 0.0039 R@10 0.0395 NDCG@10 0.0179
+Epoch 24 | 15.2s | TrainLoss 0.5846 | ValLoss 0.6493 | P@10 0.0039 R@10 0.0393 NDCG@10 0.0175
+Epoch 25 | 15.2s | TrainLoss 0.5745 | ValLoss 0.6443 | P@10 0.0040 R@10 0.0402 NDCG@10 0.0178
+Epoch 26 | 15.0s | TrainLoss 0.5661 | ValLoss 0.6386 | P@10 0.0040 R@10 0.0402 NDCG@10 0.0179
+Epoch 27 | 15.7s | TrainLoss 0.5561 | ValLoss 0.6319 | P@10 0.0041 R@10 0.0407 NDCG@10 0.0180
+Epoch 28 | 15.8s | TrainLoss 0.5458 | ValLoss 0.6254 | P@10 0.0040 R@10 0.0402 NDCG@10 0.0179
+Epoch 29 | 15.8s | TrainLoss 0.5369 | ValLoss 0.6199 | P@10 0.0040 R@10 0.0403 NDCG@10 0.0180
+Epoch 30 | 15.8s | TrainLoss 0.5261 | ValLoss 0.6145 | P@10 0.0041 R@10 0.0413 NDCG@10 0.0183
+Epoch 31 | 15.5s | TrainLoss 0.5163 | ValLoss 0.6081 | P@10 0.0042 R@10 0.0415 NDCG@10 0.0183
+Epoch 32 | 14.7s | TrainLoss 0.5059 | ValLoss 0.6008 | P@10 0.0041 R@10 0.0412 NDCG@10 0.0181
+Epoch 33 | 15.0s | TrainLoss 0.4954 | ValLoss 0.5956 | P@10 0.0041 R@10 0.0408 NDCG@10 0.0180
+Epoch 34 | 15.2s | TrainLoss 0.4832 | ValLoss 0.5876 | P@10 0.0041 R@10 0.0410 NDCG@10 0.0180
+Epoch 35 | 15.8s | TrainLoss 0.4744 | ValLoss 0.5790 | P@10 0.0041 R@10 0.0412 NDCG@10 0.0180
+Epoch 36 | 15.4s | TrainLoss 0.4633 | ValLoss 0.5748 | P@10 0.0042 R@10 0.0415 NDCG@10 0.0181
+Epoch 37 | 15.6s | TrainLoss 0.4523 | ValLoss 0.5642 | P@10 0.0042 R@10 0.0415 NDCG@10 0.0180
+Epoch 38 | 15.1s | TrainLoss 0.4440 | ValLoss 0.5574 | P@10 0.0041 R@10 0.0413 NDCG@10 0.0180
+Epoch 39 | 15.6s | TrainLoss 0.4321 | ValLoss 0.5511 | P@10 0.0041 R@10 0.0408 NDCG@10 0.0179
+Epoch 40 | 15.4s | TrainLoss 0.4225 | ValLoss 0.5508 | P@10 0.0041 R@10 0.0410 NDCG@10 0.0180
+Epoch 41 | 16.3s | TrainLoss 0.4136 | ValLoss 0.5408 | P@10 0.0041 R@10 0.0408 NDCG@10 0.0179
+Epoch 42 | 16.8s | TrainLoss 0.4038 | ValLoss 0.5337 | P@10 0.0041 R@10 0.0412 NDCG@10 0.0180
+Epoch 43 | 16.4s | TrainLoss 0.3953 | ValLoss 0.5302 | P@10 0.0042 R@10 0.0415 NDCG@10 0.0181
+Epoch 44 | 15.7s | TrainLoss 0.3845 | ValLoss 0.5223 | P@10 0.0041 R@10 0.0407 NDCG@10 0.0178
+Epoch 45 | 16.1s | TrainLoss 0.3754 | ValLoss 0.5134 | P@10 0.0041 R@10 0.0408 NDCG@10 0.0179
+Epoch 46 | 15.6s | TrainLoss 0.3683 | ValLoss 0.5084 | P@10 0.0041 R@10 0.0408 NDCG@10 0.0179
+Epoch 47 | 15.7s | TrainLoss 0.3608 | ValLoss 0.5019 | P@10 0.0041 R@10 0.0407 NDCG@10 0.0178
+Epoch 48 | 15.8s | TrainLoss 0.3523 | ValLoss 0.4998 | P@10 0.0041 R@10 0.0407 NDCG@10 0.0178
+Epoch 49 | 15.8s | TrainLoss 0.3444 | ValLoss 0.4951 | P@10 0.0040 R@10 0.0402 NDCG@10 0.0176
+Epoch 50 | 15.8s | TrainLoss 0.3376 | ValLoss 0.4838 | P@10 0.0040 R@10 0.0400 NDCG@10 0.0175
+Epoch 51 | 15.8s | TrainLoss 0.3294 | ValLoss 0.4794 | P@10 0.0040 R@10 0.0402 NDCG@10 0.0177
+Early stopping triggered at epoch 51.
+完成模擬後訓練。
+
+
+=====第 2 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0038 | R@10 0.0380 | NDCG@10 0.0170 | BPR Loss 0.4773
+
+===== Time step3 =====
+收集到幾個互動: 32851
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 0.07 秒
+節點數量: 7389 (Users: 5950, Items: 1439)
+邊數量: 62155
+圖不是連通的。將個別偵測社群
+總社群數量: 38
+
+--- 第 3 輪後進行訓練，使用目前累積的 62155 筆真實互動，訓練 100 個 epochs ---
+在 62155 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 100, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+Epoch 01 | 29.9s | TrainLoss 0.2582 | ValLoss 0.4904 | P@10 0.0041 R@10 0.0410 NDCG@10 0.0199
+Epoch 02 | 30.9s | TrainLoss 0.2440 | ValLoss 0.4843 | P@10 0.0041 R@10 0.0408 NDCG@10 0.0199
+Epoch 03 | 29.6s | TrainLoss 0.2321 | ValLoss 0.4728 | P@10 0.0041 R@10 0.0407 NDCG@10 0.0198
+Epoch 04 | 29.8s | TrainLoss 0.2225 | ValLoss 0.4705 | P@10 0.0041 R@10 0.0408 NDCG@10 0.0199
+Epoch 05 | 30.4s | TrainLoss 0.2112 | ValLoss 0.4551 | P@10 0.0041 R@10 0.0410 NDCG@10 0.0199
+Epoch 06 | 31.8s | TrainLoss 0.2062 | ValLoss 0.4501 | P@10 0.0041 R@10 0.0412 NDCG@10 0.0200
+Epoch 07 | 31.5s | TrainLoss 0.1961 | ValLoss 0.4497 | P@10 0.0041 R@10 0.0412 NDCG@10 0.0200
+Epoch 08 | 31.5s | TrainLoss 0.1914 | ValLoss 0.4423 | P@10 0.0041 R@10 0.0412 NDCG@10 0.0200
+Epoch 09 | 31.4s | TrainLoss 0.1841 | ValLoss 0.4345 | P@10 0.0041 R@10 0.0412 NDCG@10 0.0200
+Epoch 10 | 31.4s | TrainLoss 0.1792 | ValLoss 0.4339 | P@10 0.0042 R@10 0.0417 NDCG@10 0.0201
+Epoch 11 | 31.5s | TrainLoss 0.1733 | ValLoss 0.4274 | P@10 0.0042 R@10 0.0417 NDCG@10 0.0201
+Epoch 12 | 31.2s | TrainLoss 0.1697 | ValLoss 0.4132 | P@10 0.0042 R@10 0.0417 NDCG@10 0.0201
+Epoch 13 | 31.5s | TrainLoss 0.1635 | ValLoss 0.4260 | P@10 0.0042 R@10 0.0417 NDCG@10 0.0201
+Epoch 14 | 31.1s | TrainLoss 0.1626 | ValLoss 0.4277 | P@10 0.0042 R@10 0.0417 NDCG@10 0.0201
+Epoch 15 | 31.2s | TrainLoss 0.1586 | ValLoss 0.4235 | P@10 0.0042 R@10 0.0418 NDCG@10 0.0202
+Epoch 16 | 31.7s | TrainLoss 0.1573 | ValLoss 0.4120 | P@10 0.0042 R@10 0.0418 NDCG@10 0.0202
+Epoch 17 | 31.2s | TrainLoss 0.1525 | ValLoss 0.4160 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0202
+Epoch 18 | 30.7s | TrainLoss 0.1487 | ValLoss 0.4119 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0202
+Epoch 19 | 31.5s | TrainLoss 0.1498 | ValLoss 0.4078 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0202
+Epoch 20 | 30.8s | TrainLoss 0.1451 | ValLoss 0.4114 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0202
+Epoch 21 | 31.9s | TrainLoss 0.1428 | ValLoss 0.4232 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0203
+Epoch 22 | 32.0s | TrainLoss 0.1398 | ValLoss 0.4024 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0203
+Epoch 23 | 31.9s | TrainLoss 0.1384 | ValLoss 0.3891 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0203
+Epoch 24 | 32.0s | TrainLoss 0.1375 | ValLoss 0.3988 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0203
+Epoch 25 | 31.7s | TrainLoss 0.1335 | ValLoss 0.4098 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 26 | 31.4s | TrainLoss 0.1336 | ValLoss 0.4005 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 27 | 32.0s | TrainLoss 0.1315 | ValLoss 0.3951 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 28 | 31.6s | TrainLoss 0.1343 | ValLoss 0.3951 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 29 | 31.8s | TrainLoss 0.1309 | ValLoss 0.4012 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 30 | 32.1s | TrainLoss 0.1280 | ValLoss 0.4100 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 31 | 32.3s | TrainLoss 0.1288 | ValLoss 0.4083 | P@10 0.0042 R@10 0.0424 NDCG@10 0.0204
+Epoch 32 | 32.0s | TrainLoss 0.1280 | ValLoss 0.3880 | P@10 0.0042 R@10 0.0424 NDCG@10 0.0204
+Epoch 33 | 31.5s | TrainLoss 0.1240 | ValLoss 0.4003 | P@10 0.0042 R@10 0.0424 NDCG@10 0.0204
+Epoch 34 | 31.0s | TrainLoss 0.1245 | ValLoss 0.3969 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 35 | 31.7s | TrainLoss 0.1247 | ValLoss 0.3915 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 36 | 32.1s | TrainLoss 0.1258 | ValLoss 0.3954 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 37 | 32.1s | TrainLoss 0.1233 | ValLoss 0.4018 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 38 | 32.2s | TrainLoss 0.1194 | ValLoss 0.3963 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 39 | 32.2s | TrainLoss 0.1205 | ValLoss 0.4073 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 40 | 32.1s | TrainLoss 0.1237 | ValLoss 0.4004 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 41 | 32.3s | TrainLoss 0.1203 | ValLoss 0.3783 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0204
+Epoch 42 | 32.3s | TrainLoss 0.1171 | ValLoss 0.4100 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0204
+Epoch 43 | 32.2s | TrainLoss 0.1170 | ValLoss 0.3950 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0204
+Epoch 44 | 32.2s | TrainLoss 0.1175 | ValLoss 0.3870 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0203
+Epoch 45 | 32.2s | TrainLoss 0.1168 | ValLoss 0.3865 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0203
+Epoch 46 | 32.2s | TrainLoss 0.1163 | ValLoss 0.3988 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0204
+Epoch 47 | 32.2s | TrainLoss 0.1174 | ValLoss 0.3988 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0204
+Epoch 48 | 32.2s | TrainLoss 0.1133 | ValLoss 0.3876 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0203
+Epoch 49 | 30.5s | TrainLoss 0.1172 | ValLoss 0.4129 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0203
+Epoch 50 | 32.2s | TrainLoss 0.1161 | ValLoss 0.3893 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0203
+Epoch 51 | 32.1s | TrainLoss 0.1150 | ValLoss 0.3811 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0203
+Early stopping triggered at epoch 51.
+完成模擬後訓練。
+
+
+=====第 3 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0040 | R@10 0.0398 | NDCG@10 0.0197 | BPR Loss 0.4069
+
+===== Time step4 =====
+收集到幾個互動: 22240
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 0.09 秒
+節點數量: 7389 (Users: 5950, Items: 1439)
+邊數量: 84395
+圖不是連通的。將個別偵測社群
+總社群數量: 32
+
+--- 第 4 輪後進行訓練，使用目前累積的 84395 筆真實互動，訓練 100 個 epochs ---
+在 84395 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 100, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+Epoch 01 | 43.0s | TrainLoss 0.1060 | ValLoss 0.4130 | P@10 0.0042 R@10 0.0418 NDCG@10 0.0201
+Epoch 02 | 42.9s | TrainLoss 0.1035 | ValLoss 0.4066 | P@10 0.0042 R@10 0.0418 NDCG@10 0.0201
+Epoch 03 | 43.1s | TrainLoss 0.1046 | ValLoss 0.4048 | P@10 0.0042 R@10 0.0418 NDCG@10 0.0201
+Epoch 04 | 43.8s | TrainLoss 0.1049 | ValLoss 0.4233 | P@10 0.0042 R@10 0.0418 NDCG@10 0.0201
+Epoch 05 | 43.9s | TrainLoss 0.1045 | ValLoss 0.4032 | P@10 0.0042 R@10 0.0417 NDCG@10 0.0201
+Epoch 06 | 43.4s | TrainLoss 0.1011 | ValLoss 0.4261 | P@10 0.0042 R@10 0.0417 NDCG@10 0.0201
+Epoch 07 | 42.4s | TrainLoss 0.1028 | ValLoss 0.4060 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0202
+Epoch 08 | 43.3s | TrainLoss 0.0989 | ValLoss 0.4004 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0202
+Epoch 09 | 43.1s | TrainLoss 0.1005 | ValLoss 0.4096 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0202
+Epoch 10 | 43.4s | TrainLoss 0.1025 | ValLoss 0.4173 | P@10 0.0042 R@10 0.0418 NDCG@10 0.0202
+Epoch 11 | 43.1s | TrainLoss 0.1007 | ValLoss 0.3962 | P@10 0.0042 R@10 0.0417 NDCG@10 0.0201
+Epoch 12 | 42.7s | TrainLoss 0.1014 | ValLoss 0.4027 | P@10 0.0042 R@10 0.0417 NDCG@10 0.0201
+Epoch 13 | 42.8s | TrainLoss 0.1010 | ValLoss 0.4129 | P@10 0.0042 R@10 0.0417 NDCG@10 0.0201
+Epoch 14 | 42.4s | TrainLoss 0.0972 | ValLoss 0.3870 | P@10 0.0042 R@10 0.0417 NDCG@10 0.0201
+Epoch 15 | 41.6s | TrainLoss 0.0978 | ValLoss 0.4153 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0202
+Epoch 16 | 43.1s | TrainLoss 0.0977 | ValLoss 0.4166 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0202
+Epoch 17 | 42.9s | TrainLoss 0.0968 | ValLoss 0.4181 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 18 | 42.6s | TrainLoss 0.0975 | ValLoss 0.4089 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 19 | 42.3s | TrainLoss 0.0968 | ValLoss 0.3953 | P@10 0.0042 R@10 0.0420 NDCG@10 0.0202
+Epoch 20 | 43.3s | TrainLoss 0.0964 | ValLoss 0.3938 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 21 | 43.7s | TrainLoss 0.0966 | ValLoss 0.4098 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0203
+Epoch 22 | 43.7s | TrainLoss 0.0935 | ValLoss 0.4334 | P@10 0.0042 R@10 0.0424 NDCG@10 0.0204
+Epoch 23 | 43.9s | TrainLoss 0.0951 | ValLoss 0.4177 | P@10 0.0042 R@10 0.0424 NDCG@10 0.0204
+Epoch 24 | 43.0s | TrainLoss 0.0963 | ValLoss 0.4054 | P@10 0.0042 R@10 0.0424 NDCG@10 0.0204
+Epoch 25 | 42.7s | TrainLoss 0.0932 | ValLoss 0.4163 | P@10 0.0043 R@10 0.0425 NDCG@10 0.0204
+Epoch 26 | 42.4s | TrainLoss 0.0934 | ValLoss 0.3943 | P@10 0.0042 R@10 0.0424 NDCG@10 0.0204
+Epoch 27 | 42.5s | TrainLoss 0.0950 | ValLoss 0.3988 | P@10 0.0043 R@10 0.0425 NDCG@10 0.0204
+Epoch 28 | 42.9s | TrainLoss 0.0964 | ValLoss 0.4032 | P@10 0.0043 R@10 0.0425 NDCG@10 0.0204
+Epoch 29 | 42.6s | TrainLoss 0.0953 | ValLoss 0.4211 | P@10 0.0043 R@10 0.0425 NDCG@10 0.0204
+Epoch 30 | 43.0s | TrainLoss 0.0920 | ValLoss 0.4161 | P@10 0.0042 R@10 0.0424 NDCG@10 0.0204
+Epoch 31 | 43.5s | TrainLoss 0.0930 | ValLoss 0.4283 | P@10 0.0042 R@10 0.0424 NDCG@10 0.0204
+Epoch 32 | 43.4s | TrainLoss 0.0911 | ValLoss 0.4062 | P@10 0.0043 R@10 0.0425 NDCG@10 0.0204
+Epoch 33 | 42.4s | TrainLoss 0.0925 | ValLoss 0.4148 | P@10 0.0043 R@10 0.0425 NDCG@10 0.0204
+Epoch 34 | 43.5s | TrainLoss 0.0912 | ValLoss 0.4169 | P@10 0.0042 R@10 0.0424 NDCG@10 0.0204
+Epoch 35 | 43.8s | TrainLoss 0.0936 | ValLoss 0.3990 | P@10 0.0042 R@10 0.0422 NDCG@10 0.0204
+Epoch 36 | 43.8s | TrainLoss 0.0893 | ValLoss 0.4078 | P@10 0.0042 R@10 0.0424 NDCG@10 0.0204
+Epoch 37 | 44.0s | TrainLoss 0.0889 | ValLoss 0.4060 | P@10 0.0043 R@10 0.0427 NDCG@10 0.0205
+Epoch 38 | 43.4s | TrainLoss 0.0903 | ValLoss 0.3996 | P@10 0.0043 R@10 0.0427 NDCG@10 0.0205
+Epoch 39 | 43.6s | TrainLoss 0.0888 | ValLoss 0.4147 | P@10 0.0043 R@10 0.0427 NDCG@10 0.0205
+Epoch 40 | 43.3s | TrainLoss 0.0889 | ValLoss 0.4158 | P@10 0.0043 R@10 0.0427 NDCG@10 0.0205
+Epoch 41 | 42.9s | TrainLoss 0.0898 | ValLoss 0.4173 | P@10 0.0043 R@10 0.0427 NDCG@10 0.0205
+Epoch 42 | 42.2s | TrainLoss 0.0868 | ValLoss 0.4123 | P@10 0.0043 R@10 0.0429 NDCG@10 0.0206
+Epoch 43 | 43.0s | TrainLoss 0.0890 | ValLoss 0.4262 | P@10 0.0043 R@10 0.0429 NDCG@10 0.0206
+Epoch 44 | 43.3s | TrainLoss 0.0905 | ValLoss 0.4039 | P@10 0.0043 R@10 0.0430 NDCG@10 0.0206
+Epoch 45 | 43.1s | TrainLoss 0.0884 | ValLoss 0.4077 | P@10 0.0043 R@10 0.0430 NDCG@10 0.0206
+Epoch 46 | 43.5s | TrainLoss 0.0854 | ValLoss 0.4096 | P@10 0.0043 R@10 0.0432 NDCG@10 0.0207
+Epoch 47 | 42.6s | TrainLoss 0.0894 | ValLoss 0.4031 | P@10 0.0043 R@10 0.0432 NDCG@10 0.0208
+Epoch 48 | 43.0s | TrainLoss 0.0873 | ValLoss 0.4065 | P@10 0.0043 R@10 0.0434 NDCG@10 0.0208
+Epoch 49 | 43.1s | TrainLoss 0.0837 | ValLoss 0.4200 | P@10 0.0043 R@10 0.0432 NDCG@10 0.0208
+Epoch 50 | 42.2s | TrainLoss 0.0870 | ValLoss 0.4016 | P@10 0.0043 R@10 0.0432 NDCG@10 0.0208
+Epoch 51 | 41.3s | TrainLoss 0.0858 | ValLoss 0.4091 | P@10 0.0043 R@10 0.0434 NDCG@10 0.0209
+Epoch 52 | 43.3s | TrainLoss 0.0881 | ValLoss 0.4076 | P@10 0.0043 R@10 0.0432 NDCG@10 0.0208
+Epoch 53 | 43.0s | TrainLoss 0.0855 | ValLoss 0.4057 | P@10 0.0043 R@10 0.0432 NDCG@10 0.0208
+Epoch 54 | 43.2s | TrainLoss 0.0833 | ValLoss 0.4024 | P@10 0.0043 R@10 0.0430 NDCG@10 0.0208
+Epoch 55 | 43.2s | TrainLoss 0.0851 | ValLoss 0.3953 | P@10 0.0043 R@10 0.0430 NDCG@10 0.0208
+Epoch 56 | 43.4s | TrainLoss 0.0863 | ValLoss 0.4070 | P@10 0.0043 R@10 0.0430 NDCG@10 0.0207
+Epoch 57 | 43.8s | TrainLoss 0.0833 | ValLoss 0.4030 | P@10 0.0043 R@10 0.0432 NDCG@10 0.0208
+Epoch 58 | 42.9s | TrainLoss 0.0861 | ValLoss 0.4072 | P@10 0.0044 R@10 0.0435 NDCG@10 0.0209
+Epoch 59 | 43.2s | TrainLoss 0.0836 | ValLoss 0.3898 | P@10 0.0044 R@10 0.0439 NDCG@10 0.0210
+Epoch 60 | 43.6s | TrainLoss 0.0839 | ValLoss 0.4112 | P@10 0.0044 R@10 0.0437 NDCG@10 0.0209
+Epoch 61 | 43.2s | TrainLoss 0.0814 | ValLoss 0.4127 | P@10 0.0044 R@10 0.0435 NDCG@10 0.0209
+Epoch 62 | 42.6s | TrainLoss 0.0833 | ValLoss 0.3948 | P@10 0.0043 R@10 0.0434 NDCG@10 0.0208
+Epoch 63 | 43.4s | TrainLoss 0.0822 | ValLoss 0.3845 | P@10 0.0043 R@10 0.0434 NDCG@10 0.0208
+Epoch 64 | 43.2s | TrainLoss 0.0821 | ValLoss 0.4165 | P@10 0.0043 R@10 0.0434 NDCG@10 0.0208
+Epoch 65 | 43.4s | TrainLoss 0.0812 | ValLoss 0.3967 | P@10 0.0043 R@10 0.0434 NDCG@10 0.0208
+Epoch 66 | 43.2s | TrainLoss 0.0821 | ValLoss 0.4163 | P@10 0.0043 R@10 0.0434 NDCG@10 0.0208
+Epoch 67 | 42.9s | TrainLoss 0.0835 | ValLoss 0.4163 | P@10 0.0044 R@10 0.0435 NDCG@10 0.0209
+Epoch 68 | 43.1s | TrainLoss 0.0795 | ValLoss 0.4105 | P@10 0.0044 R@10 0.0435 NDCG@10 0.0209
+Epoch 69 | 42.2s | TrainLoss 0.0812 | ValLoss 0.4009 | P@10 0.0043 R@10 0.0434 NDCG@10 0.0208
+Epoch 70 | 43.0s | TrainLoss 0.0813 | ValLoss 0.4021 | P@10 0.0043 R@10 0.0434 NDCG@10 0.0208
+Epoch 71 | 42.7s | TrainLoss 0.0793 | ValLoss 0.4130 | P@10 0.0043 R@10 0.0432 NDCG@10 0.0207
+Epoch 72 | 42.8s | TrainLoss 0.0805 | ValLoss 0.4330 | P@10 0.0043 R@10 0.0430 NDCG@10 0.0207
+Epoch 73 | 42.4s | TrainLoss 0.0823 | ValLoss 0.4173 | P@10 0.0043 R@10 0.0432 NDCG@10 0.0207
+Epoch 74 | 43.1s | TrainLoss 0.0803 | ValLoss 0.4099 | P@10 0.0043 R@10 0.0434 NDCG@10 0.0208
+Epoch 75 | 42.9s | TrainLoss 0.0792 | ValLoss 0.3865 | P@10 0.0043 R@10 0.0434 NDCG@10 0.0208
+Epoch 76 | 42.9s | TrainLoss 0.0807 | ValLoss 0.3939 | P@10 0.0044 R@10 0.0437 NDCG@10 0.0209
+Epoch 77 | 43.5s | TrainLoss 0.0789 | ValLoss 0.4063 | P@10 0.0044 R@10 0.0437 NDCG@10 0.0209
+Epoch 78 | 43.0s | TrainLoss 0.0771 | ValLoss 0.3971 | P@10 0.0044 R@10 0.0439 NDCG@10 0.0210
+Epoch 79 | 43.9s | TrainLoss 0.0793 | ValLoss 0.3784 | P@10 0.0044 R@10 0.0439 NDCG@10 0.0210
+Early stopping triggered at epoch 79.
+完成模擬後訓練。
+
+
+=====第 4 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0039 | R@10 0.0392 | NDCG@10 0.0196 | BPR Loss 0.4158
+
+===== Time step5 =====
+收集到幾個互動: 17772
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 0.11 秒
+節點數量: 7389 (Users: 5950, Items: 1439)
+邊數量: 102167
+圖不是連通的。將個別偵測社群
+總社群數量: 25
+
+--- 第 5 輪後進行訓練，使用目前累積的 102167 筆真實互動，訓練 100 個 epochs ---
+在 102167 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 100, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+Epoch 01 | 43.4s | TrainLoss 0.0806 | ValLoss 0.4009 | P@10 0.0043 R@10 0.0429 NDCG@10 0.0208
+Epoch 02 | 44.5s | TrainLoss 0.0794 | ValLoss 0.4042 | P@10 0.0043 R@10 0.0430 NDCG@10 0.0209
+Epoch 03 | 44.6s | TrainLoss 0.0785 | ValLoss 0.4025 | P@10 0.0043 R@10 0.0429 NDCG@10 0.0208
+Epoch 04 | 44.9s | TrainLoss 0.0769 | ValLoss 0.4075 | P@10 0.0043 R@10 0.0432 NDCG@10 0.0209
+Epoch 05 | 44.4s | TrainLoss 0.0764 | ValLoss 0.3906 | P@10 0.0043 R@10 0.0432 NDCG@10 0.0209
+Epoch 06 | 44.2s | TrainLoss 0.0755 | ValLoss 0.4059 | P@10 0.0043 R@10 0.0430 NDCG@10 0.0209
+Epoch 07 | 44.8s | TrainLoss 0.0762 | ValLoss 0.4045 | P@10 0.0043 R@10 0.0429 NDCG@10 0.0209
+Epoch 08 | 45.3s | TrainLoss 0.0754 | ValLoss 0.4094 | P@10 0.0043 R@10 0.0427 NDCG@10 0.0209
+Epoch 09 | 45.4s | TrainLoss 0.0776 | ValLoss 0.4030 | P@10 0.0043 R@10 0.0429 NDCG@10 0.0209
+Epoch 10 | 44.8s | TrainLoss 0.0740 | ValLoss 0.4059 | P@10 0.0043 R@10 0.0430 NDCG@10 0.0210
+Epoch 11 | 45.5s | TrainLoss 0.0730 | ValLoss 0.4040 | P@10 0.0043 R@10 0.0429 NDCG@10 0.0209
+Epoch 12 | 44.7s | TrainLoss 0.0736 | ValLoss 0.3994 | P@10 0.0043 R@10 0.0434 NDCG@10 0.0211
+Epoch 13 | 45.0s | TrainLoss 0.0758 | ValLoss 0.3980 | P@10 0.0044 R@10 0.0439 NDCG@10 0.0213
+Epoch 14 | 44.7s | TrainLoss 0.0754 | ValLoss 0.4111 | P@10 0.0044 R@10 0.0444 NDCG@10 0.0214
+Epoch 15 | 45.0s | TrainLoss 0.0720 | ValLoss 0.4004 | P@10 0.0044 R@10 0.0444 NDCG@10 0.0214
+Epoch 16 | 44.6s | TrainLoss 0.0724 | ValLoss 0.4267 | P@10 0.0044 R@10 0.0444 NDCG@10 0.0214
+Epoch 17 | 45.0s | TrainLoss 0.0729 | ValLoss 0.4072 | P@10 0.0044 R@10 0.0444 NDCG@10 0.0214
+Epoch 18 | 45.0s | TrainLoss 0.0724 | ValLoss 0.4237 | P@10 0.0044 R@10 0.0444 NDCG@10 0.0214
+Epoch 19 | 44.5s | TrainLoss 0.0731 | ValLoss 0.4215 | P@10 0.0044 R@10 0.0442 NDCG@10 0.0214
+Epoch 20 | 44.3s | TrainLoss 0.0725 | ValLoss 0.3994 | P@10 0.0045 R@10 0.0445 NDCG@10 0.0215
+Epoch 21 | 44.4s | TrainLoss 0.0737 | ValLoss 0.3979 | P@10 0.0044 R@10 0.0444 NDCG@10 0.0215
+Epoch 22 | 44.3s | TrainLoss 0.0718 | ValLoss 0.3893 | P@10 0.0045 R@10 0.0449 NDCG@10 0.0218
+Epoch 23 | 44.8s | TrainLoss 0.0723 | ValLoss 0.4128 | P@10 0.0045 R@10 0.0449 NDCG@10 0.0218
+Epoch 24 | 45.1s | TrainLoss 0.0723 | ValLoss 0.4079 | P@10 0.0045 R@10 0.0449 NDCG@10 0.0218
+Epoch 25 | 45.4s | TrainLoss 0.0707 | ValLoss 0.4005 | P@10 0.0045 R@10 0.0452 NDCG@10 0.0219
+Epoch 26 | 44.7s | TrainLoss 0.0686 | ValLoss 0.4004 | P@10 0.0045 R@10 0.0452 NDCG@10 0.0219
+Epoch 27 | 45.5s | TrainLoss 0.0702 | ValLoss 0.4031 | P@10 0.0046 R@10 0.0455 NDCG@10 0.0220
+Epoch 28 | 44.8s | TrainLoss 0.0687 | ValLoss 0.3996 | P@10 0.0046 R@10 0.0457 NDCG@10 0.0221
+Epoch 29 | 44.3s | TrainLoss 0.0701 | ValLoss 0.4036 | P@10 0.0046 R@10 0.0455 NDCG@10 0.0220
+Epoch 30 | 44.8s | TrainLoss 0.0693 | ValLoss 0.3769 | P@10 0.0046 R@10 0.0461 NDCG@10 0.0222
+Epoch 31 | 44.7s | TrainLoss 0.0685 | ValLoss 0.3993 | P@10 0.0046 R@10 0.0457 NDCG@10 0.0221
+Epoch 32 | 43.9s | TrainLoss 0.0675 | ValLoss 0.4022 | P@10 0.0046 R@10 0.0457 NDCG@10 0.0222
+Epoch 33 | 45.1s | TrainLoss 0.0673 | ValLoss 0.4028 | P@10 0.0046 R@10 0.0459 NDCG@10 0.0222
+Epoch 34 | 45.0s | TrainLoss 0.0670 | ValLoss 0.4244 | P@10 0.0046 R@10 0.0459 NDCG@10 0.0222
+Epoch 35 | 45.2s | TrainLoss 0.0657 | ValLoss 0.3980 | P@10 0.0046 R@10 0.0464 NDCG@10 0.0225
+Epoch 36 | 44.9s | TrainLoss 0.0671 | ValLoss 0.4114 | P@10 0.0046 R@10 0.0464 NDCG@10 0.0225
+Epoch 37 | 45.1s | TrainLoss 0.0659 | ValLoss 0.3950 | P@10 0.0046 R@10 0.0464 NDCG@10 0.0225
+Epoch 38 | 44.7s | TrainLoss 0.0662 | ValLoss 0.3932 | P@10 0.0046 R@10 0.0464 NDCG@10 0.0226
+Epoch 39 | 44.9s | TrainLoss 0.0668 | ValLoss 0.4107 | P@10 0.0047 R@10 0.0466 NDCG@10 0.0226
+Epoch 40 | 44.6s | TrainLoss 0.0671 | ValLoss 0.4088 | P@10 0.0047 R@10 0.0467 NDCG@10 0.0226
+Epoch 41 | 44.9s | TrainLoss 0.0668 | ValLoss 0.3999 | P@10 0.0047 R@10 0.0469 NDCG@10 0.0227
+Epoch 42 | 45.3s | TrainLoss 0.0654 | ValLoss 0.4050 | P@10 0.0047 R@10 0.0467 NDCG@10 0.0226
+Epoch 43 | 44.8s | TrainLoss 0.0646 | ValLoss 0.4014 | P@10 0.0047 R@10 0.0469 NDCG@10 0.0227
+Epoch 44 | 44.5s | TrainLoss 0.0643 | ValLoss 0.4114 | P@10 0.0047 R@10 0.0469 NDCG@10 0.0227
+Epoch 45 | 44.3s | TrainLoss 0.0656 | ValLoss 0.3797 | P@10 0.0047 R@10 0.0467 NDCG@10 0.0227
+Epoch 46 | 45.0s | TrainLoss 0.0630 | ValLoss 0.4176 | P@10 0.0047 R@10 0.0466 NDCG@10 0.0227
+Epoch 47 | 44.5s | TrainLoss 0.0637 | ValLoss 0.4244 | P@10 0.0046 R@10 0.0464 NDCG@10 0.0227
+Epoch 48 | 45.1s | TrainLoss 0.0640 | ValLoss 0.4200 | P@10 0.0046 R@10 0.0464 NDCG@10 0.0228
+Epoch 49 | 44.4s | TrainLoss 0.0638 | ValLoss 0.4075 | P@10 0.0046 R@10 0.0461 NDCG@10 0.0227
+Epoch 50 | 44.6s | TrainLoss 0.0638 | ValLoss 0.4085 | P@10 0.0046 R@10 0.0462 NDCG@10 0.0228
+Epoch 51 | 44.1s | TrainLoss 0.0630 | ValLoss 0.4014 | P@10 0.0046 R@10 0.0457 NDCG@10 0.0227
+Epoch 52 | 44.7s | TrainLoss 0.0616 | ValLoss 0.4029 | P@10 0.0046 R@10 0.0461 NDCG@10 0.0228
+Epoch 53 | 45.3s | TrainLoss 0.0625 | ValLoss 0.4050 | P@10 0.0046 R@10 0.0455 NDCG@10 0.0227
+Epoch 54 | 44.6s | TrainLoss 0.0630 | ValLoss 0.3871 | P@10 0.0046 R@10 0.0457 NDCG@10 0.0228
+Epoch 55 | 44.4s | TrainLoss 0.0610 | ValLoss 0.4221 | P@10 0.0046 R@10 0.0455 NDCG@10 0.0228
+Epoch 56 | 44.8s | TrainLoss 0.0621 | ValLoss 0.4122 | P@10 0.0045 R@10 0.0450 NDCG@10 0.0227
+Epoch 57 | 45.3s | TrainLoss 0.0612 | ValLoss 0.4162 | P@10 0.0045 R@10 0.0454 NDCG@10 0.0228
+Epoch 58 | 45.3s | TrainLoss 0.0620 | ValLoss 0.4034 | P@10 0.0046 R@10 0.0455 NDCG@10 0.0229
+Epoch 59 | 45.0s | TrainLoss 0.0595 | ValLoss 0.4201 | P@10 0.0046 R@10 0.0457 NDCG@10 0.0229
+Epoch 60 | 45.0s | TrainLoss 0.0608 | ValLoss 0.4138 | P@10 0.0046 R@10 0.0457 NDCG@10 0.0230
+Epoch 61 | 45.6s | TrainLoss 0.0627 | ValLoss 0.4297 | P@10 0.0046 R@10 0.0457 NDCG@10 0.0230
+Early stopping triggered at epoch 61.
+完成模擬後訓練。
+
+
+=====第 5 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0041 | R@10 0.0413 | NDCG@10 0.0207 | BPR Loss 0.3895
+
+===== Time step6 =====
+收集到幾個互動: 15242
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 0.12 秒
+節點數量: 7392 (Users: 5950, Items: 1442)
+邊數量: 117409
+圖不是連通的。將個別偵測社群
+總社群數量: 26
+
+--- 第 6 輪後進行訓練，使用目前累積的 117409 筆真實互動，訓練 100 個 epochs ---
+在 117409 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 100, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+Epoch 01 | 51.4s | TrainLoss 0.0624 | ValLoss 0.4190 | P@10 0.0046 R@10 0.0461 NDCG@10 0.0235
+Epoch 02 | 50.6s | TrainLoss 0.0616 | ValLoss 0.3967 | P@10 0.0046 R@10 0.0464 NDCG@10 0.0235
+Epoch 03 | 50.5s | TrainLoss 0.0621 | ValLoss 0.4129 | P@10 0.0046 R@10 0.0464 NDCG@10 0.0235
+Epoch 04 | 50.3s | TrainLoss 0.0619 | ValLoss 0.4155 | P@10 0.0046 R@10 0.0462 NDCG@10 0.0235
+Epoch 05 | 50.6s | TrainLoss 0.0599 | ValLoss 0.3959 | P@10 0.0046 R@10 0.0461 NDCG@10 0.0235
+Epoch 06 | 51.8s | TrainLoss 0.0593 | ValLoss 0.3942 | P@10 0.0046 R@10 0.0464 NDCG@10 0.0236
+Epoch 07 | 57.0s | TrainLoss 0.0598 | ValLoss 0.4337 | P@10 0.0046 R@10 0.0464 NDCG@10 0.0236
+Epoch 08 | 51.1s | TrainLoss 0.0597 | ValLoss 0.4060 | P@10 0.0047 R@10 0.0466 NDCG@10 0.0237
+Epoch 09 | 52.1s | TrainLoss 0.0597 | ValLoss 0.4355 | P@10 0.0046 R@10 0.0462 NDCG@10 0.0237
+Epoch 10 | 50.8s | TrainLoss 0.0590 | ValLoss 0.3885 | P@10 0.0046 R@10 0.0462 NDCG@10 0.0237
+Epoch 11 | 51.6s | TrainLoss 0.0601 | ValLoss 0.3821 | P@10 0.0047 R@10 0.0467 NDCG@10 0.0240
+Epoch 12 | 50.9s | TrainLoss 0.0582 | ValLoss 0.4150 | P@10 0.0047 R@10 0.0467 NDCG@10 0.0240
+Epoch 13 | 50.8s | TrainLoss 0.0585 | ValLoss 0.4240 | P@10 0.0047 R@10 0.0467 NDCG@10 0.0241
+Epoch 14 | 51.7s | TrainLoss 0.0583 | ValLoss 0.4118 | P@10 0.0047 R@10 0.0469 NDCG@10 0.0242
+Epoch 15 | 51.0s | TrainLoss 0.0573 | ValLoss 0.4254 | P@10 0.0047 R@10 0.0469 NDCG@10 0.0243
+Epoch 16 | 51.1s | TrainLoss 0.0587 | ValLoss 0.3932 | P@10 0.0047 R@10 0.0471 NDCG@10 0.0244
+Epoch 17 | 51.6s | TrainLoss 0.0587 | ValLoss 0.4277 | P@10 0.0047 R@10 0.0471 NDCG@10 0.0244
+Epoch 18 | 51.1s | TrainLoss 0.0576 | ValLoss 0.4023 | P@10 0.0047 R@10 0.0474 NDCG@10 0.0245
+Epoch 19 | 51.3s | TrainLoss 0.0566 | ValLoss 0.4129 | P@10 0.0048 R@10 0.0477 NDCG@10 0.0247
+Epoch 20 | 51.8s | TrainLoss 0.0561 | ValLoss 0.4095 | P@10 0.0047 R@10 0.0474 NDCG@10 0.0246
+Epoch 21 | 51.0s | TrainLoss 0.0575 | ValLoss 0.4445 | P@10 0.0048 R@10 0.0476 NDCG@10 0.0246
+Epoch 22 | 51.5s | TrainLoss 0.0563 | ValLoss 0.3986 | P@10 0.0047 R@10 0.0474 NDCG@10 0.0246
+Epoch 23 | 50.8s | TrainLoss 0.0556 | ValLoss 0.4394 | P@10 0.0047 R@10 0.0471 NDCG@10 0.0245
+Epoch 24 | 50.4s | TrainLoss 0.0561 | ValLoss 0.4094 | P@10 0.0047 R@10 0.0469 NDCG@10 0.0244
+Epoch 25 | 51.3s | TrainLoss 0.0540 | ValLoss 0.4100 | P@10 0.0047 R@10 0.0471 NDCG@10 0.0245
+Epoch 26 | 50.2s | TrainLoss 0.0541 | ValLoss 0.4184 | P@10 0.0047 R@10 0.0469 NDCG@10 0.0244
+Epoch 27 | 51.5s | TrainLoss 0.0554 | ValLoss 0.3863 | P@10 0.0047 R@10 0.0467 NDCG@10 0.0245
+Epoch 28 | 50.7s | TrainLoss 0.0547 | ValLoss 0.4095 | P@10 0.0047 R@10 0.0469 NDCG@10 0.0245
+Epoch 29 | 51.8s | TrainLoss 0.0538 | ValLoss 0.4122 | P@10 0.0047 R@10 0.0469 NDCG@10 0.0245
+Epoch 30 | 51.5s | TrainLoss 0.0535 | ValLoss 0.4044 | P@10 0.0047 R@10 0.0472 NDCG@10 0.0246
+Epoch 31 | 51.0s | TrainLoss 0.0543 | ValLoss 0.4011 | P@10 0.0047 R@10 0.0471 NDCG@10 0.0247
+Epoch 32 | 50.3s | TrainLoss 0.0532 | ValLoss 0.3920 | P@10 0.0047 R@10 0.0472 NDCG@10 0.0247
+Epoch 33 | 51.1s | TrainLoss 0.0539 | ValLoss 0.4115 | P@10 0.0047 R@10 0.0471 NDCG@10 0.0247
+Epoch 34 | 51.5s | TrainLoss 0.0525 | ValLoss 0.4314 | P@10 0.0047 R@10 0.0471 NDCG@10 0.0246
+Epoch 35 | 51.2s | TrainLoss 0.0536 | ValLoss 0.4144 | P@10 0.0047 R@10 0.0471 NDCG@10 0.0246
+Epoch 36 | 51.7s | TrainLoss 0.0530 | ValLoss 0.4264 | P@10 0.0047 R@10 0.0471 NDCG@10 0.0245
+Epoch 37 | 51.2s | TrainLoss 0.0520 | ValLoss 0.4092 | P@10 0.0047 R@10 0.0469 NDCG@10 0.0245
+Epoch 38 | 50.7s | TrainLoss 0.0524 | ValLoss 0.3890 | P@10 0.0047 R@10 0.0469 NDCG@10 0.0245
+Epoch 39 | 50.4s | TrainLoss 0.0516 | ValLoss 0.4179 | P@10 0.0047 R@10 0.0469 NDCG@10 0.0245
+Early stopping triggered at epoch 39.
+完成模擬後訓練。
+
+
+=====第 6 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0044 | R@10 0.0439 | NDCG@10 0.0223 | BPR Loss 0.3840
+
+===== Time step7 =====
+收集到幾個互動: 13885
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 0.23 秒
+節點數量: 7397 (Users: 5950, Items: 1447)
+邊數量: 131294
+圖不是連通的。將個別偵測社群
+總社群數量: 23
+
+--- 第 7 輪後進行訓練，使用目前累積的 131294 筆真實互動，訓練 100 個 epochs ---
+在 131294 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 100, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+Epoch 01 | 57.8s | TrainLoss 0.0558 | ValLoss 0.4158 | P@10 0.0049 R@10 0.0486 NDCG@10 0.0252
+Epoch 02 | 56.1s | TrainLoss 0.0543 | ValLoss 0.4078 | P@10 0.0049 R@10 0.0486 NDCG@10 0.0252
+Epoch 03 | 58.4s | TrainLoss 0.0546 | ValLoss 0.4191 | P@10 0.0049 R@10 0.0486 NDCG@10 0.0252
+Epoch 04 | 56.0s | TrainLoss 0.0547 | ValLoss 0.4133 | P@10 0.0048 R@10 0.0484 NDCG@10 0.0252
+Epoch 05 | 56.4s | TrainLoss 0.0538 | ValLoss 0.4340 | P@10 0.0049 R@10 0.0489 NDCG@10 0.0253
+Epoch 06 | 57.8s | TrainLoss 0.0531 | ValLoss 0.3978 | P@10 0.0049 R@10 0.0486 NDCG@10 0.0252
+Epoch 07 | 57.6s | TrainLoss 0.0528 | ValLoss 0.3939 | P@10 0.0049 R@10 0.0487 NDCG@10 0.0252
+Epoch 08 | 57.2s | TrainLoss 0.0535 | ValLoss 0.4065 | P@10 0.0049 R@10 0.0486 NDCG@10 0.0251
+Epoch 09 | 57.3s | TrainLoss 0.0531 | ValLoss 0.4292 | P@10 0.0048 R@10 0.0484 NDCG@10 0.0251
+Epoch 10 | 57.4s | TrainLoss 0.0530 | ValLoss 0.4158 | P@10 0.0048 R@10 0.0484 NDCG@10 0.0251
+Epoch 11 | 57.5s | TrainLoss 0.0526 | ValLoss 0.4076 | P@10 0.0048 R@10 0.0482 NDCG@10 0.0251
+Epoch 12 | 56.6s | TrainLoss 0.0526 | ValLoss 0.4214 | P@10 0.0048 R@10 0.0481 NDCG@10 0.0252
+Epoch 13 | 58.8s | TrainLoss 0.0512 | ValLoss 0.4003 | P@10 0.0048 R@10 0.0481 NDCG@10 0.0252
+Epoch 14 | 56.3s | TrainLoss 0.0524 | ValLoss 0.4135 | P@10 0.0048 R@10 0.0482 NDCG@10 0.0252
+Epoch 15 | 58.1s | TrainLoss 0.0508 | ValLoss 0.4216 | P@10 0.0048 R@10 0.0481 NDCG@10 0.0252
+Epoch 16 | 57.0s | TrainLoss 0.0506 | ValLoss 0.4345 | P@10 0.0048 R@10 0.0481 NDCG@10 0.0252
+Epoch 17 | 57.2s | TrainLoss 0.0511 | ValLoss 0.4440 | P@10 0.0049 R@10 0.0486 NDCG@10 0.0253
+Epoch 18 | 57.1s | TrainLoss 0.0507 | ValLoss 0.4097 | P@10 0.0049 R@10 0.0487 NDCG@10 0.0254
+Epoch 19 | 57.2s | TrainLoss 0.0505 | ValLoss 0.4437 | P@10 0.0048 R@10 0.0482 NDCG@10 0.0254
+Epoch 20 | 57.5s | TrainLoss 0.0499 | ValLoss 0.4380 | P@10 0.0049 R@10 0.0487 NDCG@10 0.0255
+Epoch 21 | 57.9s | TrainLoss 0.0505 | ValLoss 0.4153 | P@10 0.0049 R@10 0.0487 NDCG@10 0.0255
+Epoch 22 | 58.1s | TrainLoss 0.0506 | ValLoss 0.4424 | P@10 0.0049 R@10 0.0489 NDCG@10 0.0256
+Epoch 23 | 58.2s | TrainLoss 0.0492 | ValLoss 0.4105 | P@10 0.0049 R@10 0.0489 NDCG@10 0.0256
+Epoch 24 | 57.9s | TrainLoss 0.0483 | ValLoss 0.4137 | P@10 0.0049 R@10 0.0489 NDCG@10 0.0256
+Epoch 25 | 56.8s | TrainLoss 0.0493 | ValLoss 0.4334 | P@10 0.0049 R@10 0.0489 NDCG@10 0.0256
+Early stopping triggered at epoch 25.
+完成模擬後訓練。
+
+
+=====第 7 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0045 | R@10 0.0445 | NDCG@10 0.0236 | BPR Loss 0.4055
+
+Environment run finished.
+Script finished.

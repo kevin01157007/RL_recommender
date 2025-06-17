@@ -40,7 +40,7 @@ if __name__ == "__main__":
     # 4. 創建 Simulator 實例
     simulator = SimpleSimulator(user_embeddings, item_embeddings, device)
     
-    k_eval_for_env = 50 
+    k_eval_for_env = 10
 
     try:
         env = RecSimEnv(
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         exit()
 
     print("Starting environment run...")
-    env.run(n_round=5, k_rec=k_eval_for_env)
+    env.run(n_round=8, k_rec=k_eval_for_env)
     print("Environment run finished.")
     print("Script finished.")
 

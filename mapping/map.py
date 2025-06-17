@@ -62,10 +62,13 @@ def convert_recommendations_to_original_ids(userid):
     with torch.no_grad():
         score = USER_EMB[userid] @ ITEM_EMB.t()
         TOP_K = 20
-        _, topk_idx = torch.topk(score, TOP_K)
+        s, topk_idx = torch.topk(score, TOP_K)
         recommendations = topk_idx.cpu().tolist()
-        print(recommendations)
-        print(torch.cosine_similarity(USER_EMB[userid], ITEM_EMB[0], dim=0))
+        s = s.tolist()
+        for i in s:
+            s1 = (float(i) + 10) /24  
+            # s2 = torch.cosine_similarity(USER_EMB[userid], ITEM_EMB[i], dim=0)
+            print(s1)
     original_ids = [reverse_mid_map[item_id] for item_id in recommendations]
     recommendations_with_titles = pd.DataFrame({
         'Original ID': original_ids,

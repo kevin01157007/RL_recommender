@@ -142,10 +142,10 @@ def train_val(model, num_items, num_epochs, batch_size, device, opt, train_inter
         val_rec_hist.append(rec)
         val_ndcg_hist.append(ndcg)
 
-        print(
-            f"Epoch {epoch:02d} | {time.time() - t0:.1f}s | TrainLoss {avg_train_loss:.4f} | "
-            f"ValLoss {avg_val_loss:.4f} | P@{K} {prec:.4f} R@{K} {rec:.4f} NDCG@{K} {ndcg:.4f}"
-        )
+        # print(
+        #     f"Epoch {epoch:02d} | {time.time() - t0:.1f}s | TrainLoss {avg_train_loss:.4f} | "
+        #     f"ValLoss {avg_val_loss:.4f} | P@{K} {prec:.4f} R@{K} {rec:.4f} NDCG@{K} {ndcg:.4f}"
+        # )
         best_model_state = model.state_dict()
         # Early stopping -----------------------------------------------------------
         # Early stopping logic
@@ -189,5 +189,5 @@ def test(model, num_items, batch_size, device, train_inter, val_inter, test_inte
         )
     print(
         f"\nFinal Test | P@{K} {prec_test:.4f} | R@{K} {rec_test:.4f} | "
-        f"NDCG@{K} {ndcg_test:.4f} | BPR Loss {avg_test_loss:.4f}"
+        f"NDCG@{K} {ndcg_test:.4f} | BPR Loss {avg_test_loss:.4f}\n"
     )

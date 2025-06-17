@@ -5,8 +5,8 @@ import pickle
 import torch, networkx as nx
 import community.community_louvain as community_louvain
 import numpy as np
-from bulid_dtrain_graph import build_dtrain_graph
-from rl_agent import RLAgent
+from utility.bulid_dtrain_graph import build_dtrain_graph
+from model.dqn.rl_agent import RLAgent
 
 import random
 

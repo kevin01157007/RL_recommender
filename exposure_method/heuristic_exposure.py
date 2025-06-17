@@ -4,7 +4,6 @@ import torch
 from sklearn.metrics.pairwise import cosine_similarity
 import community.community_louvain as community_louvain
 from collections import defaultdict
-from utility.build_nx_graph import build_nx_graph
 
 def calculate_ILS(item_emb, rec_item_set):
     """
@@ -35,7 +34,7 @@ def calculate_ILS(item_emb, rec_item_set):
     
     return ils
 
-def heuristic_exposure_strategy(user_item_graph, rec_item_set, item_emb, 
+def heuristic_exposure_strategy(dtrain_user_item_graph ,user_item_graph, rec_item_set, item_emb, 
                                n_selected_communities=2,  # 選擇的社群數量
                                n_diverse_users_per_community=10,  # 每個社群中選擇的多樣化用戶數量
                                n_items_per_user=3):  # 每個用戶選擇的項目數量
@@ -56,18 +55,18 @@ def heuristic_exposure_strategy(user_item_graph, rec_item_set, item_emb,
     print("正在檢測社群...")
 
     # 分別對每個連通元件進行 Louvain，並整合
-    connected_components = list(nx.connected_components(user_item_graph))
+    connected_components = list(nx.connected_components(dtrain_user_item_graph))
     print(f"總共有 {len(connected_components)} 個連通元件")
 
-    all_partition = community_louvain.best_partition(user_item_graph, resolution=2, random_state=42)
+    all_partition = community_louvain.best_partition(dtrain_user_item_graph, resolution=1.25, random_state=42)
 
     communities = all_partition
     print(f"總社群數量: {len(set(communities.values()))}")
 
     
     # 將節點分為用戶節點和項目節點
-    users = [node for node in user_item_graph.nodes() if user_item_graph.nodes[node].get('bipartite') == 0]
-    items = [node for node in user_item_graph.nodes() if user_item_graph.nodes[node].get('bipartite') == 1]
+    users = [node for node in dtrain_user_item_graph.nodes() if dtrain_user_item_graph.nodes[node].get('bipartite') == 0]
+    items = [node for node in dtrain_user_item_graph.nodes() if dtrain_user_item_graph.nodes[node].get('bipartite') == 1]
     print(len(users))
     print(len(items))
     # 為每個社群分配用戶和項目
@@ -147,10 +146,10 @@ def heuristic_exposure_strategy(user_item_graph, rec_item_set, item_emb,
 
     print(f"已生成 {len(all_selected_items)} 條曝光邊")
     return all_selected_items
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-user_embeddings = torch.load("model/simulator/user_emb.pt", map_location=device, weights_only=True)
-item_embeddings = torch.load("model/simulator/item_emb.pt", map_location=device, weights_only=True)
-rec_item_set = [np.random.choice(range(item_embeddings.shape[0]), size=20, replace=False).tolist() for user in range(user_embeddings.shape[0])]
-user_item_graph = build_nx_graph()
-s = heuristic_exposure_strategy(user_item_graph, rec_item_set, item_embeddings)
-print(s)
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# user_embeddings = torch.load("model/simulator/user_emb.pt", map_location=device, weights_only=True)
+# item_embeddings = torch.load("model/simulator/item_emb.pt", map_location=device, weights_only=True)
+# rec_item_set = [np.random.choice(range(item_embeddings.shape[0]), size=20, replace=False).tolist() for user in range(user_embeddings.shape[0])]
+# user_item_graph = build_nx_graph()
+# s = heuristic_exposure_strategy(user_item_graph, rec_item_set, item_embeddings)
+# print(s)

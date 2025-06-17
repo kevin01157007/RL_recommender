@@ -1,20 +1,46 @@
 ,Movie ID,Title,Genres,Rating,Timestamp
-0,1834,"Spanish Prisoner, The (1997)",Drama|Thriller,4,977166262
-1,3448,"Good Morning, Vietnam (1987)",Comedy|Drama|War,4,977166262
-2,1230,Annie Hall (1977),Comedy|Romance,4,977166262
-3,527,Schindler's List (1993),Drama|War,5,977166292
-4,858,"Godfather, The (1972)",Action|Crime|Drama,4,977166323
-5,1073,Willy Wonka and the Chocolate Factory (1971),Adventure|Children's|Comedy|Fantasy,5,977166323
-6,2966,"Straight Story, The (1999)",Drama,4,977166419
-7,3578,Gladiator (2000),Action|Drama,4,977166458
-8,2791,Airplane! (1980),Comedy,4,977166458
-9,246,Hoop Dreams (1994),Documentary,4,977166938
-10,1649,"Fast, Cheap & Out of Control (1997)",Documentary,5,977166964
-11,162,Crumb (1994),Documentary,4,977166964
-12,2677,Buena Vista Social Club (1999),Documentary,5,977166964
-13,1111,Microcosmos (Microcosmos: Le peuple de l'herbe) (1996),Documentary,5,977166985
-14,206,Unzipped (1995),Documentary,4,977167038
-15,1797,Everest (1998),Documentary,4,977167038
-16,1179,"Grifters, The (1990)",Crime|Drama|Film-Noir,4,977167096
-17,1617,L.A. Confidential (1997),Crime|Film-Noir|Mystery|Thriller,4,977167096
-18,164,Devil in a Blue Dress (1995),Crime|Film-Noir|Mystery|Thriller,4,977167096
+0,3186,"Girl, Interrupted (1999)",Drama,4,978300019
+1,1270,Back to the Future (1985),Comedy|Sci-Fi,5,978300055
+2,1721,Titanic (1997),Drama|Romance,4,978300055
+3,1022,Cinderella (1950),Animation|Children's|Musical,5,978300055
+4,1836,"Last Days of Disco, The (1998)",Drama,5,978300172
+5,3408,Erin Brockovich (2000),Drama,4,978300275
+6,2804,"Christmas Story, A (1983)",Comedy|Drama,5,978300719
+7,1207,To Kill a Mockingbird (1962),Drama,4,978300719
+8,1193,One Flew Over the Cuckoo's Nest (1975),Drama,5,978300760
+9,260,Star Wars: Episode IV - A New Hope (1977),Action|Adventure|Fantasy|Sci-Fi,4,978300760
+10,919,"Wizard of Oz, The (1939)",Adventure|Children's|Drama|Musical,4,978301368
+11,608,Fargo (1996),Crime|Drama|Thriller,4,978301398
+12,2692,Run Lola Run (Lola rennt) (1998),Action|Crime|Romance,4,978301570
+13,1961,Rain Man (1988),Drama,5,978301590
+14,2028,Saving Private Ryan (1998),Action|Drama|War,5,978301619
+15,3105,Awakenings (1990),Drama,5,978301713
+16,938,Gigi (1958),Musical,4,978301752
+17,1035,"Sound of Music, The (1965)",Musical,5,978301753
+18,1962,Driving Miss Daisy (1989),Drama,4,978301753
+19,2018,Bambi (1942),Animation|Children's,4,978301777
+20,150,Apollo 13 (1995),Drama,5,978301777
+21,1028,Mary Poppins (1964),Children's|Comedy|Musical,5,978301777
+22,1097,E.T. the Extra-Terrestrial (1982),Children's|Drama|Fantasy|Sci-Fi,4,978301953
+23,1287,Ben-Hur (1959),Action|Adventure|Drama,5,978302039
+24,2797,Big (1988),Comedy|Fantasy,4,978302039
+25,2762,"Sixth Sense, The (1999)",Thriller,4,978302091
+26,1246,Dead Poets Society (1989),Drama,4,978302091
+27,2918,Ferris Bueller's Day Off (1986),Comedy,4,978302124
+28,531,"Secret Garden, The (1993)",Children's|Drama,4,978302149
+29,3114,Toy Story 2 (1999),Animation|Children's|Comedy,4,978302174
+30,2791,Airplane! (1980),Comedy,4,978302188
+31,1029,Dumbo (1941),Animation|Children's|Musical,5,978302205
+32,594,Snow White and the Seven Dwarfs (1937),Animation|Children's|Musical,4,978302268
+33,2398,Miracle on 34th Street (1947),Drama,4,978302281
+34,1545,Ponette (1996),Drama,4,978824139
+35,527,Schindler's List (1993),Drama|War,5,978824195
+36,595,Beauty and the Beast (1991),Animation|Children's|Musical,5,978824268
+37,588,Aladdin (1992),Animation|Children's|Comedy|Musical,4,978824268
+38,1,Toy Story (1995),Animation|Children's|Comedy,5,978824268
+39,2355,"Bug's Life, A (1998)",Animation|Children's|Comedy,5,978824291
+40,2294,Antz (1998),Animation|Children's,4,978824291
+41,783,"Hunchback of Notre Dame, The (1996)",Animation|Children's|Musical,4,978824291
+42,1566,Hercules (1997),Adventure|Animation|Children's|Comedy|Musical,4,978824330
+43,1907,Mulan (1998),Animation|Children's,4,978824330
+44,48,Pocahontas (1995),Animation|Children's|Musical|Romance,5,978824351

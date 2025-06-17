@@ -1,6 +1,6 @@
 import random, torch, torch.nn as nn, torch.optim as optim
 from collections import deque
-from q_network import QNetwork
+from model.dqn.q_network import QNetwork
 
 class RLAgent:
     def __init__(
@@ -31,7 +31,7 @@ class RLAgent:
             for i in range(self.n_step):
                 R += self.n_step_buffer[i][2] * gamma
                 gamma *= self.gamma
-            s_k, _, _, _, _, G_k, done_flag = self.n_step_buffer[self.n_step]
+            s_k, _, _, _, _, G_k, done_flag = self.n_step_buffer[self.n_step - 1]
             self.buffer.append((s_k_n, a_k_n, R, s_k, G_k_n, G_k, done_flag))
             self.n_step_buffer.pop(0)
         # 若 episode 結束，把剩下的 transition 都寫進 buffer

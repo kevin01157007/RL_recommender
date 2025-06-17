@@ -14,11 +14,10 @@ class SimpleSimulator:
         self.item_emb = item_emb.to(device)
         self.device = device
 
-    def score(self, user_id, item_id, current_user_emb=None, current_item_emb=None):
+    def score(self, user_id, item_id):
 
         with torch.no_grad():
-            cosine_sim = torch.cosine_similarity(self.user_emb[user_id], self.item_emb[item_id], dim=0)
-        # Map from [-1, 1] to [0, 1]
-        score_val = (cosine_sim + 1) / 2
+            s = self.user_emb[user_id] @ self.item_emb[item_id]
+        score_val = (s + 10) / 24
 
         return score_val
