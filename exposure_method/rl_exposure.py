@@ -38,8 +38,8 @@ def epsilon(step, EPS_START, EPS_END, EPS_DECAY_RATE):
     return EPS_END + (EPS_START - EPS_END) * np.exp(-EPS_DECAY_RATE * step)
 
 def rl_exposure(agent, interaction, ITEM_EMB, USER_EMB, DEVICE,
-                total_epidsode=16, EPS_START=1, EPS_END=0.01,
-                EPS_DECAY_RATE=0.001, TOTAL_STEPS=100):
+                total_epidsode=32, EPS_START=1, EPS_END=0.01,
+                EPS_DECAY_RATE=0.016, TOTAL_STEPS=150):
     random.seed(42)
     NUM_USERS = USER_EMB.shape[0]
 
@@ -53,7 +53,13 @@ def rl_exposure(agent, interaction, ITEM_EMB, USER_EMB, DEVICE,
     exposure = []
     start = time.time()
 
+    all_episode_avg_losses = []
+    all_episode_total_rewards = []
+
     for episode in range(total_epidsode):
+        current_episode_total_reward = 0.0
+        current_episode_losses = []
+        print(f"--- Starting RL Episode {episode}/{total_epidsode} ---")
         G = build_dtrain_graph(interaction)
         C_now = community_cnt(G)
         if episode == 0:
@@ -92,9 +98,30 @@ def rl_exposure(agent, interaction, ITEM_EMB, USER_EMB, DEVICE,
 
             edge_index_next = build_edge_index(G, NUM_USERS, DEVICE)
 
+            # G is the graph for the next state (already updated by adding an edge)
+            # CANDIDATES is the list of top-100 items for each user (available in this scope)
+            # NUM_USERS is available in this scope
+            cand_pairs_for_s_next = []
+            for u_idx_loop in range(NUM_USERS):
+                # G.neighbors(f"u{u_idx_loop}") will give neighbor node strings like 'm123' or 'u456'
+                # We need to handle cases where a user might not be in G yet if G is built progressively,
+                # though build_dtrain_graph adds all users/items from initial interactions.
+                # For safety, use G.has_node and check if it's an item neighbor.
+                seen_items_in_G_next = set()
+                if G.has_node(f"u{u_idx_loop}"):
+                    for neighbor_node_str in G.neighbors(f"u{u_idx_loop}"):
+                        if neighbor_node_str.startswith('m'):
+                            seen_items_in_G_next.add(int(neighbor_node_str[1:]))
+
+                user_specific_cands_for_s_next = [item_id for item_id in CANDIDATES[u_idx_loop] if item_id not in seen_items_in_G_next]
+                for item_id_loop in user_specific_cands_for_s_next:
+                    cand_pairs_for_s_next.append((u_idx_loop, item_id_loop))
+
             # 計算 reward
             C_prev, C_new = C_now, community_cnt(G)
-            reward = 1.0 / C_new - 1.0 / C_prev
+            reward = float(C_prev - C_new)
+            current_episode_total_reward += reward
+            print(f"Reward: {reward}, C_prev: {C_prev}, C_new: {C_new}")
             C_now = C_new
 
             done = (t == TOTAL_STEPS - 1)
@@ -105,17 +132,34 @@ def rl_exposure(agent, interaction, ITEM_EMB, USER_EMB, DEVICE,
                 next_state=edge_index_next,
                 graph_prev=G_prev_edges,
                 graph_next=G_next_edges,
-                done=done
+                done=done,
+                next_state_candidate_pairs=cand_pairs_for_s_next
             )
 
             # 移除已選擇的 pair
             cand_pairs.pop(idx)
             cand_pairs_tensor = torch.tensor(cand_pairs, dtype=torch.long, device=DEVICE) if cand_pairs else torch.empty((0, 2), dtype=torch.long, device=DEVICE)
 
-            if len(agent.buffer) >= 100:
-                agent.update(u_batch, v_batch)
+            if len(agent.buffer) >= agent.batch:  # Check if buffer is ready for update
+                loss = agent.update()
+                if loss is not None:
+                    current_episode_losses.append(loss)
 
-        print(f"Episode {episode} 結束後社群數: {C_now}")
+        avg_loss_this_episode = sum(current_episode_losses) / len(current_episode_losses) if current_episode_losses else 0.0
+        all_episode_avg_losses.append(avg_loss_this_episode)
+        all_episode_total_rewards.append(current_episode_total_reward)
+        # The epsilon printed should be the one for the last step of the episode
+        final_epsilon_this_episode = epsilon(TOTAL_STEPS - 1, EPS_START, EPS_END, EPS_DECAY_RATE)
+        print(f"Episode {episode} finished. Total Reward: {current_episode_total_reward:.4f}, Avg Loss: {avg_loss_this_episode:.4f}, Epsilon_end: {final_epsilon_this_episode:.4f}, Communities: {C_now}")
+
+    print("\n--- RL Training Summary ---")
+    for i in range(len(all_episode_total_rewards)):
+        print(f"Episode {i}: Total Reward = {all_episode_total_rewards[i]:.4f}, Avg Loss = {all_episode_avg_losses[i]:.4f}")
+    avg_reward_overall = sum(all_episode_total_rewards) / len(all_episode_total_rewards) if all_episode_total_rewards else 0.0
+    avg_loss_overall = sum(all_episode_avg_losses) / len(all_episode_avg_losses) if all_episode_avg_losses else 0.0
+    print(f"Overall Avg Reward per Episode: {avg_reward_overall:.4f}")
+    print(f"Overall Avg Loss per Episode: {avg_loss_overall:.4f}")
+    print("---------------------------\n")
 
     print(f"Done | Final community count = {C_now} | Elapsed {time.time() - start:.1f}s")
     return exposure

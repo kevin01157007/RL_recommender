@@ -37,7 +37,7 @@ class RecSimEnv:
 
     def run(self, n_round, k_rec):
         user_item_graph = build_nx_graph()
-        agent = RLAgent(num_nodes=self.user_emb.shape[0] + self.item_emb.shape[0] + 1, emb_dim=self.user_emb.size(1), 
+        agent = RLAgent(num_users=self.n_user, num_nodes=self.user_emb.shape[0] + self.item_emb.shape[0] + 1, emb_dim=self.user_emb.size(1),
                         device=self.device)
         
         with torch.no_grad():
