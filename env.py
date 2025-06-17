@@ -35,7 +35,7 @@ class RecSimEnv:
         self.k_eval = k_eval # 儲存 k_eval(TOPK)
 
 
-    def run(self, n_round, k_rec):
+    def run(self, n_round, k_rec, gcn_retrain_every_n_rounds=1, gcn_simulation_retrain_epochs=100):
         user_item_graph = build_nx_graph()
         agent = RLAgent(num_users=self.n_user, num_nodes=self.user_emb.shape[0] + self.item_emb.shape[0] + 1, emb_dim=self.user_emb.size(1),
                         device=self.device)
@@ -88,7 +88,7 @@ class RecSimEnv:
                 print("收集test有幾個:",len(dtest))
                 pd.DataFrame(dtest, columns=['u','i']).to_csv("interaction_collect/dtest.csv", index=False)
                 pd.DataFrame(dval, columns=['u','i']).to_csv("interaction_collect/dval.csv", index=False)
-            else:
+            else: # This block is for t = 1, 2, ...
                 print("收集到幾個互動:",len(current_round_interactions))
 
                 dtrain_new_interactions.extend(current_round_interactions)
@@ -122,32 +122,55 @@ class RecSimEnv:
             
                 pd.DataFrame(current_round_interactions, columns=['u','i']).to_csv(f"interaction_collect/new_interactions{t}.csv", index=False)
 
-                current_num_epochs = 100
-                print(f"\n--- 第 {t} 輪後進行訓練，使用目前累積的 {len(dtrain_new_interactions)} 筆真實互動，訓練 {current_num_epochs} 個 epochs ---")
-                self.train_model_on_collected_data(
-                    training_interactions=dtrain_new_interactions,
-                    val_interactions=dval,
-                    batch_size = 1024,
-                    k_eval=10,
-                    num_epochs=current_num_epochs
-                )
-    
-                print() # 所有輪次處理完畢後換行
-                # --- 最終測試評估 ---
-                print(f"\n=====第 {t} 輪模擬結束後，於測試集上進行最終評估 =====")
-                print(f"將使用初始測試集中的 {len(dtest)} 筆互動進行最終評估...")
+                if t % gcn_retrain_every_n_rounds == 0:
+                    print(f"\n--- Triggering GCN retraining and evaluation after round {t} (gcn_retrain_every_n_rounds={gcn_retrain_every_n_rounds}) ---")
+                    current_num_epochs = gcn_simulation_retrain_epochs
+                    print(f"\n--- 第 {t} 輪後進行訓練，使用目前累積的 {len(dtrain_new_interactions)} 筆真實互動，訓練 {current_num_epochs} 個 epochs ---")
+                    self.train_model_on_collected_data(
+                        training_interactions=dtrain_new_interactions,
+                        val_interactions=dval,
+                        batch_size = 1024,
+                        k_eval=10,
+                        num_epochs=current_num_epochs
+                    )
 
-                full_edge_index  = build_edge_index(dtrain_new_interactions + dval + dtest, self.n_user).to(self.device)
+                    print(f"\n--- Updating RL agent's Q-network embeddings with trained GCN embeddings ---")
+                    with torch.no_grad():
+                        # Get the raw (layer 0) embeddings from the trained LightGCN model
+                        trained_gcn_embeddings = self.rec_model.model.embedding.weight.data
 
-                model_to_evaluate = self.rec_model.model # LightGCN 實例
-                model_to_evaluate.eval()
-                test(model_to_evaluate, 
-                    num_items = self.n_item,
-                    batch_size = 1024, 
-                    device = self.device, 
-                    train_inter = dtrain_new_interactions, val_inter = dval, test_inter = dtest, 
-                    train_edge_index = self.edge_index, full_edge_index = full_edge_index, 
-                    K = 10)
+                        # Update user embeddings in Q-network
+                        agent.q_net.node_emb.weight.data[:self.n_user] = trained_gcn_embeddings[:self.n_user]
+
+                        # Update item embeddings in Q-network
+                        # Note: LightGCN stores embeddings as [users, items]
+                        # QNetwork stores them as [users, items, virtual_node]
+                        # Item embeddings in trained_gcn_embeddings start from self.n_user index
+                        agent.q_net.node_emb.weight.data[self.n_user:self.n_user+self.n_item] = \
+                            trained_gcn_embeddings[self.n_user:self.n_user+self.n_item]
+
+                        # Update the target network embeddings to match the Q-network
+                        agent.target_net.node_emb.weight.data.copy_(agent.q_net.node_emb.weight.data)
+                    print("--- RL agent's embeddings updated ---")
+
+                    print() # 所有輪次處理完畢後換行
+                    # --- 最終測試評估 ---
+                    print(f"\n=====第 {t} 輪模擬結束後，於測試集上進行最終評估 =====")
+                    print(f"將使用初始測試集中的 {len(dtest)} 筆互動進行最終評估...")
+
+                    full_edge_index  = build_edge_index(dtrain_new_interactions + dval + dtest, self.n_user).to(self.device)
+
+                    model_to_evaluate = self.rec_model.model # LightGCN 實例
+                    model_to_evaluate.eval()
+                    test(model_to_evaluate,
+                        num_items = self.n_item,
+                        batch_size = 1024,
+                        device = self.device,
+                        train_inter = dtrain_new_interactions, val_inter = dval, test_inter = dtest,
+                        train_edge_index = self.edge_index, full_edge_index = full_edge_index,
+                        K = 10)
+                else:
+                    print(f"\n--- Skipping GCN retraining and evaluation after round {t} (current round interactions: {len(current_round_interactions)}, total dtrain: {len(dtrain_new_interactions)}, gcn_retrain_every_n_rounds={gcn_retrain_every_n_rounds}) ---")
             
     def train_model_on_collected_data(self,
                                    training_interactions, # (u,i) 元組列表
