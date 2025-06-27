@@ -4,6 +4,14 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import pandas as pd
+def same_seeds(seed):
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)  
+    np.random.seed(seed)  
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
 def pairs_from(df):
     return list(zip(df.user_id, df.movie_id))
 
@@ -14,12 +22,11 @@ def build_edge_index(pairs, num_users):
         edges.append((i+num_users, u))
     return torch.tensor(edges, dtype=torch.long).t().contiguous()
 
-def sample_mini_batch(batch_size, user_pos_dict, num_items, exclude_user_pos_dict=None):
+def sample_mini_batch(batch_size, user_pos_dict, valid_users, num_items, exclude_user_pos_dict=None):
     """Uniformly sample *users*, then one positive & one negative item each."""
     users, pos_items, neg_items = [], [], []
-
+    # valid_users = [u for u in user_pos_dict.keys() if len(user_pos_dict[u]) > 0]
     for _ in range(batch_size):
-        valid_users = [u for u in user_pos_dict.keys() if len(user_pos_dict[u]) > 0]
         u = random.choice(valid_users)
         
         # guarantee the user has at least 1 interaction (ML‑1M true for all)
@@ -81,6 +88,9 @@ def precision_recall_ndcg_at_k(model, edge_index_train, test_pairs, train_pairs=
     return np.mean(pre), np.mean(rec), np.mean(ndcg)
 
 def train_val(model, num_items, num_epochs, batch_size, device, opt, train_inter, val_inter, train_edge_index, val_edge_index, patience, K):
+    with open('rs_training_log.txt', 'w', encoding='utf-8') as f:
+        f.write("Training Log\n")
+        f.write("=" * 50 + "\n")
     train_user_pos_dict = defaultdict(list)
     for u, i in train_inter:
         train_user_pos_dict[u].append(i)
@@ -96,6 +106,9 @@ def train_val(model, num_items, num_epochs, batch_size, device, opt, train_inter
     loss_hist, val_loss_hist = [], []
     val_prec_hist, val_rec_hist, val_ndcg_hist = [], [], []
 
+    train_valid_users = [u for u in train_user_pos_dict.keys() if len(train_user_pos_dict[u]) > 0]
+    val_valid_users = [u for u in val_user_pos_dict.keys() if len(val_user_pos_dict[u]) > 0]
+
     best_precision = 0
     patience_counter = 0
 
@@ -110,7 +123,7 @@ def train_val(model, num_items, num_epochs, batch_size, device, opt, train_inter
         total_val_loss = 0.0
 
         for _ in range(steps_per_epoch):
-            u, p, n = sample_mini_batch(batch_size, train_user_pos_dict, num_items)
+            u, p, n = sample_mini_batch(batch_size, train_user_pos_dict, train_valid_users, num_items)
             u, p, n = u.to(device), p.to(device), n.to(device)
             opt.zero_grad()
             loss, _, _ = bpr_loss(model, u, p, n, train_edge_index)
@@ -124,7 +137,7 @@ def train_val(model, num_items, num_epochs, batch_size, device, opt, train_inter
         # ─── Validation ────────────────────────────────────────────────────────────
         model.eval()
         for _ in range(val_steps_per_epoch):
-            u, p, n = sample_mini_batch(batch_size, val_user_pos_dict, num_items, train_user_pos_dict)
+            u, p, n = sample_mini_batch(batch_size, val_user_pos_dict, val_valid_users, num_items, train_user_pos_dict)
             u, p, n = u.to(device), p.to(device), n.to(device)
             with torch.no_grad():
                 loss, _, _ = bpr_loss(model, u, p, n, train_edge_index)
@@ -142,10 +155,11 @@ def train_val(model, num_items, num_epochs, batch_size, device, opt, train_inter
         val_rec_hist.append(rec)
         val_ndcg_hist.append(ndcg)
 
-        # print(
-        #     f"Epoch {epoch:02d} | {time.time() - t0:.1f}s | TrainLoss {avg_train_loss:.4f} | "
-        #     f"ValLoss {avg_val_loss:.4f} | P@{K} {prec:.4f} R@{K} {rec:.4f} NDCG@{K} {ndcg:.4f}"
-        # )
+        with open('rs_training_log.txt', 'a', encoding='utf-8') as f:
+            f.write(
+                f"Epoch {epoch:02d} | {time.time() - t0:.1f}s | TrainLoss {avg_train_loss:.4f} | "
+                f"ValLoss {avg_val_loss:.4f} | P@{K} {prec:.4f} R@{K} {rec:.4f} NDCG@{K} {ndcg:.4f} \n"
+            )
         best_model_state = model.state_dict()
         # Early stopping -----------------------------------------------------------
         # Early stopping logic
@@ -175,8 +189,11 @@ def test(model, num_items, batch_size, device, train_inter, val_inter, test_inte
     val_train_user_pos_dict = defaultdict(list)
     for u, i in val_inter + train_inter:
         val_train_user_pos_dict[u].append(i)
+    
+    test_valid_users = [u for u in test_user_pos_dict.keys() if len(test_user_pos_dict[u]) > 0]
+
     for _ in range(test_steps_per_epoch):
-        u, p, n = sample_mini_batch(batch_size, test_user_pos_dict, num_items, val_train_user_pos_dict)
+        u, p, n = sample_mini_batch(batch_size, test_user_pos_dict, test_valid_users, num_items, val_train_user_pos_dict)
         u, p, n = u.to(device), p.to(device), n.to(device)
         with torch.no_grad():
             loss, _, _ = bpr_loss(model, u, p, n, train_edge_index)
@@ -191,3 +208,4 @@ def test(model, num_items, batch_size, device, train_inter, val_inter, test_inte
         f"\nFinal Test | P@{K} {prec_test:.4f} | R@{K} {rec_test:.4f} | "
         f"NDCG@{K} {ndcg_test:.4f} | BPR Loss {avg_test_loss:.4f}\n"
     )
+    return prec_test, rec_test, ndcg_test

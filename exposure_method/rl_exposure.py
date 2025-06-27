@@ -26,7 +26,7 @@ def build_dtrain_graph(inter):
     return B
 
 def community_cnt(g):
-    part = community_louvain.best_partition(g, resolution=1.25, random_state=42)
+    part = community_louvain.best_partition(g, resolution=1, random_state=42)
     return len(set(part.values()))
 
 def build_edge_index(G, NUM_USERS, DEVICE):
@@ -38,10 +38,15 @@ def epsilon(step, EPS_START, EPS_END, EPS_DECAY_RATE):
     return EPS_END + (EPS_START - EPS_END) * np.exp(-EPS_DECAY_RATE * step)
 
 def rl_exposure(agent, interaction, ITEM_EMB, USER_EMB, DEVICE,
-                total_epidsode=32, EPS_START=1, EPS_END=0.01,
-                EPS_DECAY_RATE=0.016, TOTAL_STEPS=150):
+                total_epidsode=5, EPS_START=1, EPS_END=0.01,
+                EPS_DECAY_RATE=0.005, TOTAL_STEPS=300):
     random.seed(42)
     NUM_USERS = USER_EMB.shape[0]
+
+    # 創建日誌文件
+    with open('training_log.txt', 'w', encoding='utf-8') as f:
+        f.write("Training Log\n")
+        f.write("=" * 50 + "\n")
 
     with torch.no_grad():
         score = USER_EMB @ ITEM_EMB.t()
@@ -121,7 +126,13 @@ def rl_exposure(agent, interaction, ITEM_EMB, USER_EMB, DEVICE,
             C_prev, C_new = C_now, community_cnt(G)
             reward = float(C_prev - C_new)
             current_episode_total_reward += reward
-            print(f"Reward: {reward}, C_prev: {C_prev}, C_new: {C_new}")
+            log_message = f"Reward: {reward}, C_prev: {C_prev}, C_new: {C_new}"
+            # print(log_message)
+            
+            # 寫入日誌文件
+            with open('training_log.txt', 'a', encoding='utf-8') as f:
+                f.write(f"Episode {episode}, Step {t}: {log_message}\n")
+            
             C_now = C_new
 
             done = (t == TOTAL_STEPS - 1)
@@ -151,15 +162,31 @@ def rl_exposure(agent, interaction, ITEM_EMB, USER_EMB, DEVICE,
         # The epsilon printed should be the one for the last step of the episode
         final_epsilon_this_episode = epsilon(TOTAL_STEPS - 1, EPS_START, EPS_END, EPS_DECAY_RATE)
         print(f"Episode {episode} finished. Total Reward: {current_episode_total_reward:.4f}, Avg Loss: {avg_loss_this_episode:.4f}, Epsilon_end: {final_epsilon_this_episode:.4f}, Communities: {C_now}")
+        # 寫入每個episode的總結
+        with open('training_log.txt', 'a', encoding='utf-8') as f:
+            f.write(f"\nEpisode {episode} Summary:\n")
+            f.write(f"Total Reward: {current_episode_total_reward:.4f}\n")
+            f.write(f"Average Loss: {avg_loss_this_episode:.4f}\n")
+            f.write(f"Final Epsilon: {final_epsilon_this_episode:.4f}\n")
+            f.write(f"Final Communities: {C_now}\n")
+            f.write("-" * 50 + "\n")
 
     print("\n--- RL Training Summary ---")
     for i in range(len(all_episode_total_rewards)):
         print(f"Episode {i}: Total Reward = {all_episode_total_rewards[i]:.4f}, Avg Loss = {all_episode_avg_losses[i]:.4f}")
     avg_reward_overall = sum(all_episode_total_rewards) / len(all_episode_total_rewards) if all_episode_total_rewards else 0.0
     avg_loss_overall = sum(all_episode_avg_losses) / len(all_episode_avg_losses) if all_episode_avg_losses else 0.0
-    print(f"Overall Avg Reward per Episode: {avg_reward_overall:.4f}")
-    print(f"Overall Avg Loss per Episode: {avg_loss_overall:.4f}")
-    print("---------------------------\n")
+
+    # 寫入整體訓練總結
+    with open('training_log.txt', 'a', encoding='utf-8') as f:
+        f.write("\nOverall Training Summary\n")
+        f.write("=" * 50 + "\n")
+        for i in range(len(all_episode_total_rewards)):
+            f.write(f"Episode {i}: Total Reward = {all_episode_total_rewards[i]:.4f}, Avg Loss = {all_episode_avg_losses[i]:.4f}\n")
+        f.write(f"\nOverall Avg Reward per Episode: {avg_reward_overall:.4f}\n")
+        f.write(f"Overall Avg Loss per Episode: {avg_loss_overall:.4f}\n")
+        f.write(f"Final community count: {C_now}\n")
+        f.write(f"Total training time: {time.time() - start:.1f}s\n")
 
     print(f"Done | Final community count = {C_now} | Elapsed {time.time() - start:.1f}s")
     return exposure

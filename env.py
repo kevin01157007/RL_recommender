@@ -1,12 +1,11 @@
 import torch
 import pandas as pd
-from utility.utilis import build_edge_index, train_val, test
+from utility.utilis import build_edge_index, train_val, test, same_seeds
 import community.community_louvain as community_louvain
 from utility.bulid_dtrain_graph import build_dtrain_graph
 from utility.build_nx_graph import build_nx_graph
 from exposure_method.heuristic_exposure import heuristic_exposure_strategy as heuristic_exposure
-from exposure_method.rl_exposure import rl_exposure
-from model.dqn.rl_agent import RLAgent
+from utility.plot import plot
 import random
 
 class RecSimEnv:
@@ -35,15 +34,11 @@ class RecSimEnv:
         self.k_eval = k_eval # 儲存 k_eval(TOPK)
 
 
-    def run(self, n_round, k_rec, gcn_retrain_every_n_rounds=2, gcn_simulation_retrain_epochs=100):
+    def run(self, n_round, k_rec, gcn_retrain_every_n_rounds=1, gcn_simulation_retrain_epochs=10):
+        same_seeds(0)
+        test_prec_hist, test_rec_hist, test_ndcg_hist = [], [], []
+        retrain_rounds = []
         user_item_graph = build_nx_graph()
-        agent = RLAgent(num_users=self.n_user, num_nodes=self.user_emb.shape[0] + self.item_emb.shape[0] + 1, emb_dim=self.user_emb.size(1),
-                        device=self.device)
-        
-        with torch.no_grad():
-            agent.q_net.node_emb.weight.data[:self.n_user] = self.user_emb
-            agent.q_net.node_emb.weight.data[self.n_user:self.n_user+self.n_item] = self.item_emb
-            agent.target_net.node_emb.weight.data.copy_(agent.q_net.node_emb.weight.data)
         dtrain_new_interactions = [] # 這將是一個 (u,i) 元組的列表，累積所有輪次的互動
         dval = []
         dtest = []
@@ -64,7 +59,7 @@ class RecSimEnv:
                         if len(rec_items) > k_rec:
                             rec_items = random.sample(rec_items, k_rec)
                     else:
-                        rec_items = self.rec_model.recommend(u, k=k_rec, exclude=seen[u]) # rec_items 是 I_i^t
+                        rec_items = self.rec_model.recommend(u, k=k_rec, exclude=seen[u])
                     # rec_items  推薦的 item_ids
                     for item_id_recommended in rec_items: # 直接遍歷 RS 推薦的物品
                         seen[u].add(item_id_recommended) # 用戶喜歡過的物品
@@ -92,17 +87,18 @@ class RecSimEnv:
                 print("收集到幾個互動:",len(current_round_interactions))
 
                 dtrain_new_interactions.extend(current_round_interactions)
-                # dtrain_graph = build_dtrain_graph(dtrain_new_interactions)
-                #產生曝光邊
-                exposure = rl_exposure(agent, dtrain_new_interactions, self.item_emb, self.user_emb, self.device)
-                # exposure = heuristic_exposure(dtrain_graph, user_item_graph, total_rec_item, self.item_emb)
+                dtrain_graph = build_dtrain_graph(dtrain_new_interactions)
+                if t > 0:
+                    #產生曝光邊
+                    # exposure = rl_exposure(agent, dtrain_new_interactions, self.item_emb, self.user_emb, self.device)
+                    exposure = heuristic_exposure(dtrain_graph, user_item_graph, total_rec_item, self.item_emb)
 
-                for u, item in exposure:
-                     seen[u].add(item)
+                    for u, item in exposure:
+                        seen[u].add(item)
 
-                #把曝光邊接起來
-                current_round_interactions.extend(exposure)
-                dtrain_new_interactions.extend(exposure)
+                    # 把曝光邊接起來
+                    current_round_interactions.extend(exposure)
+                    dtrain_new_interactions.extend(exposure)
 
                 #去除重複(u,i)
                 current_round_interactions = list(set(current_round_interactions))
@@ -117,20 +113,23 @@ class RecSimEnv:
                 
                 #拿dtrain再做一次louvain
                 dtrain_graph = build_dtrain_graph(dtrain_new_interactions)
-                communities = community_louvain.best_partition(dtrain_graph, resolution=1.25, random_state=42)
+                communities = community_louvain.best_partition(dtrain_graph, resolution=1, random_state=42)
                 print(f"總社群數量: {len(set(communities.values()))}")
             
                 pd.DataFrame(current_round_interactions, columns=['u','i']).to_csv(f"interaction_collect/new_interactions{t}.csv", index=False)
 
                 if t % gcn_retrain_every_n_rounds == 0:
+                    retrain_rounds.append(t)
                     print(f"\n--- Triggering GCN retraining and evaluation after round {t} (gcn_retrain_every_n_rounds={gcn_retrain_every_n_rounds}) ---")
                     current_num_epochs = gcn_simulation_retrain_epochs
+                    # if t == n_round - 1:
+                    #     current_num_epochs = 100
                     print(f"\n--- 第 {t} 輪後進行訓練，使用目前累積的 {len(dtrain_new_interactions)} 筆真實互動，訓練 {current_num_epochs} 個 epochs ---")
                     self.train_model_on_collected_data(
                         training_interactions=dtrain_new_interactions,
                         val_interactions=dval,
                         batch_size = 1024,
-                        k_eval=10,
+                        k_eval=self.k_eval,
                         num_epochs=current_num_epochs
                     )
                     print() # 所有輪次處理完畢後換行
@@ -142,16 +141,25 @@ class RecSimEnv:
 
                     model_to_evaluate = self.rec_model.model # LightGCN 實例
                     model_to_evaluate.eval()
-                    test(model_to_evaluate,
-                        num_items = self.n_item,
-                        batch_size = 1024,
-                        device = self.device,
-                        train_inter = dtrain_new_interactions, val_inter = dval, test_inter = dtest,
-                        train_edge_index = self.edge_index, full_edge_index = full_edge_index,
-                        K = 10)
+                    prec_test, rec_test, ndcg_test = test(model_to_evaluate,
+                                                        num_items = self.n_item,
+                                                        batch_size = 1024,
+                                                        device = self.device,
+                                                        train_inter = dtrain_new_interactions, 
+                                                        val_inter = dval, 
+                                                        test_inter = dtest,
+                                                        train_edge_index = self.edge_index, full_edge_index = full_edge_index,
+                                                        K = self.k_eval)
+                    test_prec_hist.append(prec_test)
+                    test_rec_hist.append(rec_test)
+                    test_ndcg_hist.append(ndcg_test)
                 else:
                     print(f"\n--- Skipping GCN retraining and evaluation after round {t} (current round interactions: {len(current_round_interactions)}, total dtrain: {len(dtrain_new_interactions)}, gcn_retrain_every_n_rounds={gcn_retrain_every_n_rounds}) ---")
-            
+        plot(test_prec_hist, test_rec_hist, test_ndcg_hist, self.k_eval, retrain_rounds)
+        user_emb, item_emb = self.rec_model.model.get_user_item(full_edge_index)
+        # torch.save(model.state_dict(), "lightgcn_ml1m_fixed.pth")
+        torch.save(user_emb.cpu(), "model/RS/user_emb.pt")
+        torch.save(item_emb.cpu(), "model/RS/item_emb.pt")
     def train_model_on_collected_data(self,
                                    training_interactions, # (u,i) 元組列表
                                    val_interactions,       

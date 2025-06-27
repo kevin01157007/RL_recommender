@@ -36,8 +36,8 @@ def calculate_ILS(item_emb, rec_item_set):
 
 def heuristic_exposure_strategy(dtrain_user_item_graph ,user_item_graph, rec_item_set, item_emb, 
                                n_selected_communities=2,  # 選擇的社群數量
-                               n_diverse_users_per_community=10,  # 每個社群中選擇的多樣化用戶數量
-                               n_items_per_user=3):  # 每個用戶選擇的項目數量
+                               n_diverse_users_per_community=20,  # 每個社群中選擇的多樣化用戶數量
+                               n_items_per_user=20):  # 每個用戶選擇的項目數量
     """
     
     參數:
@@ -58,17 +58,14 @@ def heuristic_exposure_strategy(dtrain_user_item_graph ,user_item_graph, rec_ite
     connected_components = list(nx.connected_components(dtrain_user_item_graph))
     print(f"總共有 {len(connected_components)} 個連通元件")
 
-    all_partition = community_louvain.best_partition(dtrain_user_item_graph, resolution=1.25, random_state=42)
+    all_partition = community_louvain.best_partition(dtrain_user_item_graph, resolution=1, random_state=42)
 
     communities = all_partition
     print(f"總社群數量: {len(set(communities.values()))}")
-
     
     # 將節點分為用戶節點和項目節點
     users = [node for node in dtrain_user_item_graph.nodes() if dtrain_user_item_graph.nodes[node].get('bipartite') == 0]
     items = [node for node in dtrain_user_item_graph.nodes() if dtrain_user_item_graph.nodes[node].get('bipartite') == 1]
-    print(len(users))
-    print(len(items))
     # 為每個社群分配用戶和項目
     community_users = defaultdict(list)
     community_items = defaultdict(list)
@@ -79,9 +76,8 @@ def heuristic_exposure_strategy(dtrain_user_item_graph ,user_item_graph, rec_ite
         elif node in items:
             community_items[community_id].append(node)
     
-    # 過濾掉少於3個user或3個item的社群
     valid_communities = [comm_id for comm_id in set(communities.values())
-                        if len(community_users[comm_id]) > 2 and len(community_items[comm_id]) > 2]
+                        if len(community_users[comm_id]) > 0 and len(community_items[comm_id]) > 0]
     print("\nTop 社群資訊（前10）:")
     from collections import Counter
     comm_sizes = Counter(communities.values())
@@ -131,7 +127,12 @@ def heuristic_exposure_strategy(dtrain_user_item_graph ,user_item_graph, rec_ite
 
         # 為每個多樣化用戶選擇歷史交互項目
         for user in diverse_users:
-            user_items = list(user_item_graph.neighbors(f"u{user}"))
+            neighbor_items = user_item_graph.neighbors(f"u{user}")
+            # 選擇與用戶不同社群的項目
+            user_items = [
+                item for item in neighbor_items
+                if item in communities and communities[item] != source_idx
+            ]
             
             if len(user_items) == 0:
                 continue
