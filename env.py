@@ -7,6 +7,7 @@ from utility.build_nx_graph import build_nx_graph
 from exposure_method.heuristic_exposure import heuristic_exposure_strategy as heuristic_exposure
 from utility.plot import plot
 import random
+import networkx as nx
 
 class RecSimEnv:
     def __init__(self,
@@ -45,7 +46,7 @@ class RecSimEnv:
         seen = {u: set() for u in range(self.n_user)}
 
         for t in range(n_round):
-            print(f"===== Time step{t} =====")
+            print(f"===== Time step {t} =====")
             current_round_interactions = [] # 當前timestep收集的互動
             total_rec_item = [] #存放每個user的推薦列表
 
@@ -103,7 +104,7 @@ class RecSimEnv:
                 #去除重複(u,i)
                 current_round_interactions = list(set(current_round_interactions))
                 dtrain_new_interactions = list(set(dtrain_new_interactions))
-
+                dtrain_new_interactions = list(set(dtrain_new_interactions) - set(dtest) - set(dval))
 
                 #建立edge_index
                 delta_edge_index = build_edge_index(current_round_interactions, self.n_user).to(self.device)
@@ -113,6 +114,8 @@ class RecSimEnv:
                 
                 #拿dtrain再做一次louvain
                 dtrain_graph = build_dtrain_graph(dtrain_new_interactions)
+                connected_components = list(nx.connected_components(dtrain_graph))
+                print(f"總共有 {len(connected_components)} 個連通元件")
                 communities = community_louvain.best_partition(dtrain_graph, resolution=1, random_state=42)
                 print(f"總社群數量: {len(set(communities.values()))}")
             
@@ -122,8 +125,7 @@ class RecSimEnv:
                     retrain_rounds.append(t)
                     print(f"\n--- Triggering GCN retraining and evaluation after round {t} (gcn_retrain_every_n_rounds={gcn_retrain_every_n_rounds}) ---")
                     current_num_epochs = gcn_simulation_retrain_epochs
-                    # if t == n_round - 1:
-                    #     current_num_epochs = 100
+
                     print(f"\n--- 第 {t} 輪後進行訓練，使用目前累積的 {len(dtrain_new_interactions)} 筆真實互動，訓練 {current_num_epochs} 個 epochs ---")
                     self.train_model_on_collected_data(
                         training_interactions=dtrain_new_interactions,

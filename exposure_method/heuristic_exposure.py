@@ -131,7 +131,7 @@ def heuristic_exposure_strategy(dtrain_user_item_graph ,user_item_graph, rec_ite
             # 選擇與用戶不同社群的項目
             user_items = [
                 item for item in neighbor_items
-                if item in communities and communities[item] != source_idx
+                if item in communities and communities[item] != source_idx and item not in dtrain_user_item_graph.neighbors(f"u{user}")
             ]
             
             if len(user_items) == 0:

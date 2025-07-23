@@ -1,0 +1,12 @@
+Training Log
+==================================================
+Epoch 01 | 85.2s | TrainLoss 0.1001 | ValLoss 0.2813 | P@10 0.0190 R@10 0.1901 NDCG@10 0.1125 
+Epoch 02 | 84.7s | TrainLoss 0.0983 | ValLoss 0.2732 | P@10 0.0192 R@10 0.1916 NDCG@10 0.1147 
+Epoch 03 | 84.7s | TrainLoss 0.0963 | ValLoss 0.2726 | P@10 0.0192 R@10 0.1918 NDCG@10 0.1157 
+Epoch 04 | 84.8s | TrainLoss 0.0947 | ValLoss 0.2738 | P@10 0.0192 R@10 0.1919 NDCG@10 0.1161 
+Epoch 05 | 84.8s | TrainLoss 0.0937 | ValLoss 0.2721 | P@10 0.0192 R@10 0.1918 NDCG@10 0.1163 
+Epoch 06 | 84.8s | TrainLoss 0.0927 | ValLoss 0.2463 | P@10 0.0192 R@10 0.1921 NDCG@10 0.1168 
+Epoch 07 | 84.8s | TrainLoss 0.0915 | ValLoss 0.2663 | P@10 0.0194 R@10 0.1938 NDCG@10 0.1177 
+Epoch 08 | 86.0s | TrainLoss 0.0897 | ValLoss 0.2758 | P@10 0.0194 R@10 0.1945 NDCG@10 0.1184 
+Epoch 09 | 84.8s | TrainLoss 0.0890 | ValLoss 0.2700 | P@10 0.0197 R@10 0.1973 NDCG@10 0.1199 
+Epoch 10 | 84.7s | TrainLoss 0.0885 | ValLoss 0.2486 | P@10 0.0200 R@10 0.2000 NDCG@10 0.1213 
