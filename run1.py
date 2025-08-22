@@ -58,7 +58,7 @@ if __name__ == "__main__":
         exit()
 
     print("Starting environment run...")
-    env.run(n_round=11, k_rec=k_eval_for_env)
+    env.run(n_round=10, k_rec=k_eval_for_env)
     print("Environment run finished.")
     print("Script finished.")
 
