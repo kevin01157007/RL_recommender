@@ -35,7 +35,7 @@ class RecSimEnv:
         self.k_eval = k_eval # 儲存 k_eval(TOPK)
 
 
-    def run(self, n_round, k_rec, gcn_retrain_every_n_rounds=1, gcn_simulation_retrain_epochs=10):
+    def run(self, n_round, k_rec, gcn_retrain_every_n_rounds=1, gcn_simulation_retrain_epochs=20):
         same_seeds(0)
         test_prec_hist, test_rec_hist, test_ndcg_hist = [], [], []
         retrain_rounds = []
@@ -169,8 +169,8 @@ class RecSimEnv:
         plot(test_prec_hist, test_rec_hist, test_ndcg_hist, self.k_eval, retrain_rounds)
         user_emb, item_emb = self.rec_model.model.get_user_item(full_edge_index)
         # torch.save(model.state_dict(), "lightgcn_ml1m_fixed.pth")
-        torch.save(user_emb.cpu(), "model/RS/user_emb.pt")
-        torch.save(item_emb.cpu(), "model/RS/item_emb.pt")
+        torch.save(user_emb.cpu(), "model/RS/user_emb_heuristic_20epoch.pt")
+        torch.save(item_emb.cpu(), "model/RS/item_emb_heuristic_20epoch.pt")
     def train_model_on_collected_data(self,
                                    training_interactions, # (u,i) 元組列表
                                    val_interactions,       

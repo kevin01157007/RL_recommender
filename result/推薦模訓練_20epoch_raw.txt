@@ -1,0 +1,244 @@
+Using device: cuda
+Starting environment run...
+===== Time step 0 =====
+收集到幾個互動: 33662
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 0.06 秒
+節點數量: 7737 (Users: 5840, Items: 1897)
+邊數量: 33662
+圖不是連通的。將個別偵測社群
+總共有 6 個連通元件
+總社群數量: 24
+
+--- Triggering GCN retraining and evaluation after round 0 (gcn_retrain_every_n_rounds=1) ---
+
+--- 第 0 輪後進行訓練，使用目前累積的 33662 筆真實互動，訓練 20 個 epochs ---
+在 33662 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 20, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+完成模擬後訓練。
+
+
+=====第 0 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0042 | R@10 0.0418 | NDCG@10 0.0194 | BPR Loss 0.5747
+
+===== Time step 1 =====
+收集到幾個互動: 271732
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 0.51 秒
+節點數量: 7834 (Users: 5903, Items: 1931)
+邊數量: 305394
+圖不是連通的。將個別偵測社群
+總共有 6 個連通元件
+總社群數量: 31
+
+--- Triggering GCN retraining and evaluation after round 1 (gcn_retrain_every_n_rounds=1) ---
+
+--- 第 1 輪後進行訓練，使用目前累積的 305394 筆真實互動，訓練 20 個 epochs ---
+在 305394 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 20, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+完成模擬後訓練。
+
+
+=====第 1 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0140 | R@10 0.1403 | NDCG@10 0.0923 | BPR Loss 0.3808
+
+===== Time step 2 =====
+收集到幾個互動: 193943
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 0.87 秒
+節點數量: 7851 (Users: 5917, Items: 1934)
+邊數量: 499337
+圖不是連通的。將個別偵測社群
+總共有 4 個連通元件
+總社群數量: 10
+
+--- Triggering GCN retraining and evaluation after round 2 (gcn_retrain_every_n_rounds=1) ---
+
+--- 第 2 輪後進行訓練，使用目前累積的 499337 筆真實互動，訓練 20 個 epochs ---
+在 499337 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 20, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+完成模擬後訓練。
+
+
+=====第 2 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0154 | R@10 0.1538 | NDCG@10 0.0990 | BPR Loss 0.3607
+
+===== Time step 3 =====
+收集到幾個互動: 129398
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 1.09 秒
+節點數量: 7882 (Users: 5924, Items: 1958)
+邊數量: 628735
+圖不是連通的。將個別偵測社群
+總共有 3 個連通元件
+總社群數量: 8
+
+--- Triggering GCN retraining and evaluation after round 3 (gcn_retrain_every_n_rounds=1) ---
+
+--- 第 3 輪後進行訓練，使用目前累積的 628735 筆真實互動，訓練 20 個 epochs ---
+在 628735 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 20, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+完成模擬後訓練。
+
+
+=====第 3 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0152 | R@10 0.1523 | NDCG@10 0.0990 | BPR Loss 0.3985
+
+===== Time step 4 =====
+收集到幾個互動: 112637
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 1.31 秒
+節點數量: 7910 (Users: 5928, Items: 1982)
+邊數量: 741372
+圖不是連通的。將個別偵測社群
+總共有 3 個連通元件
+總社群數量: 8
+
+--- Triggering GCN retraining and evaluation after round 4 (gcn_retrain_every_n_rounds=1) ---
+
+--- 第 4 輪後進行訓練，使用目前累積的 741372 筆真實互動，訓練 20 個 epochs ---
+在 741372 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 20, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+完成模擬後訓練。
+
+
+=====第 4 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0154 | R@10 0.1541 | NDCG@10 0.0996 | BPR Loss 0.3975
+
+===== Time step 5 =====
+收集到幾個互動: 94603
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 1.61 秒
+節點數量: 7929 (Users: 5932, Items: 1997)
+邊數量: 835975
+圖不是連通的。將個別偵測社群
+總共有 5 個連通元件
+總社群數量: 12
+
+--- Triggering GCN retraining and evaluation after round 5 (gcn_retrain_every_n_rounds=1) ---
+
+--- 第 5 輪後進行訓練，使用目前累積的 835975 筆真實互動，訓練 20 個 epochs ---
+在 835975 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 20, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+完成模擬後訓練。
+
+
+=====第 5 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0173 | R@10 0.1734 | NDCG@10 0.1096 | BPR Loss 0.3528
+
+===== Time step 6 =====
+收集到幾個互動: 97235
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 1.76 秒
+節點數量: 7954 (Users: 5934, Items: 2020)
+邊數量: 933210
+圖不是連通的。將個別偵測社群
+總共有 4 個連通元件
+總社群數量: 9
+
+--- Triggering GCN retraining and evaluation after round 6 (gcn_retrain_every_n_rounds=1) ---
+
+--- 第 6 輪後進行訓練，使用目前累積的 933210 筆真實互動，訓練 20 個 epochs ---
+在 933210 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 20, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+完成模擬後訓練。
+
+
+=====第 6 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0213 | R@10 0.2126 | NDCG@10 0.1398 | BPR Loss 0.3026
+
+===== Time step 7 =====
+收集到幾個互動: 96913
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 2.02 秒
+節點數量: 7964 (Users: 5937, Items: 2027)
+邊數量: 1030123
+圖不是連通的。將個別偵測社群
+總共有 4 個連通元件
+總社群數量: 10
+
+--- Triggering GCN retraining and evaluation after round 7 (gcn_retrain_every_n_rounds=1) ---
+
+--- 第 7 輪後進行訓練，使用目前累積的 1030123 筆真實互動，訓練 20 個 epochs ---
+在 1030123 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 20, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+完成模擬後訓練。
+
+
+=====第 7 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0246 | R@10 0.2457 | NDCG@10 0.1629 | BPR Loss 0.2665
+
+===== Time step 8 =====
+收集到幾個互動: 76881
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 2.40 秒
+節點數量: 7972 (Users: 5940, Items: 2032)
+邊數量: 1107004
+圖不是連通的。將個別偵測社群
+總共有 5 個連通元件
+總社群數量: 10
+
+--- Triggering GCN retraining and evaluation after round 8 (gcn_retrain_every_n_rounds=1) ---
+
+--- 第 8 輪後進行訓練，使用目前累積的 1107004 筆真實互動，訓練 20 個 epochs ---
+在 1107004 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 20, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+完成模擬後訓練。
+
+
+=====第 8 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0279 | R@10 0.2787 | NDCG@10 0.1887 | BPR Loss 0.2115
+
+===== Time step 9 =====
+收集到幾個互動: 61276
+
+建立Dtrain使用者-電影 雙邊圖...
+圖建立完成。耗時: 2.37 秒
+節點數量: 7977 (Users: 5943, Items: 2034)
+邊數量: 1168280
+圖不是連通的。將個別偵測社群
+總共有 4 個連通元件
+總社群數量: 11
+
+--- Triggering GCN retraining and evaluation after round 9 (gcn_retrain_every_n_rounds=1) ---
+
+--- 第 9 輪後進行訓練，使用目前累積的 1168280 筆真實互動，訓練 20 個 epochs ---
+在 1168280 個互動上訓練 LightGCN，在 5950 個互動上進行驗證。
+Epochs: 20, Batch Size: 1024, LR: 0.0001, Lambda_reg: 0.0005, K_eval: 10, Patience: 20
+完成模擬後訓練。
+
+
+=====第 9 輪模擬結束後，於測試集上進行最終評估 =====
+將使用初始測試集中的 5950 筆互動進行最終評估...
+
+Final Test | P@10 0.0316 | R@10 0.3163 | NDCG@10 0.2152 | BPR Loss 0.1859
+
+Environment run finished.
+Script finished.

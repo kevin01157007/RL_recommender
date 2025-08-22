@@ -1,12 +1,22 @@
 Training Log
 ==================================================
-Epoch 01 | 84.1s | TrainLoss 0.1003 | ValLoss 0.2588 | P@10 0.0185 R@10 0.1850 NDCG@10 0.1081 
-Epoch 02 | 83.6s | TrainLoss 0.0974 | ValLoss 0.2518 | P@10 0.0187 R@10 0.1866 NDCG@10 0.1091 
-Epoch 03 | 83.7s | TrainLoss 0.0955 | ValLoss 0.2529 | P@10 0.0189 R@10 0.1892 NDCG@10 0.1105 
-Epoch 04 | 83.6s | TrainLoss 0.0940 | ValLoss 0.2435 | P@10 0.0191 R@10 0.1913 NDCG@10 0.1118 
-Epoch 05 | 83.7s | TrainLoss 0.0917 | ValLoss 0.2529 | P@10 0.0192 R@10 0.1924 NDCG@10 0.1125 
-Epoch 06 | 83.7s | TrainLoss 0.0901 | ValLoss 0.2570 | P@10 0.0194 R@10 0.1941 NDCG@10 0.1135 
-Epoch 07 | 83.5s | TrainLoss 0.0895 | ValLoss 0.2510 | P@10 0.0197 R@10 0.1970 NDCG@10 0.1149 
-Epoch 08 | 82.7s | TrainLoss 0.0882 | ValLoss 0.2442 | P@10 0.0198 R@10 0.1976 NDCG@10 0.1153 
-Epoch 09 | 82.7s | TrainLoss 0.0867 | ValLoss 0.2374 | P@10 0.0200 R@10 0.2003 NDCG@10 0.1165 
-Epoch 10 | 83.3s | TrainLoss 0.0853 | ValLoss 0.2481 | P@10 0.0204 R@10 0.2035 NDCG@10 0.1179 
+Epoch 01 | 98.6s | TrainLoss 0.0706 | ValLoss 0.1517 | P@10 0.0308 R@10 0.3084 NDCG@10 0.2056 
+Epoch 02 | 97.9s | TrainLoss 0.0697 | ValLoss 0.1492 | P@10 0.0310 R@10 0.3104 NDCG@10 0.2063 
+Epoch 03 | 97.8s | TrainLoss 0.0689 | ValLoss 0.1536 | P@10 0.0312 R@10 0.3118 NDCG@10 0.2076 
+Epoch 04 | 97.8s | TrainLoss 0.0681 | ValLoss 0.1488 | P@10 0.0314 R@10 0.3143 NDCG@10 0.2090 
+Epoch 05 | 97.8s | TrainLoss 0.0678 | ValLoss 0.1613 | P@10 0.0316 R@10 0.3156 NDCG@10 0.2101 
+Epoch 06 | 97.8s | TrainLoss 0.0669 | ValLoss 0.1540 | P@10 0.0317 R@10 0.3170 NDCG@10 0.2112 
+Epoch 07 | 97.9s | TrainLoss 0.0663 | ValLoss 0.1516 | P@10 0.0318 R@10 0.3182 NDCG@10 0.2120 
+Epoch 08 | 97.9s | TrainLoss 0.0653 | ValLoss 0.1631 | P@10 0.0319 R@10 0.3190 NDCG@10 0.2131 
+Epoch 09 | 98.1s | TrainLoss 0.0655 | ValLoss 0.1472 | P@10 0.0321 R@10 0.3210 NDCG@10 0.2143 
+Epoch 10 | 97.8s | TrainLoss 0.0647 | ValLoss 0.1538 | P@10 0.0323 R@10 0.3225 NDCG@10 0.2158 
+Epoch 11 | 97.9s | TrainLoss 0.0643 | ValLoss 0.1328 | P@10 0.0324 R@10 0.3239 NDCG@10 0.2170 
+Epoch 12 | 97.9s | TrainLoss 0.0637 | ValLoss 0.1411 | P@10 0.0325 R@10 0.3250 NDCG@10 0.2178 
+Epoch 13 | 98.3s | TrainLoss 0.0630 | ValLoss 0.1419 | P@10 0.0327 R@10 0.3267 NDCG@10 0.2186 
+Epoch 14 | 97.9s | TrainLoss 0.0629 | ValLoss 0.1409 | P@10 0.0327 R@10 0.3269 NDCG@10 0.2192 
+Epoch 15 | 97.9s | TrainLoss 0.0629 | ValLoss 0.1556 | P@10 0.0328 R@10 0.3284 NDCG@10 0.2202 
+Epoch 16 | 97.9s | TrainLoss 0.0621 | ValLoss 0.1593 | P@10 0.0331 R@10 0.3308 NDCG@10 0.2212 
+Epoch 17 | 97.9s | TrainLoss 0.0612 | ValLoss 0.1453 | P@10 0.0333 R@10 0.3333 NDCG@10 0.2232 
+Epoch 18 | 97.8s | TrainLoss 0.0612 | ValLoss 0.1372 | P@10 0.0336 R@10 0.3365 NDCG@10 0.2250 
+Epoch 19 | 97.9s | TrainLoss 0.0611 | ValLoss 0.1429 | P@10 0.0338 R@10 0.3380 NDCG@10 0.2259 
+Epoch 20 | 97.9s | TrainLoss 0.0605 | ValLoss 0.1318 | P@10 0.0340 R@10 0.3397 NDCG@10 0.2268 
